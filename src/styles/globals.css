@@ -10,7 +10,7 @@
     "Segoe UI",
     sans-serif;
 
-  color: #111827;
+  color: #0f172a;
   background: #f4f7fb;
 
   font-synthesis: none;
@@ -47,4 +47,332 @@ button {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes dashboard-float {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+
+  50% {
+    transform: translateY(-5px) scale(1.005);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.65s ease-out both;
+}
+
+.animate-fade-up {
+  animation: fade-up 0.65s ease-out both;
+}
+
+.animate-fade-up-delay-1 {
+  animation: fade-up 0.75s 0.08s ease-out both;
+}
+
+.animate-fade-up-delay-2 {
+  animation: fade-up 0.85s 0.16s ease-out both;
+}
+
+.animate-fade-up-delay-3 {
+  animation: fade-up 0.95s 0.24s ease-out both;
+}
+
+.animate-float-y {
+  animation: float-y 4s ease-in-out infinite;
+}
+
+.animate-dashboard-float {
+  animation: dashboard-float 5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* =========================================================
+   AUTH UI ENHANCEMENTS
+   ========================================================= */
+
+@keyframes auth-page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes auth-glow {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.6;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes auth-button-shine {
+  from {
+    transform: translateX(-160%) skewX(-20deg);
+  }
+
+  to {
+    transform: translateX(260%) skewX(-20deg);
+  }
+}
+
+.auth-page-enter {
+  animation: auth-page-enter 0.55s ease-out both;
+}
+
+.auth-glow {
+  animation: auth-glow 6s ease-in-out infinite;
+}
+
+.auth-card {
+  position: relative;
+  overflow: hidden;
+
+  border: 1px solid rgb(226 232 240 / 0.9);
+  background:
+    linear-gradient(
+      145deg,
+      rgb(255 255 255 / 0.98),
+      rgb(248 250 252 / 0.92)
+    );
+
+  box-shadow:
+    0 28px 70px rgb(15 23 42 / 0.08),
+    0 3px 12px rgb(15 23 42 / 0.04);
+}
+
+.auth-card::before {
+  position: absolute;
+  top: 0;
+  left: 8%;
+  width: 84%;
+  height: 1px;
+
+  content: "";
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgb(59 130 246 / 0.55),
+      transparent
+    );
+}
+
+.auth-primary-button {
+  position: relative;
+  overflow: hidden;
+
+  background:
+    linear-gradient(
+      110deg,
+      #2563eb 0%,
+      #1d4ed8 48%,
+      #4f46e5 100%
+    );
+
+  box-shadow:
+    0 12px 24px rgb(37 99 235 / 0.24);
+
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    filter 180ms ease;
+}
+
+.auth-primary-button::before {
+  position: absolute;
+  top: -50%;
+  left: -25%;
+  width: 22%;
+  height: 200%;
+
+  content: "";
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgb(255 255 255 / 0.45),
+      transparent
+    );
+
+  transform: translateX(-160%) skewX(-20deg);
+}
+
+.auth-primary-button:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 17px 32px rgb(37 99 235 / 0.3);
+
+  filter: saturate(1.08);
+}
+
+.auth-primary-button:hover::before {
+  animation: auth-button-shine 0.8s ease;
+}
+
+.auth-primary-button:active {
+  transform: translateY(0);
+}
+
+.auth-page input:not([type="checkbox"]) {
+  box-shadow:
+    inset 0 1px 2px rgb(15 23 42 / 0.025);
+
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease,
+    background-color 180ms ease;
+}
+
+.auth-page input:not([type="checkbox"]):hover {
+  border-color: rgb(148 163 184);
+  background-color: rgb(248 250 252 / 0.55);
+}
+
+.auth-page input:not([type="checkbox"]):focus {
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 0 0 4px rgb(219 234 254 / 0.9),
+    0 8px 20px rgb(37 99 235 / 0.08);
+}
+
+.auth-page input[type="checkbox"] {
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-page-enter,
+  .auth-glow {
+    animation: none;
+  }
+}
+
+/* =========================================================
+   ACCOUNT MENU AND DIALOG
+   ========================================================= */
+
+@keyframes account-menu-in {
+  from {
+    opacity: 0;
+    transform:
+      translateY(-8px)
+      scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform:
+      translateY(0)
+      scale(1);
+  }
+}
+
+@keyframes dialog-backdrop-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes dialog-card-in {
+  from {
+    opacity: 0;
+    transform:
+      translateY(18px)
+      scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform:
+      translateY(0)
+      scale(1);
+  }
+}
+
+.animate-account-menu-in {
+  animation:
+    account-menu-in
+    180ms
+    cubic-bezier(0.16, 1, 0.3, 1)
+    both;
+}
+
+.animate-dialog-backdrop-in {
+  animation:
+    dialog-backdrop-in
+    180ms
+    ease-out
+    both;
+}
+
+.animate-dialog-card-in {
+  animation:
+    dialog-card-in
+    260ms
+    cubic-bezier(0.16, 1, 0.3, 1)
+    both;
 }

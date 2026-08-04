@@ -34,7 +34,7 @@ const statistics = [
 
 export const DashboardPage = () => {
   return (
-    <main className="min-h-screen p-6 lg:p-8">
+    <div>
       <header>
         <p className="text-sm font-medium text-blue-600">
           Rental Manager
@@ -86,7 +86,7 @@ export const DashboardPage = () => {
 
       <section className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
         <h2 className="text-lg font-semibold text-gray-900">
-          Frontend đã sẵn sàng
+          Giao diện đã sẵn sàng
         </h2>
 
         <p className="mt-2 text-sm leading-6 text-gray-500">
@@ -94,6 +94,6 @@ export const DashboardPage = () => {
           sidebar, header và dashboard theo thiết kế của team.
         </p>
       </section>
-    </main>
+    </div>
   );
 };
