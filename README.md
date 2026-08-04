@@ -24,3 +24,4 @@
 18. Luôn luôn hỏi những file cần thiết để hiểu sâu về những chức năng thêm vào hoặc sửa đổi.
 19. Khi thay đổi giao diện cũ cần báo lại là thay đổi ở phần nào.
 20. Ưu tiên tận dụng các component, hook có sẵn trước.
+# FE_service
