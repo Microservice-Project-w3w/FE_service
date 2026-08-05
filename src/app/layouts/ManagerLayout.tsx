@@ -2,8 +2,8 @@ import {
   RoleBasedLayout,
 } from "@/app/layouts/RoleBasedLayout";
 
-export const AdminLayout = () => {
+export const ManagerLayout = () => {
   return (
-    <RoleBasedLayout role="ADMIN" />
+    <RoleBasedLayout role="MANAGER" />
   );
 };

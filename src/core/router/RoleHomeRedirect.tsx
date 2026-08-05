@@ -1,6 +1,5 @@
 import {
   Navigate,
-  Outlet,
 } from "react-router";
 
 import {
@@ -11,7 +10,7 @@ import {
   useAuthStore,
 } from "@/modules/auth/store/auth.store";
 
-export const GuestRoute = () => {
+export const RoleHomeRedirect = () => {
   const user = useAuthStore(
     (state) => state.user,
   );
@@ -23,16 +22,21 @@ export const GuestRoute = () => {
     );
 
   if (
-    isAuthenticated &&
-    user
+    !isAuthenticated ||
+    !user
   ) {
     return (
       <Navigate
-        to={getRoleHomePath(user.role)}
+        to="/login"
         replace
       />
     );
   }
 
-  return <Outlet />;
+  return (
+    <Navigate
+      to={getRoleHomePath(user.role)}
+      replace
+    />
+  );
 };

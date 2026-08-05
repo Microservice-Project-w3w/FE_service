@@ -4,14 +4,20 @@ import {
 } from "lucide-react";
 import { NavLink } from "react-router";
 
-import { navigationGroups } from "@/shared/constants/navigation";
+import type {
+  RoleNavigationGroup,
+} from "@/shared/constants/roleNavigation";
 
 interface SidebarProps {
+  groups: RoleNavigationGroup[];
+  homePath: string;
   open: boolean;
   onClose: () => void;
 }
 
 export const Sidebar = ({
+  groups,
+  homePath,
   open,
   onClose,
 }: SidebarProps) => {
@@ -31,12 +37,14 @@ export const Sidebar = ({
           "fixed inset-y-0 left-0 z-50 flex w-72 flex-col",
           "border-r border-gray-200 bg-white",
           "transition-transform duration-200 lg:translate-x-0",
-          open ? "translate-x-0" : "-translate-x-full",
+          open
+            ? "translate-x-0"
+            : "-translate-x-full",
         ].join(" ")}
       >
         <header className="flex h-16 items-center justify-between border-b border-gray-200 px-5">
           <NavLink
-            to="/"
+            to={homePath}
             onClick={onClose}
             className="flex min-w-0 items-center gap-3"
           >
@@ -46,11 +54,11 @@ export const Sidebar = ({
 
             <span className="min-w-0">
               <strong className="block truncate text-sm text-gray-950">
-                Rental Manager
+                RentAI Manager
               </strong>
 
               <span className="block truncate text-xs text-gray-500">
-                Thiết bị sự kiện
+                Quản lý thiết bị cho thuê
               </span>
             </span>
           </NavLink>
@@ -66,7 +74,7 @@ export const Sidebar = ({
         </header>
 
         <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-5">
-          {navigationGroups.map((group) => (
+          {groups.map((group) => (
             <section key={group.label}>
               <h2 className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
                 {group.label}
@@ -80,20 +88,28 @@ export const Sidebar = ({
                     <NavLink
                       key={item.path}
                       to={item.path}
-                      end={item.path === "/"}
+                      end
                       onClick={onClose}
-                      className={({ isActive }) =>
+                      className={({
+                        isActive,
+                      }) =>
                         [
                           "flex items-center gap-3 rounded-xl px-3 py-2.5",
                           "text-sm font-medium transition-colors",
                           isActive
-                            ? "bg-blue-50 text-blue-700"
+                            ? "bg-blue-600 text-white shadow-sm"
                             : "text-gray-600 hover:bg-gray-100 hover:text-gray-950",
                         ].join(" ")
                       }
                     >
-                      <Icon size={19} />
-                      <span>{item.label}</span>
+                      <Icon
+                        size={19}
+                        aria-hidden="true"
+                      />
+
+                      <span>
+                        {item.label}
+                      </span>
                     </NavLink>
                   );
                 })}
@@ -105,11 +121,11 @@ export const Sidebar = ({
         <footer className="border-t border-gray-200 p-4">
           <div className="rounded-xl bg-blue-50 p-3">
             <p className="text-sm font-semibold text-blue-900">
-              Chế độ phát triển
+              RentAI Manager
             </p>
 
             <p className="mt-1 text-xs leading-5 text-blue-700">
-              Frontend hiện đang sử dụng mock data.
+              Hệ thống quản lý cho thuê thiết bị.
             </p>
           </div>
         </footer>

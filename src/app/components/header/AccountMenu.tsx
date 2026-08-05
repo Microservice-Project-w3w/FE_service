@@ -16,20 +16,14 @@ import {
 } from "react-router";
 
 import {
-  type UserRole,
+  USER_ROLE_LABELS,
+} from "@/core/auth/roleLabels";
+
+import {
   useAuthStore,
 } from "@/modules/auth";
 
 import { ConfirmDialog } from "@/shared/components/feedback";
-
-const roleLabels: Record<
-  UserRole,
-  string
-> = {
-  ADMIN: "Quản trị viên",
-  CUSTOMER: "Khách hàng",
-  EMPLOYEE: "Nhân viên",
-};
 
 const getInitials = (
   fullName: string,
@@ -144,7 +138,7 @@ export const AccountMenu = () => {
 
   const displayRole =
     user
-      ? roleLabels[user.role]
+      ? USER_ROLE_LABELS[user.role]
       : "Người dùng";
 
   const accountLabel =

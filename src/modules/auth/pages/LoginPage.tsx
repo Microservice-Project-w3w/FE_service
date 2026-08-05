@@ -15,6 +15,10 @@ import {
 } from "react-router";
 
 import {
+  getRoleHomePath,
+} from "@/core/auth/roleHome";
+
+import {
   loginSchema,
   type LoginFormValues,
 } from "@/modules/auth/schemas/auth.schema";
@@ -65,8 +69,21 @@ export const LoginPage = () => {
     try {
       await login(values);
 
+      const authenticatedUser =
+        useAuthStore.getState().user;
+
+      const destination =
+        state?.from ??
+        (
+          authenticatedUser
+            ? getRoleHomePath(
+                authenticatedUser.role,
+              )
+            : "/"
+        );
+
       navigate(
-        state?.from ?? "/",
+        destination,
         {
           replace: true,
         },
