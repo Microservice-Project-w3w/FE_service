@@ -1,8 +1,9 @@
 import {
-  Building2,
+  Boxes,
   CircleOff,
   Eye,
-  MapPin,
+  Layers3,
+  PackageSearch,
   Pencil,
   Plus,
   Power,
@@ -10,8 +11,6 @@ import {
   RefreshCcw,
   Search,
   Trash2,
-  UserRoundCog,
-  Users,
 } from "lucide-react";
 
 import {
@@ -22,97 +21,53 @@ import {
 } from "react";
 
 import {
-  branchesApi,
-} from "@/modules/branches/api/branches.api";
+  equipmentCategoriesApi,
+} from "@/modules/equipment-categories/api/equipment-categories.api";
 
 import {
-  BranchActionConfirmDialog,
-} from "@/modules/branches/components/BranchActionConfirmDialog";
+  EquipmentCategoryActionConfirmDialog,
+} from "@/modules/equipment-categories/components/EquipmentCategoryActionConfirmDialog";
 
 import {
-  BranchDetailDrawer,
-} from "@/modules/branches/components/BranchDetailDrawer";
+  EquipmentCategoryDetailDrawer,
+} from "@/modules/equipment-categories/components/EquipmentCategoryDetailDrawer";
 
 import {
-  BranchFormModal,
-} from "@/modules/branches/components/BranchFormModal";
+  EquipmentCategoryFormModal,
+} from "@/modules/equipment-categories/components/EquipmentCategoryFormModal";
 
 import {
-  BranchManagerDialog,
-  type BranchManagerOption,
-} from "@/modules/branches/components/BranchManagerDialog";
-
-import {
-  BranchStatusBadge,
-} from "@/modules/branches/components/BranchStatusBadge";
+  EquipmentCategoryStatusBadge,
+} from "@/modules/equipment-categories/components/EquipmentCategoryStatusBadge";
 
 import type {
-  Branch,
-  BranchStatus,
-  CreateBranchInput,
-} from "@/modules/branches/types/branch.types";
-
-import {
-  employeesApi,
-} from "@/modules/employees/api/employees.api";
-
-import type {
-  Employee,
-  EmployeePosition,
-} from "@/modules/employees/types/employee.types";
+  CreateEquipmentCategoryInput,
+  EquipmentCategory,
+  EquipmentCategoryLevel,
+  EquipmentCategoryStatus,
+} from "@/modules/equipment-categories/types/equipment-category.types";
 
 import {
   DataPagination,
 } from "@/shared/components/data-display/DataPagination";
 
-type BranchFormMode =
+type CategoryFormMode =
   | "CREATE"
   | "EDIT";
 
 type PendingAction =
   | {
       type: "STATUS";
-      branch: Branch;
-      nextStatus: BranchStatus;
+      category: EquipmentCategory;
+      nextStatus: EquipmentCategoryStatus;
     }
   | {
       type: "DELETE";
-      branch: Branch;
+      category: EquipmentCategory;
     }
   | {
       type: "RESET";
     };
-
-const positionLabels: Record<
-  EmployeePosition,
-  string
-> = {
-  BRANCH_MANAGER: "Quản lý chi nhánh",
-  SALES_STAFF: "Nhân viên kinh doanh",
-  OPERATIONS_STAFF: "Nhân viên vận hành",
-  ACCOUNTANT: "Kế toán",
-  TECHNICIAN: "Kỹ thuật viên",
-  WAREHOUSE_STAFF: "Nhân viên kho",
-  CUSTOMER_SERVICE: "Chăm sóc khách hàng",
-};
-
-const dateFormatter =
-  new Intl.DateTimeFormat(
-    "vi-VN",
-    {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    },
-  );
-
-const formatDate = (
-  value: string,
-): string => {
-  return dateFormatter.format(
-    new Date(value),
-  );
-};
 
 const normalizeText = (
   value: string,
@@ -122,16 +77,11 @@ const normalizeText = (
     .toLocaleLowerCase("vi");
 };
 
-export const BranchesPage = () => {
+export const EquipmentCategoriesPage = () => {
   const [
-    branches,
-    setBranches,
-  ] = useState<Branch[]>([]);
-
-  const [
-    employees,
-    setEmployees,
-  ] = useState<Employee[]>([]);
+    categories,
+    setCategories,
+  ] = useState<EquipmentCategory[]>([]);
 
   const [
     search,
@@ -142,13 +92,15 @@ export const BranchesPage = () => {
     statusFilter,
     setStatusFilter,
   ] = useState<
-    BranchStatus | "ALL"
+    EquipmentCategoryStatus | "ALL"
   >("ALL");
 
   const [
-    provinceFilter,
-    setProvinceFilter,
-  ] = useState("ALL");
+    levelFilter,
+    setLevelFilter,
+  ] = useState<
+    EquipmentCategoryLevel | "ALL"
+  >("ALL");
 
   const [
     currentPage,
@@ -185,28 +137,21 @@ export const BranchesPage = () => {
   const [
     formMode,
     setFormMode,
-  ] = useState<BranchFormMode>(
+  ] = useState<CategoryFormMode>(
     "CREATE",
   );
 
   const [
-    formBranch,
-    setFormBranch,
-  ] = useState<Branch | null>(
+    formCategory,
+    setFormCategory,
+  ] = useState<EquipmentCategory | null>(
     null,
   );
 
   const [
-    detailBranch,
-    setDetailBranch,
-  ] = useState<Branch | null>(
-    null,
-  );
-
-  const [
-    managerBranch,
-    setManagerBranch,
-  ] = useState<Branch | null>(
+    detailCategory,
+    setDetailCategory,
+  ] = useState<EquipmentCategory | null>(
     null,
   );
 
@@ -217,27 +162,21 @@ export const BranchesPage = () => {
     null,
   );
 
-  const loadData =
+  const loadCategories =
     useCallback(async () => {
       setIsLoading(true);
       setErrorMessage(null);
 
       try {
-        const [
-          branchData,
-          employeeData,
-        ] = await Promise.all([
-          branchesApi.list(),
-          employeesApi.list(),
-        ]);
+        const data =
+          await equipmentCategoriesApi.list();
 
-        setBranches(branchData);
-        setEmployees(employeeData);
+        setCategories(data);
       } catch (error) {
         setErrorMessage(
           error instanceof Error
             ? error.message
-            : "Không thể tải dữ liệu chi nhánh.",
+            : "Không thể tải dữ liệu danh mục.",
         );
       } finally {
         setIsLoading(false);
@@ -245,67 +184,72 @@ export const BranchesPage = () => {
     }, []);
 
   useEffect(() => {
-    void loadData();
-  }, [loadData]);
+    void loadCategories();
+  }, [loadCategories]);
 
   const statistics = useMemo(() => {
     return {
-      total: branches.length,
+      total: categories.length,
 
-      active: branches.filter(
-        (branch) =>
-          branch.status === "ACTIVE",
+      active: categories.filter(
+        (category) =>
+          category.status === "ACTIVE",
       ).length,
 
-      inactive: branches.filter(
-        (branch) =>
-          branch.status ===
-          "INACTIVE",
+      inactive: categories.filter(
+        (category) =>
+          category.status === "INACTIVE",
       ).length,
 
-      employees: branches.reduce(
-        (total, branch) =>
+      root: categories.filter(
+        (category) =>
+          category.parentId === null,
+      ).length,
+
+      equipment: categories.reduce(
+        (total, category) =>
           total +
-          branch.employeeCount,
+          category.equipmentCount,
         0,
       ),
     };
-  }, [branches]);
+  }, [categories]);
 
-  const provinces = useMemo(() => {
-    return Array.from(
-      new Set(
-        branches.map(
-          (branch) =>
-            branch.province,
-        ),
-      ),
-    ).sort((left, right) =>
-      left.localeCompare(
-        right,
-        "vi",
-      ),
-    );
-  }, [branches]);
+  const childCountById = useMemo(() => {
+    const counts =
+      new Map<string, number>();
 
-  const filteredBranches =
+    categories.forEach((category) => {
+      if (category.parentId === null) {
+        return;
+      }
+
+      counts.set(
+        category.parentId,
+        (counts.get(
+          category.parentId,
+        ) ?? 0) + 1,
+      );
+    });
+
+    return counts;
+  }, [categories]);
+
+  const filteredCategories =
     useMemo(() => {
       const normalizedSearch =
         normalizeText(search);
 
-      return branches
-        .filter((branch) => {
+      return categories
+        .filter((category) => {
           const matchesSearch =
             normalizedSearch.length ===
               0 ||
             [
-              branch.branchCode,
-              branch.name,
-              branch.phone,
-              branch.email,
-              branch.address,
-              branch.province,
-              branch.managerName ?? "",
+              category.categoryCode,
+              category.name,
+              category.parentName ?? "",
+              category.description,
             ].some((value) =>
               normalizeText(
                 value,
@@ -316,29 +260,49 @@ export const BranchesPage = () => {
 
           const matchesStatus =
             statusFilter === "ALL" ||
-            branch.status ===
+            category.status ===
               statusFilter;
 
-          const matchesProvince =
-            provinceFilter === "ALL" ||
-            branch.province ===
-              provinceFilter;
+          const categoryLevel:
+            EquipmentCategoryLevel =
+              category.parentId === null
+                ? "ROOT"
+                : "CHILD";
+
+          const matchesLevel =
+            levelFilter === "ALL" ||
+            categoryLevel ===
+              levelFilter;
 
           return (
             matchesSearch &&
             matchesStatus &&
-            matchesProvince
+            matchesLevel
           );
         })
         .sort((left, right) => {
+          const leftIsRoot =
+            left.parentId === null;
+
+          const rightIsRoot =
+            right.parentId === null;
+
           if (
-            left.status !==
-            right.status
+            leftIsRoot !== rightIsRoot
           ) {
-            return left.status ===
-              "ACTIVE"
-              ? -1
-              : 1;
+            return leftIsRoot ? -1 : 1;
+          }
+
+          const parentComparison =
+            (
+              left.parentName ?? ""
+            ).localeCompare(
+              right.parentName ?? "",
+              "vi",
+            );
+
+          if (parentComparison !== 0) {
+            return parentComparison;
           }
 
           return left.name.localeCompare(
@@ -347,8 +311,8 @@ export const BranchesPage = () => {
           );
         });
     }, [
-      branches,
-      provinceFilter,
+      categories,
+      levelFilter,
       search,
       statusFilter,
     ]);
@@ -356,24 +320,24 @@ export const BranchesPage = () => {
   const totalPages = Math.max(
     1,
     Math.ceil(
-      filteredBranches.length /
+      filteredCategories.length /
         pageSize,
     ),
   );
 
-  const paginatedBranches =
+  const paginatedCategories =
     useMemo(() => {
       const startIndex =
         (currentPage - 1) *
         pageSize;
 
-      return filteredBranches.slice(
+      return filteredCategories.slice(
         startIndex,
         startIndex + pageSize,
       );
     }, [
       currentPage,
-      filteredBranches,
+      filteredCategories,
       pageSize,
     ]);
 
@@ -382,7 +346,7 @@ export const BranchesPage = () => {
   }, [
     search,
     statusFilter,
-    provinceFilter,
+    levelFilter,
   ]);
 
   useEffect(() => {
@@ -396,79 +360,33 @@ export const BranchesPage = () => {
     totalPages,
   ]);
 
-  const managerOptions =
-    useMemo<
-      BranchManagerOption[]
-    >(() => {
-      return employees
-        .filter(
-          (employee) =>
-            employee.status ===
-            "ACTIVE",
-        )
-        .map((employee) => {
-          const assignedBranch =
-            branches.find(
-              (branch) =>
-                branch.managerEmployeeId ===
-                employee.id,
-            );
+  const refreshCategories =
+    async (): Promise<void> => {
+      const data =
+        await equipmentCategoriesApi.list();
 
-          return {
-            id: employee.id,
-            fullName:
-              employee.fullName,
-            email: employee.email,
-            positionLabel:
-              positionLabels[
-                employee.position
-              ],
-            assignedBranchId:
-              assignedBranch?.id ??
-              null,
-            assignedBranchName:
-              assignedBranch?.name ??
-              null,
-          };
-        })
-        .sort((left, right) =>
-          left.fullName.localeCompare(
-            right.fullName,
-            "vi",
-          ),
-        );
-    }, [
-      branches,
-      employees,
-    ]);
+      setCategories(data);
+    };
 
   const handleOpenCreate = () => {
     setErrorMessage(null);
     setFormMode("CREATE");
-    setFormBranch(null);
+    setFormCategory(null);
     setFormOpen(true);
   };
 
   const handleOpenEdit = (
-    branch: Branch,
+    category: EquipmentCategory,
   ) => {
     setErrorMessage(null);
-    setDetailBranch(null);
+    setDetailCategory(null);
     setFormMode("EDIT");
-    setFormBranch(branch);
+    setFormCategory(category);
     setFormOpen(true);
   };
 
-  const handleOpenManager = (
-    branch: Branch,
-  ) => {
-    setErrorMessage(null);
-    setDetailBranch(null);
-    setManagerBranch(branch);
-  };
-
-  const handleSaveBranch = async (
-    input: CreateBranchInput,
+  const handleSaveCategory = async (
+    input: CreateEquipmentCategoryInput,
   ) => {
     setIsSubmitting(true);
     setErrorMessage(null);
@@ -476,88 +394,27 @@ export const BranchesPage = () => {
     try {
       if (
         formMode === "EDIT" &&
-        formBranch
+        formCategory
       ) {
-        const updatedBranch =
-          await branchesApi.update(
-            formBranch.id,
-            input,
-          );
-
-        setBranches((current) =>
-          current.map((branch) =>
-            branch.id ===
-            updatedBranch.id
-              ? updatedBranch
-              : branch,
-          ),
+        await equipmentCategoriesApi.update(
+          formCategory.id,
+          input,
         );
       } else {
-        const createdBranch =
-          await branchesApi.create(
-            input,
-          );
-
-        setBranches((current) => [
-          createdBranch,
-          ...current,
-        ]);
+        await equipmentCategoriesApi.create(
+          input,
+        );
       }
 
+      await refreshCategories();
+
       setFormOpen(false);
-      setFormBranch(null);
+      setFormCategory(null);
     } catch (error) {
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : "Không thể lưu chi nhánh.",
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleAssignManager = async (
-    manager:
-      | BranchManagerOption
-      | null,
-  ) => {
-    if (!managerBranch) {
-      return;
-    }
-
-    setIsSubmitting(true);
-    setErrorMessage(null);
-
-    try {
-      const updatedBranch =
-        await branchesApi.assignManager(
-          managerBranch.id,
-          {
-            managerEmployeeId:
-              manager?.id ?? null,
-            managerName:
-              manager?.fullName ?? null,
-            managerEmail:
-              manager?.email ?? null,
-          },
-        );
-
-      setBranches((current) =>
-        current.map((branch) =>
-          branch.id ===
-          updatedBranch.id
-            ? updatedBranch
-            : branch,
-        ),
-      );
-
-      setManagerBranch(null);
-    } catch (error) {
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Không thể gán quản lý.",
+          : "Không thể lưu danh mục.",
       );
     } finally {
       setIsSubmitting(false);
@@ -578,10 +435,11 @@ export const BranchesPage = () => {
           pendingAction.type ===
           "RESET"
         ) {
-          const resetData =
-            await branchesApi.resetMockData();
+          const data =
+            await equipmentCategoriesApi
+              .resetMockData();
 
-          setBranches(resetData);
+          setCategories(data);
           setCurrentPage(1);
         }
 
@@ -589,37 +447,25 @@ export const BranchesPage = () => {
           pendingAction.type ===
           "STATUS"
         ) {
-          const updatedBranch =
-            await branchesApi.updateStatus(
-              pendingAction.branch.id,
+          await equipmentCategoriesApi
+            .updateStatus(
+              pendingAction.category.id,
               pendingAction.nextStatus,
             );
 
-          setBranches((current) =>
-            current.map((branch) =>
-              branch.id ===
-              updatedBranch.id
-                ? updatedBranch
-                : branch,
-            ),
-          );
+          await refreshCategories();
         }
 
         if (
           pendingAction.type ===
           "DELETE"
         ) {
-          await branchesApi.remove(
-            pendingAction.branch.id,
-          );
+          await equipmentCategoriesApi
+            .remove(
+              pendingAction.category.id,
+            );
 
-          setBranches((current) =>
-            current.filter(
-              (branch) =>
-                branch.id !==
-                pendingAction.branch.id,
-            ),
-          );
+          await refreshCategories();
         }
 
         setPendingAction(null);
@@ -650,7 +496,7 @@ export const BranchesPage = () => {
           title:
             "Khôi phục dữ liệu mẫu?",
           message:
-            "Toàn bộ thay đổi chi nhánh trong localStorage sẽ được thay bằng dữ liệu mẫu ban đầu.",
+            "Toàn bộ thay đổi danh mục trong localStorage sẽ được thay bằng dữ liệu mẫu ban đầu.",
           confirmLabel: "Khôi phục",
           tone:
             "WARNING" as const,
@@ -662,11 +508,10 @@ export const BranchesPage = () => {
         "DELETE"
       ) {
         return {
-          title:
-            "Xóa chi nhánh?",
-          message: `Chi nhánh ${pendingAction.branch.name} sẽ bị xóa khỏi dữ liệu mock.`,
+          title: "Xóa danh mục?",
+          message: `Danh mục ${pendingAction.category.name} sẽ bị xóa khỏi dữ liệu mock.`,
           confirmLabel:
-            "Xóa chi nhánh",
+            "Xóa danh mục",
           tone:
             "DANGER" as const,
         };
@@ -678,14 +523,17 @@ export const BranchesPage = () => {
 
       return {
         title: isActivating
-          ? "Kích hoạt chi nhánh?"
-          : "Ngừng hoạt động chi nhánh?",
+          ? "Kích hoạt danh mục?"
+          : "Ngừng hoạt động danh mục?",
+
         message: isActivating
-          ? `Chi nhánh ${pendingAction.branch.name} sẽ được phép hoạt động trở lại.`
-          : `Chi nhánh ${pendingAction.branch.name} sẽ ngừng tiếp nhận hoạt động mới.`,
+          ? `Danh mục ${pendingAction.category.name} sẽ được sử dụng trở lại.`
+          : `Danh mục ${pendingAction.category.name} sẽ ngừng được sử dụng cho dữ liệu mới.`,
+
         confirmLabel: isActivating
           ? "Kích hoạt"
           : "Ngừng hoạt động",
+
         tone:
           "WARNING" as const,
       };
@@ -696,17 +544,17 @@ export const BranchesPage = () => {
       <header className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
         <div>
           <p className="text-sm font-semibold text-blue-600">
-            Quản trị tổ chức
+            Quản trị thiết bị
           </p>
 
           <h1 className="mt-1 text-2xl font-bold text-slate-900">
-            Quản lý chi nhánh
+            Quản lý danh mục
           </h1>
 
           <p className="mt-2 text-sm text-slate-500">
-            Quản lý thông tin, nhân sự và
-            trạng thái vận hành của từng
-            chi nhánh.
+            Tổ chức danh mục cha, danh mục
+            con và các nhóm thiết bị trong
+            hệ thống.
           </p>
         </div>
 
@@ -730,16 +578,16 @@ export const BranchesPage = () => {
             className="flex h-11 items-center gap-2 rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
           >
             <Plus size={18} />
-            Thêm chi nhánh
+            Thêm danh mục
           </button>
         </div>
       </header>
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between">
             <span className="flex size-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
-              <Building2 size={21} />
+              <Boxes size={21} />
             </span>
 
             <span className="text-2xl font-bold text-slate-900">
@@ -748,7 +596,7 @@ export const BranchesPage = () => {
           </div>
 
           <p className="mt-4 text-sm font-semibold text-slate-700">
-            Tổng chi nhánh
+            Tổng danh mục
           </p>
         </article>
 
@@ -787,16 +635,32 @@ export const BranchesPage = () => {
         <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between">
             <span className="flex size-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
-              <Users size={21} />
+              <Layers3 size={21} />
             </span>
 
             <span className="text-2xl font-bold text-slate-900">
-              {statistics.employees}
+              {statistics.root}
             </span>
           </div>
 
           <p className="mt-4 text-sm font-semibold text-slate-700">
-            Tổng nhân viên
+            Danh mục gốc
+          </p>
+        </article>
+
+        <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <span className="flex size-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+              <PackageSearch size={21} />
+            </span>
+
+            <span className="text-2xl font-bold text-slate-900">
+              {statistics.equipment}
+            </span>
+          </div>
+
+          <p className="mt-4 text-sm font-semibold text-slate-700">
+            Tổng thiết bị
           </p>
         </article>
       </section>
@@ -816,7 +680,7 @@ export const BranchesPage = () => {
                   event.target.value,
                 )
               }
-              placeholder="Tìm theo tên, mã, email, điện thoại..."
+              placeholder="Tìm theo tên, mã hoặc danh mục cha..."
               className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 pl-12 pr-4 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100"
             />
           </label>
@@ -826,7 +690,7 @@ export const BranchesPage = () => {
             onChange={(event) =>
               setStatusFilter(
                 event.target.value as
-                  | BranchStatus
+                  | EquipmentCategoryStatus
                   | "ALL",
               )
             }
@@ -846,59 +710,59 @@ export const BranchesPage = () => {
           </select>
 
           <select
-            value={provinceFilter}
+            value={levelFilter}
             onChange={(event) =>
-              setProvinceFilter(
-                event.target.value,
+              setLevelFilter(
+                event.target.value as
+                  | EquipmentCategoryLevel
+                  | "ALL",
               )
             }
             className="h-12 rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
           >
             <option value="ALL">
-              Tất cả tỉnh thành
+              Tất cả cấp danh mục
             </option>
 
-            {provinces.map(
-              (province) => (
-                <option
-                  key={province}
-                  value={province}
-                >
-                  {province}
-                </option>
-              ),
-            )}
+            <option value="ROOT">
+              Danh mục gốc
+            </option>
+
+            <option value="CHILD">
+              Danh mục con
+            </option>
           </select>
         </div>
       </section>
 
-      {errorMessage && (
-        <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
-          {errorMessage}
-        </div>
-      )}
+      {errorMessage &&
+        !formOpen && (
+          <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
+            {errorMessage}
+          </div>
+        )}
 
       <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <header className="flex flex-col gap-3 border-b border-slate-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="font-bold text-slate-900">
-              Danh sách chi nhánh
+              Danh sách danh mục
             </h2>
 
             <p className="mt-1 text-sm text-slate-500">
-              Theo dõi các đơn vị trực
-              thuộc doanh nghiệp.
+              Theo dõi cấu trúc phân loại
+              thiết bị trong hệ thống.
             </p>
           </div>
 
           <span className="w-fit rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-700">
-            {filteredBranches.length} chi
-            nhánh
+            {filteredCategories.length} danh
+            mục
           </span>
         </header>
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1450px] border-collapse">
+          <table className="w-full min-w-[1300px] border-collapse">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
                 <th className="px-5 py-4">
@@ -906,35 +770,31 @@ export const BranchesPage = () => {
                 </th>
 
                 <th className="px-5 py-4">
-                  Chi nhánh
+                  Danh mục
                 </th>
 
                 <th className="px-5 py-4">
-                  Liên hệ
+                  Cấp danh mục
                 </th>
 
                 <th className="px-5 py-4">
-                  Địa chỉ
+                  Danh mục cha
                 </th>
 
                 <th className="px-5 py-4">
-                  Quản lý
+                  Danh mục con
                 </th>
 
                 <th className="px-5 py-4">
-                  Nhân viên
+                  Loại thiết bị
                 </th>
 
                 <th className="px-5 py-4">
-                  Đơn thuê
+                  Thiết bị
                 </th>
 
                 <th className="px-5 py-4">
                   Trạng thái
-                </th>
-
-                <th className="px-5 py-4">
-                  Khai trương
                 </th>
 
                 <th className="px-5 py-4 text-right">
@@ -947,42 +807,80 @@ export const BranchesPage = () => {
               {isLoading ? (
                 <tr>
                   <td
-                    colSpan={10}
+                    colSpan={9}
                     className="px-5 py-16 text-center text-sm text-slate-500"
                   >
-                    Đang tải dữ liệu chi
-                    nhánh...
+                    Đang tải dữ liệu danh
+                    mục...
                   </td>
                 </tr>
-              ) : filteredBranches.length ===
+              ) : filteredCategories.length ===
                 0 ? (
                 <tr>
                   <td
-                    colSpan={10}
+                    colSpan={9}
                     className="px-5 py-16 text-center text-sm text-slate-500"
                   >
-                    Không tìm thấy chi
-                    nhánh phù hợp.
+                    Không tìm thấy danh mục
+                    phù hợp.
                   </td>
                 </tr>
               ) : (
-                paginatedBranches.map(
-                  (branch, index) => {
+                paginatedCategories.map(
+                  (category, index) => {
+                    const childCount =
+                      childCountById.get(
+                        category.id,
+                      ) ?? 0;
+
+                    const activeChildExists =
+                      categories.some(
+                        (item) =>
+                          item.parentId ===
+                            category.id &&
+                          item.status ===
+                            "ACTIVE",
+                      );
+
+                    const parent =
+                      category.parentId
+                        ? categories.find(
+                            (item) =>
+                              item.id ===
+                              category.parentId,
+                          )
+                        : null;
+
                     const canDeactivate =
-                      branch.activeRentalCount ===
-                      0;
+                      category.equipmentCount ===
+                        0 &&
+                      !activeChildExists;
+
+                    const canActivate =
+                      category.parentId ===
+                        null ||
+                      parent?.status ===
+                        "ACTIVE";
+
+                    const canToggleStatus =
+                      category.status ===
+                      "ACTIVE"
+                        ? canDeactivate
+                        : canActivate;
 
                     const canDelete =
-                      branch.status ===
+                      category.status ===
                         "INACTIVE" &&
-                      branch.employeeCount ===
+                      category
+                        .equipmentTypeCount ===
                         0 &&
-                      branch.activeRentalCount ===
-                        0;
+                      category.equipmentCount ===
+                        0 &&
+                      childCount === 0;
 
                     return (
                       <tr
-                        key={branch.id}
+                        key={category.id}
                         className="border-b border-slate-100 last:border-b-0 hover:bg-slate-50/70"
                       >
                         <td className="px-5 py-5 text-sm font-medium text-slate-500">
@@ -995,85 +893,52 @@ export const BranchesPage = () => {
 
                         <td className="px-5 py-5">
                           <div>
-                              <p className="font-bold text-slate-900">
-                                {
-                                  branch.name
-                                }
-                              </p>
+                            <p className="font-bold text-slate-900">
+                              {category.name}
+                            </p>
 
-                              <p className="mt-1 text-xs font-semibold text-slate-400">
-                                {
-                                  branch.branchCode
-                                }
-                              </p>
+                            <p className="mt-1 text-xs font-semibold text-slate-400">
+                              {category.categoryCode}
+                            </p>
                           </div>
                         </td>
 
                         <td className="px-5 py-5">
-                          <p className="text-sm font-semibold text-slate-700">
-                            {branch.email}
-                          </p>
-
-                          <p className="mt-1 text-xs text-slate-500">
-                            {branch.phone}
-                          </p>
+                          <span className="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600">
+                            {category.parentId ===
+                            null
+                              ? "Danh mục gốc"
+                              : "Danh mục con"}
+                          </span>
                         </td>
 
-                        <td className="px-5 py-5">
-                          <div className="flex max-w-64 items-start gap-2 text-sm text-slate-600">
-                            <MapPin
-                              size={16}
-                              className="mt-0.5 shrink-0 text-slate-400"
-                            />
-
-                            <span>
-                              {
-                                branch.address
-                              }
-                              ,{" "}
-                              {
-                                branch.province
-                              }
-                            </span>
-                          </div>
+                        <td className="px-5 py-5 text-sm font-semibold text-slate-700">
+                          {category.parentName ??
+                            "—"}
                         </td>
 
-                        <td className="px-5 py-5">
-                          <p className="text-sm font-semibold text-slate-700">
-                            {branch.managerName ??
-                              "Chưa gán"}
-                          </p>
-
-                          <p className="mt-1 text-xs text-slate-500">
-                            {branch.managerEmail ??
-                              "Chưa có email"}
-                          </p>
+                        <td className="px-5 py-5 text-sm font-semibold text-slate-700">
+                          {childCount}
                         </td>
 
                         <td className="px-5 py-5 text-sm font-semibold text-slate-700">
                           {
-                            branch.employeeCount
+                            category.equipmentTypeCount
                           }
                         </td>
 
                         <td className="px-5 py-5 text-sm font-semibold text-slate-700">
                           {
-                            branch.activeRentalCount
+                            category.equipmentCount
                           }
                         </td>
 
                         <td className="px-5 py-5">
-                          <BranchStatusBadge
+                          <EquipmentCategoryStatusBadge
                             status={
-                              branch.status
+                              category.status
                             }
                           />
-                        </td>
-
-                        <td className="px-5 py-5 text-sm text-slate-600">
-                          {formatDate(
-                            branch.openedAt,
-                          )}
                         </td>
 
                         <td className="px-5 py-5">
@@ -1082,17 +947,13 @@ export const BranchesPage = () => {
                               type="button"
                               title="Xem chi tiết"
                               onClick={() =>
-                                setDetailBranch(
-                                  branch,
+                                setDetailCategory(
+                                  category,
                                 )
                               }
                               className="flex size-9 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition hover:bg-blue-50 hover:text-blue-700"
                             >
-                              <Eye
-                                size={
-                                  16
-                                }
-                              />
+                              <Eye size={16} />
                             </button>
 
                             <button
@@ -1100,57 +961,38 @@ export const BranchesPage = () => {
                               title="Chỉnh sửa"
                               onClick={() =>
                                 handleOpenEdit(
-                                  branch,
+                                  category,
                                 )
                               }
                               className="flex size-9 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition hover:bg-blue-50 hover:text-blue-700"
                             >
                               <Pencil
-                                size={
-                                  16
-                                }
-                              />
-                            </button>
-
-                            <button
-                              type="button"
-                              title="Gán quản lý"
-                              onClick={() =>
-                                handleOpenManager(
-                                  branch,
-                                )
-                              }
-                              className="flex size-9 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition hover:bg-blue-50 hover:text-blue-700"
-                            >
-                              <UserRoundCog
-                                size={
-                                  16
-                                }
+                                size={16}
                               />
                             </button>
 
                             <button
                               type="button"
                               disabled={
-                                branch.status ===
-                                  "ACTIVE" &&
-                                !canDeactivate
+                                !canToggleStatus
                               }
                               title={
-                                branch.status ===
+                                category.status ===
                                 "ACTIVE"
                                   ? canDeactivate
                                     ? "Ngừng hoạt động"
-                                    : "Chi nhánh đang có đơn thuê"
-                                  : "Kích hoạt"
+                                    : "Danh mục đang có thiết bị hoặc danh mục con hoạt động"
+                                  : canActivate
+                                    ? "Kích hoạt"
+                                    : "Danh mục cha đang ngừng hoạt động"
                               }
                               onClick={() =>
                                 setPendingAction(
                                   {
                                     type: "STATUS",
-                                    branch,
+                                    category,
                                     nextStatus:
-                                      branch.status ===
+                                      category.status ===
                                       "ACTIVE"
                                         ? "INACTIVE"
                                         : "ACTIVE",
@@ -1159,46 +1001,40 @@ export const BranchesPage = () => {
                               }
                               className="flex size-9 items-center justify-center rounded-xl border border-slate-200 text-slate-600 transition hover:bg-amber-50 hover:text-amber-700 disabled:cursor-not-allowed disabled:opacity-30"
                             >
-                              {branch.status ===
+                              {category.status ===
                               "ACTIVE" ? (
                                 <PowerOff
-                                  size={
-                                    16
-                                  }
+                                  size={16}
                                 />
                               ) : (
                                 <Power
-                                  size={
-                                    16
-                                  }
+                                  size={16}
                                 />
                               )}
                             </button>
 
                             <button
                               type="button"
-                              title={
-                                canDelete
-                                  ? "Xóa chi nhánh"
-                                  : "Chỉ xóa chi nhánh ngừng hoạt động và không có dữ liệu nghiệp vụ"
-                              }
                               disabled={
                                 !canDelete
+                              }
+                              title={
+                                canDelete
+                                  ? "Xóa danh mục"
+                                  : "Chỉ xóa danh mục ngừng hoạt động và không có dữ liệu"
                               }
                               onClick={() =>
                                 setPendingAction(
                                   {
                                     type: "DELETE",
-                                    branch,
+                                    category,
                                   },
                                 )
                               }
                               className="flex size-9 items-center justify-center rounded-xl border border-rose-100 bg-rose-50 text-rose-600 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-30"
                             >
                               <Trash2
-                                size={
-                                  16
-                                }
+                                size={16}
                               />
                             </button>
                           </div>
@@ -1218,9 +1054,9 @@ export const BranchesPage = () => {
           currentPage={currentPage}
           pageSize={pageSize}
           totalItems={
-            filteredBranches.length
+            filteredCategories.length
           }
-          itemLabel="chi nhánh"
+          itemLabel="danh mục"
           onPageChange={
             setCurrentPage
           }
@@ -1230,29 +1066,35 @@ export const BranchesPage = () => {
             setPageSize(
               nextPageSize,
             );
+
             setCurrentPage(1);
           }}
         />
       )}
 
-      <BranchDetailDrawer
-        branch={detailBranch}
+      <EquipmentCategoryDetailDrawer
+        category={detailCategory}
+        childCount={
+          detailCategory
+            ? childCountById.get(
+                detailCategory.id,
+              ) ?? 0
+            : 0
+        }
         isOpen={
-          detailBranch !== null
+          detailCategory !== null
         }
         onClose={() =>
-          setDetailBranch(null)
+          setDetailCategory(null)
         }
         onEdit={handleOpenEdit}
-        onAssignManager={
-          handleOpenManager
-        }
       />
 
-      <BranchFormModal
+      <EquipmentCategoryFormModal
         isOpen={formOpen}
         mode={formMode}
-        branch={formBranch}
+        category={formCategory}
+        categories={categories}
         isSubmitting={isSubmitting}
         errorMessage={
           formOpen
@@ -1262,43 +1104,18 @@ export const BranchesPage = () => {
         onClose={() => {
           if (!isSubmitting) {
             setFormOpen(false);
-            setFormBranch(null);
+            setFormCategory(null);
             setErrorMessage(null);
           }
         }}
         onSubmit={(input) => {
-          void handleSaveBranch(
+          void handleSaveCategory(
             input,
           );
         }}
       />
 
-      <BranchManagerDialog
-        branch={managerBranch}
-        isOpen={
-          managerBranch !== null
-        }
-        managers={managerOptions}
-        isSubmitting={isSubmitting}
-        errorMessage={
-          managerBranch
-            ? errorMessage
-            : null
-        }
-        onClose={() => {
-          if (!isSubmitting) {
-            setManagerBranch(null);
-            setErrorMessage(null);
-          }
-        }}
-        onConfirm={(manager) => {
-          void handleAssignManager(
-            manager,
-          );
-        }}
-      />
-
-      <BranchActionConfirmDialog
+      <EquipmentCategoryActionConfirmDialog
         isOpen={
           pendingAction !== null
         }
