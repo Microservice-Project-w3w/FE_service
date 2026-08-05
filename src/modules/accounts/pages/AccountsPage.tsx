@@ -34,8 +34,8 @@ import {
 } from "@/modules/accounts/components/AccountFormModal";
 
 import {
-  AccountPagination,
-} from "@/modules/accounts/components/AccountPagination";
+  DataPagination,
+} from "@/shared/components/data-display/DataPagination";
 
 import {
   AccountSortControls,
@@ -742,17 +742,15 @@ export const AccountsPage = () => {
       </div>
 
       {!isLoading && (
-        <AccountPagination
+        <DataPagination
           currentPage={
             currentPage
-          }
-          totalPages={
-            totalPages
           }
           pageSize={pageSize}
           totalItems={
             accounts.length
           }
+          itemLabel="tài khoản"
           onPageChange={
             setCurrentPage
           }
