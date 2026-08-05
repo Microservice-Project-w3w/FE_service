@@ -1,3 +1,4 @@
+import { BranchesPage } from "@/modules/branches";
 import { EmployeesPage } from "@/modules/employees";
 import {
   BrowserRouter,
@@ -144,12 +145,7 @@ export const AppRouter = () => {
 
               <Route
                 path="branches"
-                element={
-                  <ModulePlaceholderPage
-                    title="Quản lý chi nhánh"
-                    description="Quản lý thông tin và hoạt động của các chi nhánh."
-                  />
-                }
+                element={<BranchesPage />}
               />
 
               <Route
