@@ -1,4 +1,5 @@
 import { BranchesPage } from "@/modules/branches";
+import { EquipmentCategoriesPage } from "@/modules/equipment-categories";
 import { EmployeesPage } from "@/modules/employees";
 import {
   BrowserRouter,
@@ -150,12 +151,7 @@ export const AppRouter = () => {
 
               <Route
                 path="categories"
-                element={
-                  <ModulePlaceholderPage
-                    title="Quản lý danh mục"
-                    description="Cấu hình danh mục thiết bị, bảng giá và chính sách."
-                  />
-                }
+                element={<EquipmentCategoriesPage />}
               />
 
               <Route
