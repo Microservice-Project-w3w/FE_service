@@ -37,10 +37,6 @@ import {
 } from "@/modules/equipment-categories/components/EquipmentCategoryFormModal";
 
 import {
-  EquipmentCategoryIconBadge,
-} from "@/modules/equipment-categories/components/EquipmentCategoryIconBadge";
-
-import {
   EquipmentCategoryStatusBadge,
 } from "@/modules/equipment-categories/components/EquipmentCategoryStatusBadge";
 
@@ -590,7 +586,7 @@ export const EquipmentCategoriesPage = () => {
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="flex size-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-700">
+            <span className="flex size-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
               <Boxes size={21} />
             </span>
 
@@ -606,7 +602,7 @@ export const EquipmentCategoriesPage = () => {
 
         <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="flex size-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">
+            <span className="flex size-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
               <Power size={21} />
             </span>
 
@@ -622,7 +618,7 @@ export const EquipmentCategoriesPage = () => {
 
         <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="flex size-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-600">
+            <span className="flex size-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
               <CircleOff size={21} />
             </span>
 
@@ -638,7 +634,7 @@ export const EquipmentCategoriesPage = () => {
 
         <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="flex size-11 items-center justify-center rounded-2xl bg-violet-50 text-violet-700">
+            <span className="flex size-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
               <Layers3 size={21} />
             </span>
 
@@ -654,7 +650,7 @@ export const EquipmentCategoriesPage = () => {
 
         <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="flex size-11 items-center justify-center rounded-2xl bg-cyan-50 text-cyan-700">
+            <span className="flex size-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
               <PackageSearch size={21} />
             </span>
 
@@ -896,26 +892,14 @@ export const EquipmentCategoriesPage = () => {
                         </td>
 
                         <td className="px-5 py-5">
-                          <div className="flex items-center gap-3">
-                            <EquipmentCategoryIconBadge
-                              icon={
-                                category.icon
-                              }
-                            />
+                          <div>
+                            <p className="font-bold text-slate-900">
+                              {category.name}
+                            </p>
 
-                            <div>
-                              <p className="font-bold text-slate-900">
-                                {
-                                  category.name
-                                }
-                              </p>
-
-                              <p className="mt-1 text-xs font-semibold text-blue-600">
-                                {
-                                  category.categoryCode
-                                }
-                              </p>
-                            </div>
+                            <p className="mt-1 text-xs font-semibold text-slate-400">
+                              {category.categoryCode}
+                            </p>
                           </div>
                         </td>
 

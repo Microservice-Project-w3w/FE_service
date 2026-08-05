@@ -738,7 +738,7 @@ export const BranchesPage = () => {
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="flex size-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-700">
+            <span className="flex size-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
               <Building2 size={21} />
             </span>
 
@@ -754,7 +754,7 @@ export const BranchesPage = () => {
 
         <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="flex size-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">
+            <span className="flex size-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
               <Power size={21} />
             </span>
 
@@ -770,7 +770,7 @@ export const BranchesPage = () => {
 
         <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="flex size-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-600">
+            <span className="flex size-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
               <CircleOff size={21} />
             </span>
 
@@ -786,7 +786,7 @@ export const BranchesPage = () => {
 
         <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="flex size-11 items-center justify-center rounded-2xl bg-violet-50 text-violet-700">
+            <span className="flex size-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
               <Users size={21} />
             </span>
 
@@ -994,28 +994,18 @@ export const BranchesPage = () => {
                         </td>
 
                         <td className="px-5 py-5">
-                          <div className="flex items-center gap-3">
-                            <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-blue-100 bg-blue-50 text-blue-700">
-                              <Building2
-                                size={
-                                  20
-                                }
-                              />
-                            </span>
-
-                            <div>
+                          <div>
                               <p className="font-bold text-slate-900">
                                 {
                                   branch.name
                                 }
                               </p>
 
-                              <p className="mt-1 text-xs font-semibold text-blue-600">
+                              <p className="mt-1 text-xs font-semibold text-slate-400">
                                 {
                                   branch.branchCode
                                 }
                               </p>
-                            </div>
                           </div>
                         </td>
 
