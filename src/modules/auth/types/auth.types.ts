@@ -2,10 +2,28 @@ export type AccountType =
   | "personal"
   | "business";
 
+export const USER_ROLES = [
+  "ADMIN",
+  "MANAGER",
+  "SALES_STAFF",
+  "OPERATIONS_STAFF",
+  "ACCOUNTANT",
+  "CUSTOMER",
+] as const;
+
 export type UserRole =
-  | "ADMIN"
-  | "CUSTOMER"
-  | "EMPLOYEE";
+  (typeof USER_ROLES)[number];
+
+export const isUserRole = (
+  value: unknown,
+): value is UserRole => {
+  return (
+    typeof value === "string" &&
+    (
+      USER_ROLES as readonly string[]
+    ).includes(value)
+  );
+};
 
 export interface AuthUser {
   id: string;
