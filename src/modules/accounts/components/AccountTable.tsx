@@ -428,23 +428,6 @@ export const AccountTable = ({
         </table>
       </div>
 
-      <footer className="flex items-center justify-between border-t border-slate-200 bg-slate-50 px-5 py-4">
-        <p className="text-sm text-slate-500">
-          Đang hiển thị{" "}
-          <strong className="text-blue-700">
-            {accounts.length}
-          </strong>
-          {" trên "}
-          <strong className="text-slate-700">
-            {totalCount}
-          </strong>{" "}
-          tài khoản
-        </p>
-
-        <p className="text-xs font-medium text-slate-400">
-          Dữ liệu tài khoản hệ thống
-        </p>
-      </footer>
     </section>
   );
 };

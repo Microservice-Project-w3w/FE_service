@@ -1,3 +1,4 @@
+import { EmployeesPage } from "@/modules/employees";
 import {
   BrowserRouter,
   Navigate,
@@ -138,12 +139,7 @@ export const AppRouter = () => {
 
               <Route
                 path="employees"
-                element={
-                  <ModulePlaceholderPage
-                    title="Quản lý nhân viên"
-                    description="Quản lý hồ sơ, vai trò và thông tin nhân viên."
-                  />
-                }
+                element={<EmployeesPage />}
               />
 
               <Route
