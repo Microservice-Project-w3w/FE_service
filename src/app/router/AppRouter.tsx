@@ -50,6 +50,10 @@ import {
 } from "@/core/router/guards/RoleRoute";
 
 import {
+  AccountsPage,
+} from "@/modules/accounts";
+
+import {
   LoginPage,
   RegisterPage,
 } from "@/modules/auth";
@@ -129,12 +133,7 @@ export const AppRouter = () => {
 
               <Route
                 path="accounts"
-                element={
-                  <ModulePlaceholderPage
-                    title="Quản lý tài khoản"
-                    description="Quản lý tài khoản đăng nhập và trạng thái hoạt động."
-                  />
-                }
+                element={<AccountsPage />}
               />
 
               <Route
