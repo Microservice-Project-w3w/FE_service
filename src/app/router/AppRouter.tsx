@@ -58,6 +58,8 @@ import {
     CustomerEquipmentDetailPage,
     CustomerEquipmentPage,
     CustomerRentalRequestCreatePage,
+    CustomerRentalRequestDetailPage,
+    CustomerRentalRequestsPage,
 } from "@/modules/customers";
 
 import {
@@ -550,10 +552,14 @@ export const AppRouter = () => {
                             <Route
                                 path="rental-requests"
                                 element={
-                                    <ModulePlaceholderPage
-                                        title="Yêu cầu thuê của tôi"
-                                        description="Tạo và theo dõi các yêu cầu thuê thiết bị."
-                                    />
+                                    <CustomerRentalRequestsPage />
+                                }
+                            />
+
+                            <Route
+                                path="rental-requests/:requestId"
+                                element={
+                                    <CustomerRentalRequestDetailPage />
                                 }
                             />
 

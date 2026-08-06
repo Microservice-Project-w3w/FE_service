@@ -1,6 +1,3 @@
-// Public API của module customers.
-// Module khác chỉ được import thông qua file index.ts này.
-
 export {
     CustomerEquipmentPage,
 } from "./pages/CustomerEquipmentPage";
@@ -12,3 +9,11 @@ export {
 export {
     CustomerRentalRequestCreatePage,
 } from "./pages/CustomerRentalRequestCreatePage";
+
+export {
+    CustomerRentalRequestsPage,
+} from "./pages/CustomerRentalRequestsPage";
+
+export {
+    CustomerRentalRequestDetailPage,
+} from "./pages/CustomerRentalRequestDetailPage";
