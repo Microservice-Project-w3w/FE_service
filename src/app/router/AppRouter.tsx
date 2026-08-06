@@ -69,6 +69,10 @@ import {
 } from "@/modules/dashboard";
 
 import {
+  ManagerQuotationApprovalsPage,
+} from "@/modules/quotations";
+
+import {
   ModulePlaceholderPage,
 } from "@/shared/pages/ModulePlaceholderPage";
 
@@ -200,10 +204,7 @@ export const AppRouter = () => {
               <Route
                 path="quotation-approvals"
                 element={
-                  <ModulePlaceholderPage
-                    title="Báo giá chờ duyệt"
-                    description="Phê duyệt hoặc từ chối các báo giá đang chờ xử lý."
-                  />
+                  <ManagerQuotationApprovalsPage />
                 }
               />
 
