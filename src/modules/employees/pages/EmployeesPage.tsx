@@ -772,7 +772,8 @@ export const EmployeesPage = () => {
           </div>
         )}
 
-      <section className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="mt-5 w-full">
+        <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <header className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
           <div>
             <h2 className="text-lg font-bold text-slate-900">
@@ -989,10 +990,10 @@ export const EmployeesPage = () => {
             </tbody>
           </table>
         </div>
-      </section>
+        </section>
 
-      {!isLoading && (
-        <DataPagination
+        {!isLoading && (
+          <DataPagination
           currentPage={
             currentPage
           }
@@ -1013,8 +1014,9 @@ export const EmployeesPage = () => {
 
             setCurrentPage(1);
           }}
-        />
-      )}
+          />
+        )}
+      </div>
 
       <EmployeeDetailDrawer
         isOpen={

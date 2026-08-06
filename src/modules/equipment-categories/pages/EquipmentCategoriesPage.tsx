@@ -742,7 +742,8 @@ export const EquipmentCategoriesPage = () => {
           </div>
         )}
 
-      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="w-full">
+        <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <header className="flex flex-col gap-3 border-b border-slate-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="font-bold text-slate-900">
@@ -1047,10 +1048,10 @@ export const EquipmentCategoriesPage = () => {
             </tbody>
           </table>
         </div>
-      </section>
+        </section>
 
-      {!isLoading && (
-        <DataPagination
+        {!isLoading && (
+          <DataPagination
           currentPage={currentPage}
           pageSize={pageSize}
           totalItems={
@@ -1069,8 +1070,9 @@ export const EquipmentCategoriesPage = () => {
 
             setCurrentPage(1);
           }}
-        />
-      )}
+          />
+        )}
+      </div>
 
       <EquipmentCategoryDetailDrawer
         category={detailCategory}

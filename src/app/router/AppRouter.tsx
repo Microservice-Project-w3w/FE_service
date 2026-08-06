@@ -1,5 +1,6 @@
 import { BranchesPage } from "@/modules/branches";
 import { EquipmentCategoriesPage } from "@/modules/equipment-categories";
+import { SystemSettingsPage } from "@/modules/settings";
 import { EmployeesPage } from "@/modules/employees";
 import {
   BrowserRouter,
@@ -156,12 +157,7 @@ export const AppRouter = () => {
 
               <Route
                 path="settings"
-                element={
-                  <ModulePlaceholderPage
-                    title="Cấu hình hệ thống"
-                    description="Thiết lập thông tin và các cấu hình vận hành."
-                  />
-                }
+                element={<SystemSettingsPage />}
               />
 
               <Route
