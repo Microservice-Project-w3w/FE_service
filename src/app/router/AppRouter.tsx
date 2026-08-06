@@ -1,6 +1,7 @@
 import { BranchesPage } from "@/modules/branches";
 import { EquipmentCategoriesPage } from "@/modules/equipment-categories";
 import { SystemSettingsPage } from "@/modules/settings";
+import { AdminReportsPage } from "@/modules/reports";
 import { EmployeesPage } from "@/modules/employees";
 import {
   BrowserRouter,
@@ -162,12 +163,7 @@ export const AppRouter = () => {
 
               <Route
                 path="reports"
-                element={
-                  <ModulePlaceholderPage
-                    title="Báo cáo tổng thể"
-                    description="Theo dõi số liệu tổng hợp toàn hệ thống."
-                  />
-                }
+                element={<AdminReportsPage />}
               />
             </Route>
           </Route>
