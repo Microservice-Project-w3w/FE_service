@@ -65,6 +65,7 @@ import {
 
 import {
   DashboardPage,
+  ManagerDashboardPage,
 } from "@/modules/dashboard";
 
 import {
@@ -193,12 +194,7 @@ export const AppRouter = () => {
 
               <Route
                 path="dashboard"
-                element={
-                  <ModulePlaceholderPage
-                    title="Dashboard quản lý"
-                    description="Theo dõi hoạt động và tình hình của chi nhánh."
-                  />
-                }
+                element={<ManagerDashboardPage />}
               />
 
               <Route
