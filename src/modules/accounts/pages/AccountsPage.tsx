@@ -667,7 +667,7 @@ export const AccountsPage = () => {
         })}
       </section>
 
-      <div className="mt-5">
+      <div className="mt-5 w-full">
         <AccountFilters
           value={filters}
           branches={branches}
@@ -739,10 +739,8 @@ export const AccountsPage = () => {
             });
           }}
         />
-      </div>
-
-      {!isLoading && (
-        <DataPagination
+        {!isLoading && (
+          <DataPagination
           currentPage={
             currentPage
           }
@@ -763,8 +761,9 @@ export const AccountsPage = () => {
 
             setCurrentPage(1);
           }}
-        />
-      )}
+          />
+        )}
+      </div>
 
       <AccountDetailDrawer
         account={selectedAccount}
