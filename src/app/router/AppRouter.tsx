@@ -73,6 +73,10 @@ import {
 } from "@/modules/quotations";
 
 import {
+  ManagerContractApprovalsPage,
+} from "@/modules/contracts";
+
+import {
   ModulePlaceholderPage,
 } from "@/shared/pages/ModulePlaceholderPage";
 
@@ -211,10 +215,7 @@ export const AppRouter = () => {
               <Route
                 path="contract-approvals"
                 element={
-                  <ModulePlaceholderPage
-                    title="Hợp đồng chờ duyệt"
-                    description="Kiểm tra và phê duyệt các hợp đồng đang chờ."
-                  />
+                  <ManagerContractApprovalsPage />
                 }
               />
 
