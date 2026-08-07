@@ -52,3 +52,14 @@ export {
 export {
     CustomerReturnRequestDetailPage,
 } from "./pages/CustomerReturnRequestDetailPage";
+export {
+    CustomerIncidentsPage,
+} from "./pages/CustomerIncidentsPage";
+
+export {
+    CustomerIncidentCreatePage,
+} from "./pages/CustomerIncidentCreatePage";
+
+export {
+    CustomerIncidentDetailPage,
+} from "./pages/CustomerIncidentDetailPage";

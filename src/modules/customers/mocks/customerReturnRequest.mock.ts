@@ -1,7 +1,6 @@
 import type {
     CustomerReturnRequestItem,
-} from "../types/customerReturnRequest.types";
-
+} from '../types/customerReturnRequest.types';
 export const CUSTOMER_RETURN_REQUEST_MOCKS:
     CustomerReturnRequestItem[] = [
     {
@@ -16,7 +15,6 @@ export const CUSTOMER_RETURN_REQUEST_MOCKS:
         equipmentCode: "EQ-2505-003",
         equipmentName:
             "Máy phát điện Denyo 45kVA",
-
         equipmentImageUrl:
             "https://images.unsplash.com/photo-1581092160607-ee22621dd758",
 
@@ -36,8 +34,7 @@ export const CUSTOMER_RETURN_REQUEST_MOCKS:
         returnMethod:
             "BRANCH_RETURN",
 
-        status:
-            "PROCESSING",
+        status: "PROCESSING",
 
         note:
             "Thiết bị hoạt động bình thường.",
@@ -58,7 +55,6 @@ export const CUSTOMER_RETURN_REQUEST_MOCKS:
         equipmentCode: "EQ-2505-002",
         equipmentName:
             "Xe nâng Heli CPCD30",
-
         equipmentImageUrl:
             "https://images.unsplash.com/photo-1586528116493-da8b895d4c05",
 
@@ -78,11 +74,7 @@ export const CUSTOMER_RETURN_REQUEST_MOCKS:
         returnMethod:
             "PICKUP",
 
-        status:
-            "DUE_SOON",
-
-        note:
-            "Khách hàng yêu cầu đơn vị đến nhận thiết bị.",
+        status: "DUE_SOON",
 
         createdAt:
             "2026-08-06T15:20:00",
@@ -100,7 +92,6 @@ export const CUSTOMER_RETURN_REQUEST_MOCKS:
         equipmentCode: "EQ-2505-004",
         equipmentName:
             "Giàn giáo nêm Ringlock",
-
         equipmentImageUrl:
             "https://images.unsplash.com/photo-1504307651254-35680f356dfd",
 
@@ -120,8 +111,7 @@ export const CUSTOMER_RETURN_REQUEST_MOCKS:
         returnMethod:
             "BRANCH_RETURN",
 
-        status:
-            "CANCELLED",
+        status: "CANCELLED",
 
         cancellationReason:
             "Khách hàng tiếp tục sử dụng thiết bị.",
@@ -142,7 +132,6 @@ export const CUSTOMER_RETURN_REQUEST_MOCKS:
         equipmentCode: "EQ-2505-001",
         equipmentName:
             "Máy xúc Komatsu PC200-8",
-
         equipmentImageUrl:
             "https://images.unsplash.com/photo-1508450859948-4e04fabaa4ea",
 
@@ -162,11 +151,7 @@ export const CUSTOMER_RETURN_REQUEST_MOCKS:
         returnMethod:
             "PICKUP",
 
-        status:
-            "PROCESSING",
-
-        note:
-            "Thiết bị đang chờ xác nhận lịch nhận.",
+        status: "PROCESSING",
 
         createdAt:
             "2026-08-04T11:45:00",
@@ -184,7 +169,6 @@ export const CUSTOMER_RETURN_REQUEST_MOCKS:
         equipmentCode: "EQ-2505-005",
         equipmentName:
             "Xe nâng người Genie S-60",
-
         equipmentImageUrl:
             "https://images.unsplash.com/photo-1586864387967-d02ef85d93e8",
 
@@ -204,11 +188,7 @@ export const CUSTOMER_RETURN_REQUEST_MOCKS:
         returnMethod:
             "BRANCH_RETURN",
 
-        status:
-            "COMPLETED",
-
-        note:
-            "Thiết bị đã được hoàn trả đầy đủ.",
+        status: "COMPLETED",
 
         completedAt:
             "2026-08-08T13:10:00",
@@ -229,7 +209,6 @@ export const CUSTOMER_RETURN_REQUEST_MOCKS:
         equipmentCode: "EQ-2505-006",
         equipmentName:
             "Máy lu Hamm HD75",
-
         equipmentImageUrl:
             "https://images.unsplash.com/photo-1503387762-592deb58ef4e",
 
@@ -249,11 +228,7 @@ export const CUSTOMER_RETURN_REQUEST_MOCKS:
         returnMethod:
             "PICKUP",
 
-        status:
-            "COMPLETED",
-
-        note:
-            "Thiết bị đã được tiếp nhận và kiểm tra.",
+        status: "COMPLETED",
 
         completedAt:
             "2026-08-02T09:25:00",

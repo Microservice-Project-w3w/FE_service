@@ -59,6 +59,9 @@ import {
     CustomerContractsPage,
     CustomerEquipmentDetailPage,
     CustomerEquipmentPage,
+    CustomerIncidentCreatePage,
+    CustomerIncidentDetailPage,
+    CustomerIncidentsPage,
     CustomerInvoiceDetailPage,
     CustomerInvoicesPage,
     CustomerQuotationDetailPage,
@@ -656,13 +659,27 @@ export const AppRouter = () => {
                                 }
                             />
 
+                            {/* Báo cáo sự cố */}
                             <Route
                                 path="incidents"
                                 element={
-                                    <ModulePlaceholderPage
-                                        title="Báo cáo sự cố"
-                                        description="Gửi thông tin về sự cố trong quá trình sử dụng thiết bị."
-                                    />
+                                    <CustomerIncidentsPage />
+                                }
+                            />
+
+                            {/* Tạo báo cáo sự cố */}
+                            <Route
+                                path="incidents/create"
+                                element={
+                                    <CustomerIncidentCreatePage />
+                                }
+                            />
+
+                            {/* Chi tiết báo cáo sự cố */}
+                            <Route
+                                path="incidents/:incidentId"
+                                element={
+                                    <CustomerIncidentDetailPage />
                                 }
                             />
                         </Route>
