@@ -25,3 +25,11 @@ export {
 export {
     CustomerQuotationDetailPage,
 } from "./pages/CustomerQuotationDetailPage";
+
+export {
+    CustomerContractsPage,
+} from "./pages/CustomerContractsPage";
+
+export {
+    CustomerContractDetailPage,
+} from "./pages/CustomerContractDetailPage";

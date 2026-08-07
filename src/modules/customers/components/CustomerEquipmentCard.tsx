@@ -5,7 +5,9 @@ import {
     Tag,
     Wrench,
 } from "lucide-react";
-import { Link } from "react-router";
+import {
+    Link,
+} from "react-router";
 
 import type {
     CustomerEquipment,
@@ -65,7 +67,7 @@ export const CustomerEquipmentCard = ({
         );
 
     return (
-        <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md">
+        <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md">
             <div className="h-40 overflow-hidden bg-slate-100">
                 <img
                     src={equipment.imageUrl}
@@ -74,7 +76,7 @@ export const CustomerEquipmentCard = ({
                 />
             </div>
 
-            <div className="p-3">
+            <div className="flex flex-1 flex-col p-3">
                 <div className="flex flex-wrap items-center gap-1.5">
                     <CustomerEquipmentStatusBadge
                         status={equipment.status}
@@ -103,7 +105,9 @@ export const CustomerEquipmentCard = ({
                                 aria-hidden="true"
                             />
 
-                                {availabilityLabel}
+                                {
+                                    availabilityLabel
+                                }
                         </span>
                         )}
                 </div>
@@ -118,7 +122,9 @@ export const CustomerEquipmentCard = ({
                         aria-hidden="true"
                     />
 
-                    <span>{equipment.code}</span>
+                    <span>
+                        {equipment.code}
+                    </span>
                 </div>
 
                 {equipment.status ===
@@ -148,44 +154,55 @@ export const CustomerEquipmentCard = ({
                     </span>
 
                     <span className="ml-1 text-xs text-slate-500">
-                        / {equipment.rentalUnit}
+                        /{" "}
+                        {
+                            equipment.rentalUnit
+                        }
                     </span>
                 </div>
 
-                <div className="mt-2.5 grid grid-cols-2 gap-2">
-                    <Link
-                        to={`/customer/equipment/${equipment.id}`}
-                        className="flex h-9 items-center justify-center rounded-lg border border-blue-200 bg-white px-2 text-xs font-semibold text-blue-700 transition hover:bg-blue-50"
-                    >
-                        Xem chi tiết
-                    </Link>
-
-                    {canRent ? (
+                <div className="mt-auto pt-3">
+                    <div className="grid grid-cols-2 gap-2.5">
                         <Link
-                            to={`/customer/equipment/${equipment.id}/rental-request`}
-                            className="flex h-9 items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-2 text-xs font-semibold text-white transition hover:bg-blue-700"
+                            to={`/customer/equipment/${equipment.id}`}
+                            className="inline-flex h-10 w-full items-center justify-center rounded-xl border border-blue-200 bg-white px-3 text-sm font-semibold text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
                         >
-                            <ShoppingCart
-                                size={14}
-                                aria-hidden="true"
-                            />
-
-                            Yêu cầu thuê
+                            Xem chi tiết
                         </Link>
-                    ) : (
-                        <button
-                            type="button"
-                            disabled
-                            className="flex h-9 cursor-not-allowed items-center justify-center gap-1.5 rounded-lg bg-slate-300 px-2 text-xs font-semibold text-white"
-                        >
-                            <ShoppingCart
-                                size={14}
-                                aria-hidden="true"
-                            />
 
-                            Chưa thể thuê
-                        </button>
-                    )}
+                        {canRent ? (
+                            <Link
+                                to={`/customer/equipment/${equipment.id}/rental-request`}
+                                className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+                            >
+                                <ShoppingCart
+                                    size={15}
+                                    aria-hidden="true"
+                                    className="shrink-0 text-white"
+                                />
+
+                                <span className="whitespace-nowrap text-white">
+                                    Yêu cầu thuê
+                                </span>
+                            </Link>
+                        ) : (
+                            <button
+                                type="button"
+                                disabled
+                                className="inline-flex h-10 w-full cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-slate-200 px-3 text-sm font-semibold text-slate-400"
+                            >
+                                <ShoppingCart
+                                    size={15}
+                                    aria-hidden="true"
+                                    className="shrink-0"
+                                />
+
+                                <span className="whitespace-nowrap">
+                                    Chưa thể thuê
+                                </span>
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
         </article>

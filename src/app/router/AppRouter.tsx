@@ -55,6 +55,8 @@ import {
 } from "@/modules/auth";
 
 import {
+    CustomerContractDetailPage,
+    CustomerContractsPage,
     CustomerEquipmentDetailPage,
     CustomerEquipmentPage,
     CustomerQuotationDetailPage,
@@ -593,13 +595,19 @@ export const AppRouter = () => {
                                 }
                             />
 
+                            {/* Hợp đồng của tôi */}
                             <Route
                                 path="contracts"
                                 element={
-                                    <ModulePlaceholderPage
-                                        title="Hợp đồng của tôi"
-                                        description="Xem thông tin và trạng thái hợp đồng thuê."
-                                    />
+                                    <CustomerContractsPage />
+                                }
+                            />
+
+                            {/* Chi tiết hợp đồng */}
+                            <Route
+                                path="contracts/:contractId"
+                                element={
+                                    <CustomerContractDetailPage />
                                 }
                             />
 

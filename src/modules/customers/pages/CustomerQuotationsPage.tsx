@@ -1,5 +1,7 @@
 import {
     CheckCircle2,
+    ChevronLeft,
+    ChevronRight,
     Clock3,
     FileText,
     SearchX,
@@ -83,14 +85,22 @@ const matchesDateFilter = (
         return true;
     }
 
-    const createdDate = new Date(createdAt);
+    const createdDate =
+        new Date(createdAt);
 
-    if (Number.isNaN(createdDate.getTime())) {
+    if (
+        Number.isNaN(
+            createdDate.getTime(),
+        )
+    ) {
         return false;
     }
 
     const daysMap: Record<
-        Exclude<CustomerQuotationDateFilter, "ALL">,
+        Exclude<
+            CustomerQuotationDateFilter,
+            "ALL"
+        >,
         number
     > = {
         LAST_7_DAYS: 7,
@@ -98,26 +108,38 @@ const matchesDateFilter = (
         LAST_90_DAYS: 90,
     };
 
-    const minimumDate = new Date();
+    const minimumDate =
+        new Date();
 
-    minimumDate.setHours(0, 0, 0, 0);
+    minimumDate.setHours(
+        0,
+        0,
+        0,
+        0,
+    );
+
     minimumDate.setDate(
         minimumDate.getDate() -
         daysMap[dateFilter],
     );
 
-    return createdDate >= minimumDate;
+    return (
+        createdDate >=
+        minimumDate
+    );
 };
 
 export const CustomerQuotationsPage = () => {
-    const navigate = useNavigate();
+    const navigate =
+        useNavigate();
 
     const [
         quotations,
         setQuotations,
-    ] = useState<CustomerQuotationItem[]>(
-        CUSTOMER_QUOTATION_MOCKS,
-    );
+    ] =
+        useState<CustomerQuotationItem[]>(
+            CUSTOMER_QUOTATION_MOCKS,
+        );
 
     const [
         searchTerm,
@@ -134,9 +156,10 @@ export const CustomerQuotationsPage = () => {
     const [
         dateFilter,
         setDateFilter,
-    ] = useState<CustomerQuotationDateFilter>(
-        "ALL",
-    );
+    ] =
+        useState<CustomerQuotationDateFilter>(
+            "ALL",
+        );
 
     const [
         currentPage,
@@ -146,72 +169,86 @@ export const CustomerQuotationsPage = () => {
     const [
         actionState,
         setActionState,
-    ] = useState<QuotationActionState | null>(
-        null,
-    );
+    ] =
+        useState<QuotationActionState | null>(
+            null,
+        );
 
     const [
         rejectionReason,
         setRejectionReason,
     ] = useState("");
 
-    const filteredQuotations = useMemo(() => {
-        const normalizedSearch =
-            normalizeSearchValue(searchTerm);
-
-        return quotations.filter(
-            (quotation) => {
-                const searchableText = [
-                    quotation.quotationCode,
-                    quotation.requestCode,
-                    quotation.equipmentName,
-                    quotation.equipmentCode,
-                    quotation.branch,
-                ]
-                    .map(normalizeSearchValue)
-                    .join(" ");
-
-                const matchesSearch =
-                    normalizedSearch === "" ||
-                    searchableText.includes(
-                        normalizedSearch,
-                    );
-
-                const matchesStatus =
-                    status === "ALL" ||
-                    quotation.status === status;
-
-                const matchesDate =
-                    matchesDateFilter(
-                        quotation.createdAt,
-                        dateFilter,
-                    );
-
-                return (
-                    matchesSearch &&
-                    matchesStatus &&
-                    matchesDate
+    const filteredQuotations =
+        useMemo(() => {
+            const normalizedSearch =
+                normalizeSearchValue(
+                    searchTerm,
                 );
-            },
-        );
-    }, [
-        quotations,
-        searchTerm,
-        status,
-        dateFilter,
-    ]);
 
-    const totalPages = Math.max(
-        1,
-        Math.ceil(
-            filteredQuotations.length /
-            ITEMS_PER_PAGE,
-        ),
-    );
+            return quotations.filter(
+                (quotation) => {
+                    const searchableText = [
+                        quotation.quotationCode,
+                        quotation.requestCode,
+                        quotation.equipmentName,
+                        quotation.equipmentCode,
+                        quotation.branch,
+                    ]
+                        .map(
+                            normalizeSearchValue,
+                        )
+                        .join(" ");
+
+                    const matchesSearch =
+                        normalizedSearch ===
+                        "" ||
+                        searchableText.includes(
+                            normalizedSearch,
+                        );
+
+                    const matchesStatus =
+                        status === "ALL" ||
+                        quotation.status ===
+                        status;
+
+                    const matchesDate =
+                        matchesDateFilter(
+                            quotation.createdAt,
+                            dateFilter,
+                        );
+
+                    return (
+                        matchesSearch &&
+                        matchesStatus &&
+                        matchesDate
+                    );
+                },
+            );
+        }, [
+            quotations,
+            searchTerm,
+            status,
+            dateFilter,
+        ]);
+
+    const totalPages =
+        Math.max(
+            1,
+            Math.ceil(
+                filteredQuotations.length /
+                ITEMS_PER_PAGE,
+            ),
+        );
 
     useEffect(() => {
-        if (currentPage > totalPages) {
-            setCurrentPage(totalPages);
+        if (
+            currentPage >
+            totalPages
+        ) {
+            setCurrentPage(
+                totalPages,
+            );
         }
     }, [
         currentPage,
@@ -226,9 +263,17 @@ export const CustomerQuotationsPage = () => {
         const handleKeyDown = (
             event: KeyboardEvent,
         ): void => {
-            if (event.key === "Escape") {
-                setActionState(null);
-                setRejectionReason("");
+            if (
+                event.key ===
+                "Escape"
+            ) {
+                setActionState(
+                    null,
+                );
+
+                setRejectionReason(
+                    "",
+                );
             }
         };
 
@@ -259,47 +304,62 @@ export const CustomerQuotationsPage = () => {
 
             return filteredQuotations.slice(
                 startIndex,
-                startIndex + ITEMS_PER_PAGE,
+                startIndex +
+                ITEMS_PER_PAGE,
             );
         }, [
             filteredQuotations,
             currentPage,
         ]);
 
-    const statistics = useMemo(() => {
-        return {
-            total: quotations.length,
+    const statistics =
+        useMemo(() => {
+            return {
+                total:
+                quotations.length,
 
-            pending: quotations.filter(
-                (quotation) =>
-                    quotation.status ===
-                    "PENDING_RESPONSE",
-            ).length,
+                pending:
+                quotations.filter(
+                    (
+                        quotation,
+                    ) =>
+                        quotation.status ===
+                        "PENDING_RESPONSE",
+                ).length,
 
-            accepted: quotations.filter(
-                (quotation) =>
-                    quotation.status ===
-                    "ACCEPTED",
-            ).length,
+                accepted:
+                quotations.filter(
+                    (
+                        quotation,
+                    ) =>
+                        quotation.status ===
+                        "ACCEPTED",
+                ).length,
 
-            closed: quotations.filter(
-                (quotation) =>
-                    quotation.status ===
-                    "REJECTED" ||
-                    quotation.status ===
-                    "EXPIRED" ||
-                    quotation.status ===
-                    "SUPERSEDED",
-            ).length,
+                closed:
+                quotations.filter(
+                    (
+                        quotation,
+                    ) =>
+                        quotation.status ===
+                        "REJECTED" ||
+                        quotation.status ===
+                        "EXPIRED" ||
+                        quotation.status ===
+                        "SUPERSEDED",
+                ).length,
+            };
+        }, [quotations]);
+
+    const handleResetFilters =
+        (): void => {
+            setSearchTerm("");
+            setStatus("ALL");
+            setDateFilter(
+                "ALL",
+            );
+            setCurrentPage(1);
         };
-    }, [quotations]);
-
-    const handleResetFilters = (): void => {
-        setSearchTerm("");
-        setStatus("ALL");
-        setDateFilter("ALL");
-        setCurrentPage(1);
-    };
 
     const handleSearchChange = (
         value: string,
@@ -321,20 +381,31 @@ export const CustomerQuotationsPage = () => {
         nextDateFilter:
         CustomerQuotationDateFilter,
     ): void => {
-        setDateFilter(nextDateFilter);
+        setDateFilter(
+            nextDateFilter,
+        );
+
         setCurrentPage(1);
     };
 
     const handleViewDetail = (
-        quotation: CustomerQuotationItem,
+        quotation:
+        CustomerQuotationItem,
     ): void => {
         navigate(
             `/customer/quotations/${quotation.id}`,
         );
+
+        window.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: "auto",
+        });
     };
 
     const handleAccept = (
-        quotation: CustomerQuotationItem,
+        quotation:
+        CustomerQuotationItem,
     ): void => {
         setActionState({
             type: "ACCEPT",
@@ -343,61 +414,88 @@ export const CustomerQuotationsPage = () => {
     };
 
     const handleReject = (
-        quotation: CustomerQuotationItem,
+        quotation:
+        CustomerQuotationItem,
     ): void => {
-        setRejectionReason("");
+        setRejectionReason(
+            "",
+        );
+
         setActionState({
             type: "REJECT",
             quotation,
         });
     };
 
-    const handleCloseActionModal = (): void => {
-        setActionState(null);
-        setRejectionReason("");
-    };
+    const handleCloseActionModal =
+        (): void => {
+            setActionState(
+                null,
+            );
 
-    const handleConfirmAction = (): void => {
-        if (!actionState) {
-            return;
-        }
+            setRejectionReason(
+                "",
+            );
+        };
 
-        if (
-            actionState.type === "REJECT" &&
-            rejectionReason.trim() === ""
-        ) {
-            return;
-        }
+    const handleConfirmAction =
+        (): void => {
+            if (!actionState) {
+                return;
+            }
 
-        setQuotations(
-            (currentQuotations) =>
-                currentQuotations.map(
-                    (currentQuotation) =>
-                        currentQuotation.id ===
-                        actionState.quotation.id
-                            ? {
-                                ...currentQuotation,
-                                status:
-                                    actionState.type ===
-                                    "ACCEPT"
-                                        ? "ACCEPTED"
-                                        : "REJECTED",
-                                rejectionReason:
-                                    actionState.type ===
-                                    "REJECT"
-                                        ? rejectionReason.trim()
-                                        : undefined,
-                            }
-                            : currentQuotation,
-                ),
-        );
+            if (
+                actionState.type ===
+                "REJECT" &&
+                rejectionReason.trim() ===
+                ""
+            ) {
+                return;
+            }
 
-        handleCloseActionModal();
-    };
+            setQuotations(
+                (
+                    currentQuotations,
+                ) =>
+                    currentQuotations.map(
+                        (
+                            currentQuotation,
+                        ) =>
+                            currentQuotation.id ===
+                            actionState
+                                .quotation.id
+                                ? {
+                                    ...currentQuotation,
+
+                                    status:
+                                        actionState.type ===
+                                        "ACCEPT"
+                                            ? "ACCEPTED"
+                                            : "REJECTED",
+
+                                    rejectionReason:
+                                        actionState.type ===
+                                        "REJECT"
+                                            ? rejectionReason.trim()
+                                            : undefined,
+                                }
+                                : currentQuotation,
+                    ),
+            );
+
+            handleCloseActionModal();
+        };
 
     const handlePageChange = (
         page: number,
     ): void => {
+        if (
+            page < 1 ||
+            page > totalPages
+        ) {
+            return;
+        }
+
         setCurrentPage(page);
 
         window.scrollTo({
@@ -407,42 +505,36 @@ export const CustomerQuotationsPage = () => {
         });
     };
 
-    const firstVisibleItem =
-        filteredQuotations.length === 0
-            ? 0
-            : (currentPage - 1) *
-            ITEMS_PER_PAGE +
-            1;
-
-    const lastVisibleItem = Math.min(
-        currentPage * ITEMS_PER_PAGE,
-        filteredQuotations.length,
-    );
-
     const statisticItems = [
         {
-            label: "Tất cả báo giá",
+            label:
+                "Tất cả báo giá",
             description:
                 "Toàn bộ báo giá đã nhận",
-            value: statistics.total,
+            value:
+            statistics.total,
             icon: FileText,
             className:
                 "bg-blue-50 text-blue-700",
         },
         {
-            label: "Chờ phản hồi",
+            label:
+                "Chờ phản hồi",
             description:
                 "Cần chấp nhận hoặc từ chối",
-            value: statistics.pending,
+            value:
+            statistics.pending,
             icon: Clock3,
             className:
                 "bg-amber-50 text-amber-700",
         },
         {
-            label: "Đã chấp nhận",
+            label:
+                "Đã chấp nhận",
             description:
                 "Đã đồng ý với báo giá",
-            value: statistics.accepted,
+            value:
+            statistics.accepted,
             icon: CheckCircle2,
             className:
                 "bg-emerald-50 text-emerald-700",
@@ -451,7 +543,8 @@ export const CustomerQuotationsPage = () => {
             label: "Đã đóng",
             description:
                 "Đã từ chối hoặc hết hiệu lực",
-            value: statistics.closed,
+            value:
+            statistics.closed,
             icon: XCircle,
             className:
                 "bg-slate-100 text-slate-600",
@@ -459,7 +552,8 @@ export const CustomerQuotationsPage = () => {
     ];
 
     const isRejectAction =
-        actionState?.type === "REJECT";
+        actionState?.type ===
+        "REJECT";
 
     return (
         <>
@@ -470,56 +564,79 @@ export const CustomerQuotationsPage = () => {
                     </h1>
 
                     <p className="mt-1.5 text-sm text-slate-500">
-                        Xem chi tiết, chấp nhận hoặc từ chối
-                        các báo giá thuê thiết bị.
+                        Xem chi tiết,
+                        chấp nhận hoặc từ
+                        chối các báo giá
+                        thuê thiết bị.
                     </p>
                 </header>
 
                 <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                    {statisticItems.map((item) => {
-                        const Icon = item.icon;
+                    {statisticItems.map(
+                        (item) => {
+                            const Icon =
+                                item.icon;
 
-                        return (
-                            <article
-                                key={item.label}
-                                className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm"
-                            >
-                                <span
-                                    className={[
-                                        "flex size-11 shrink-0 items-center justify-center rounded-xl",
-                                        item.className,
-                                    ].join(" ")}
+                            return (
+                                <article
+                                    key={
+                                        item.label
+                                    }
+                                    className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm"
                                 >
-                                    <Icon
-                                        size={20}
-                                        aria-hidden="true"
-                                    />
-                                </span>
+                                    <span
+                                        className={[
+                                            "flex size-11 shrink-0 items-center justify-center rounded-xl",
+                                            item.className,
+                                        ].join(
+                                            " ",
+                                        )}
+                                    >
+                                        <Icon
+                                            size={
+                                                20
+                                            }
+                                            aria-hidden="true"
+                                        />
+                                    </span>
 
-                                <div className="min-w-0">
-                                    <div className="flex items-baseline gap-2">
-                                        <p className="text-xl font-bold text-slate-950">
-                                            {item.value}
-                                        </p>
+                                    <div className="min-w-0">
+                                        <div className="flex items-baseline gap-2">
+                                            <p className="text-xl font-bold text-slate-950">
+                                                {
+                                                    item.value
+                                                }
+                                            </p>
 
-                                        <p className="truncate text-sm font-semibold text-slate-800">
-                                            {item.label}
+                                            <p className="truncate text-sm font-semibold text-slate-800">
+                                                {
+                                                    item.label
+                                                }
+                                            </p>
+                                        </div>
+
+                                        <p className="mt-0.5 truncate text-xs text-slate-500">
+                                            {
+                                                item.description
+                                            }
                                         </p>
                                     </div>
-
-                                    <p className="mt-0.5 truncate text-xs text-slate-500">
-                                        {item.description}
-                                    </p>
-                                </div>
-                            </article>
-                        );
-                    })}
+                                </article>
+                            );
+                        },
+                    )}
                 </section>
 
                 <CustomerQuotationFilters
-                    searchTerm={searchTerm}
-                    status={status}
-                    dateFilter={dateFilter}
+                    searchTerm={
+                        searchTerm
+                    }
+                    status={
+                        status
+                    }
+                    dateFilter={
+                        dateFilter
+                    }
                     onSearchChange={
                         handleSearchChange
                     }
@@ -529,10 +646,12 @@ export const CustomerQuotationsPage = () => {
                     onDateFilterChange={
                         handleDateFilterChange
                     }
-                    onReset={handleResetFilters}
+                    onReset={
+                        handleResetFilters
+                    }
                 />
 
-                <section className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                <section>
                     <p className="text-sm font-semibold text-slate-700">
                         Tìm thấy{" "}
                         {
@@ -540,28 +659,19 @@ export const CustomerQuotationsPage = () => {
                         }{" "}
                         báo giá
                     </p>
-
-                    {filteredQuotations.length >
-                        0 && (
-                            <p className="text-xs text-slate-500">
-                                Hiển thị{" "}
-                                {firstVisibleItem}–
-                                {lastVisibleItem} trong{" "}
-                                {
-                                    filteredQuotations.length
-                                }{" "}
-                                báo giá
-                            </p>
-                        )}
                 </section>
 
                 {paginatedQuotations.length >
                 0 ? (
                     <section className="space-y-3">
                         {paginatedQuotations.map(
-                            (quotation) => (
+                            (
+                                quotation,
+                            ) => (
                                 <CustomerQuotationCard
-                                    key={quotation.id}
+                                    key={
+                                        quotation.id
+                                    }
                                     quotation={
                                         quotation
                                     }
@@ -587,17 +697,21 @@ export const CustomerQuotationsPage = () => {
                         />
 
                         <h2 className="mt-4 text-base font-bold text-slate-900">
-                            Không tìm thấy báo giá
+                            Không tìm thấy
+                            báo giá
                         </h2>
 
                         <p className="mt-2 text-sm text-slate-500">
-                            Hãy thử thay đổi từ khóa hoặc
-                            bộ lọc hiện tại.
+                            Hãy thử thay đổi
+                            từ khóa hoặc bộ
+                            lọc hiện tại.
                         </p>
 
                         <button
                             type="button"
-                            onClick={handleResetFilters}
+                            onClick={
+                                handleResetFilters
+                            }
                             className="mt-5 inline-flex h-10 items-center justify-center rounded-xl border border-blue-200 bg-blue-50 px-4 text-sm font-semibold text-blue-700 transition hover:bg-blue-100"
                         >
                             Đặt lại bộ lọc
@@ -608,43 +722,93 @@ export const CustomerQuotationsPage = () => {
                 {totalPages > 1 && (
                     <nav
                         aria-label="Phân trang báo giá"
-                        className="flex items-center justify-center gap-2 pb-4 pt-1"
+                        className="flex items-center justify-center gap-1.5 pb-5 pt-2"
                     >
+                        <button
+                            type="button"
+                            aria-label="Trang trước"
+                            disabled={
+                                currentPage ===
+                                1
+                            }
+                            onClick={() => {
+                                handlePageChange(
+                                    currentPage -
+                                    1,
+                                );
+                            }}
+                            className="flex size-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-30"
+                        >
+                            <ChevronLeft
+                                size={17}
+                                aria-hidden="true"
+                            />
+                        </button>
+
                         {Array.from(
                             {
-                                length: totalPages,
+                                length:
+                                totalPages,
                             },
                             (_, index) =>
                                 index + 1,
-                        ).map((page) => {
-                            const isActive =
-                                page === currentPage;
+                        ).map(
+                            (page) => {
+                                const isActive =
+                                    page ===
+                                    currentPage;
 
-                            return (
-                                <button
-                                    key={page}
-                                    type="button"
-                                    aria-label={`Đi đến trang ${page}`}
-                                    aria-current={
-                                        isActive
-                                            ? "page"
-                                            : undefined
-                                    }
-                                    onClick={() => {
-                                        handlePageChange(
-                                            page,
-                                        );
-                                    }}
-                                    className={
-                                        isActive
-                                            ? "flex size-10 items-center justify-center rounded-xl bg-blue-600 text-sm font-semibold text-white shadow-sm"
-                                            : "flex size-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
-                                    }
-                                >
-                                    {page}
-                                </button>
-                            );
-                        })}
+                                return (
+                                    <button
+                                        key={
+                                            page
+                                        }
+                                        type="button"
+                                        aria-label={`Đi đến trang ${page}`}
+                                        aria-current={
+                                            isActive
+                                                ? "page"
+                                                : undefined
+                                        }
+                                        onClick={() => {
+                                            handlePageChange(
+                                                page,
+                                            );
+                                        }}
+                                        className={
+                                            isActive
+                                                ? "flex size-9 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold text-white shadow-sm"
+                                                : "flex size-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-sm font-semibold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                                        }
+                                    >
+                                        {
+                                            page
+                                        }
+                                    </button>
+                                );
+                            },
+                        )}
+
+                        <button
+                            type="button"
+                            aria-label="Trang sau"
+                            disabled={
+                                currentPage ===
+                                totalPages
+                            }
+                            onClick={() => {
+                                handlePageChange(
+                                    currentPage +
+                                    1,
+                                );
+                            }}
+                            className="flex size-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-30"
+                        >
+                            <ChevronRight
+                                size={17}
+                                aria-hidden="true"
+                            />
+                        </button>
                     </nav>
                 )}
             </main>
@@ -652,7 +816,9 @@ export const CustomerQuotationsPage = () => {
             {actionState && (
                 <div
                     role="presentation"
-                    onMouseDown={(event) => {
+                    onMouseDown={(
+                        event,
+                    ) => {
                         if (
                             event.target ===
                             event.currentTarget
@@ -679,12 +845,16 @@ export const CustomerQuotationsPage = () => {
                                 >
                                     {isRejectAction ? (
                                         <XCircle
-                                            size={21}
+                                            size={
+                                                21
+                                            }
                                             aria-hidden="true"
                                         />
                                     ) : (
                                         <CheckCircle2
-                                            size={21}
+                                            size={
+                                                21
+                                            }
                                             aria-hidden="true"
                                         />
                                     )}
@@ -717,7 +887,9 @@ export const CustomerQuotationsPage = () => {
                                 className="flex size-9 shrink-0 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
                             >
                                 <X
-                                    size={19}
+                                    size={
+                                        19
+                                    }
                                     aria-hidden="true"
                                 />
                             </button>
@@ -772,7 +944,8 @@ export const CustomerQuotationsPage = () => {
                                 <div className="mt-4 grid gap-3 border-t border-slate-200 pt-4 sm:grid-cols-2">
                                     <div>
                                         <p className="text-xs text-slate-500">
-                                            Thời gian thuê
+                                            Thời gian
+                                            thuê
                                         </p>
 
                                         <p className="mt-1 text-sm font-semibold text-slate-900">
@@ -792,7 +965,8 @@ export const CustomerQuotationsPage = () => {
 
                                     <div>
                                         <p className="text-xs text-slate-500">
-                                            Hiệu lực đến
+                                            Hiệu lực
+                                            đến
                                         </p>
 
                                         <p className="mt-1 text-sm font-semibold text-slate-900">
@@ -809,7 +983,8 @@ export const CustomerQuotationsPage = () => {
                             {isRejectAction && (
                                 <label className="block">
                                     <span className="text-sm font-semibold text-slate-800">
-                                        Lý do từ chối{" "}
+                                        Lý do
+                                        từ chối{" "}
                                         <span className="text-red-500">
                                             *
                                         </span>
@@ -819,13 +994,21 @@ export const CustomerQuotationsPage = () => {
                                         value={
                                             rejectionReason
                                         }
-                                        onChange={(event) => {
+                                        onChange={(
+                                            event,
+                                        ) => {
                                             setRejectionReason(
-                                                event.target.value,
+                                                event
+                                                    .target
+                                                    .value,
                                             );
                                         }}
-                                        rows={4}
-                                        maxLength={300}
+                                        rows={
+                                            4
+                                        }
+                                        maxLength={
+                                            300
+                                        }
                                         placeholder="Ví dụ: Chi phí chưa phù hợp, cần thay đổi thời gian thuê..."
                                         className="mt-2 w-full resize-none rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-red-400 focus:ring-4 focus:ring-red-100"
                                     />
@@ -842,11 +1025,15 @@ export const CustomerQuotationsPage = () => {
                             {!isRejectAction && (
                                 <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-3">
                                     <p className="text-sm leading-6 text-emerald-800">
-                                        Sau khi xác nhận, báo giá sẽ chuyển sang trạng thái{" "}
+                                        Sau khi xác
+                                        nhận, báo giá
+                                        sẽ chuyển sang
+                                        trạng thái{" "}
                                         <strong>
-                                            Đã chấp nhận
+                                            Đã chấp
+                                            nhận
                                         </strong>
-                                        . Hệ thống có thể tiếp tục tạo hợp đồng thuê.
+                                        .
                                     </p>
                                 </div>
                             )}
@@ -881,12 +1068,16 @@ export const CustomerQuotationsPage = () => {
                             >
                                 {isRejectAction ? (
                                     <XCircle
-                                        size={16}
+                                        size={
+                                            16
+                                        }
                                         aria-hidden="true"
                                     />
                                 ) : (
                                     <CheckCircle2
-                                        size={16}
+                                        size={
+                                            16
+                                        }
                                         aria-hidden="true"
                                     />
                                 )}

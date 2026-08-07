@@ -537,8 +537,24 @@ export const CustomerRentalRequestsPage = () => {
             {totalPages > 1 && (
                 <nav
                     aria-label="Phân trang yêu cầu thuê"
-                    className="flex items-center justify-center gap-2 pb-4 pt-1"
+                    className="flex items-center justify-center gap-1.5 pb-5 pt-2"
                 >
+                    <button
+                        type="button"
+                        aria-label="Trang trước"
+                        disabled={
+                            currentPage === 1
+                        }
+                        onClick={() => {
+                            handlePageChange(
+                                currentPage - 1,
+                            );
+                        }}
+                        className="flex size-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-30"
+                    >
+                        ‹
+                    </button>
+
                     {Array.from(
                         {
                             length: totalPages,
@@ -566,16 +582,34 @@ export const CustomerRentalRequestsPage = () => {
                                 }}
                                 className={
                                     isActive
-                                        ? "flex size-10 items-center justify-center rounded-xl bg-blue-600 text-sm font-semibold text-white shadow-sm"
-                                        : "flex size-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                                        ? "flex size-9 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold text-white shadow-sm"
+                                        : "flex size-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-sm font-semibold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
                                 }
                             >
                                 {page}
                             </button>
                         );
                     })}
+
+                    <button
+                        type="button"
+                        aria-label="Trang sau"
+                        disabled={
+                            currentPage ===
+                            totalPages
+                        }
+                        onClick={() => {
+                            handlePageChange(
+                                currentPage + 1,
+                            );
+                        }}
+                        className="flex size-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-30"
+                    >
+                        ›
+                    </button>
                 </nav>
             )}
+
         </main>
     );
 };
