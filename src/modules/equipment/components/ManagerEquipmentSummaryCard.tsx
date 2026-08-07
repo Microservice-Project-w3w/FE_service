@@ -2,19 +2,19 @@ import type {
   LucideIcon,
 } from "lucide-react";
 
-interface ManagerRentalSummaryCardProps {
+interface ManagerEquipmentSummaryCardProps {
   title: string;
   value: string;
   description: string;
   icon: LucideIcon;
 }
 
-export const ManagerRentalSummaryCard = ({
+export const ManagerEquipmentSummaryCard = ({
   title,
   value,
   description,
   icon: Icon,
-}: ManagerRentalSummaryCardProps) => (
+}: ManagerEquipmentSummaryCardProps) => (
   <article className="min-h-[190px] rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
     <div className="flex items-start justify-between gap-4">
       <div className="min-w-0">
@@ -22,11 +22,11 @@ export const ManagerRentalSummaryCard = ({
           {title}
         </p>
 
-        <p className="mt-3 whitespace-nowrap text-[clamp(1.125rem,1.35vw,1.5rem)] font-bold tracking-tight text-slate-900">
+        <p className="mt-3 whitespace-nowrap text-2xl font-bold tracking-tight text-slate-900">
           {value}
         </p>
 
-        <p className="mt-3 text-xs leading-5 text-slate-400">
+        <p className="mt-2 text-xs leading-5 text-slate-400">
           {description}
         </p>
       </div>

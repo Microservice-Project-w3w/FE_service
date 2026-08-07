@@ -89,6 +89,10 @@ import {
 } from "@/modules/receivables";
 
 import {
+  ManagerEquipmentPage,
+} from "@/modules/equipment";
+
+import {
   ModulePlaceholderPage,
 } from "@/shared/pages/ModulePlaceholderPage";
 
@@ -255,10 +259,7 @@ export const AppRouter = () => {
               <Route
                 path="equipment"
                 element={
-                  <ModulePlaceholderPage
-                    title="Thiết bị"
-                    description="Xem tình trạng thiết bị và lịch bảo trì."
-                  />
+                  <ManagerEquipmentPage />
                 }
               />
             </Route>

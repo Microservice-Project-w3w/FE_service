@@ -65,11 +65,11 @@ export const ManagerDeliveryTable = ({
         <table className="w-full min-w-[1340px] border-collapse">
           <thead>
             <tr className="border-b border-slate-200 bg-slate-50/80">
-              <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <th className="min-w-[180px] px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
                 Nhiệm vụ
               </th>
 
-              <th className="px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <th className="min-w-[200px] px-4 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
                 Đơn thuê
               </th>
 
@@ -123,7 +123,7 @@ export const ManagerDeliveryTable = ({
                   key={task.id}
                   className="border-b border-slate-100 last:border-b-0 hover:bg-blue-50/30"
                 >
-                  <td className="px-5 py-4 align-top">
+                  <td className="min-w-[180px] px-5 py-4 align-top">
                     <div className="flex items-start gap-3">
                       <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
                         {task.type ===
@@ -144,7 +144,7 @@ export const ManagerDeliveryTable = ({
                           onClick={() =>
                             onView(task)
                           }
-                          className="font-semibold text-blue-700 hover:text-blue-800"
+                          className="whitespace-nowrap font-semibold text-blue-700 hover:text-blue-800"
                         >
                           {task.taskCode}
                         </button>
@@ -164,8 +164,8 @@ export const ManagerDeliveryTable = ({
                     </div>
                   </td>
 
-                  <td className="px-4 py-4 align-top">
-                    <p className="font-semibold text-slate-700">
+                  <td className="min-w-[200px] px-4 py-4 align-top">
+                    <p className="whitespace-nowrap font-semibold text-slate-700">
                       {
                         task.rentalCode
                       }
