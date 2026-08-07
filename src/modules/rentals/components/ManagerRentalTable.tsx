@@ -117,7 +117,7 @@ export const ManagerRentalTable = ({
         <table className="w-full min-w-[1320px] border-collapse">
           <thead>
             <tr className="border-b border-slate-200 bg-slate-50/80">
-              <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <th className="min-w-[180px] px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
                 Đơn thuê
               </th>
 
@@ -173,13 +173,13 @@ export const ManagerRentalTable = ({
                   key={rental.id}
                   className="border-b border-slate-100 last:border-b-0 hover:bg-blue-50/30"
                 >
-                  <td className="px-5 py-4 align-top">
+                  <td className="min-w-[180px] px-5 py-4 align-top">
                     <button
                       type="button"
                       onClick={() =>
                         onView(rental)
                       }
-                      className="font-semibold text-blue-700 hover:text-blue-800"
+                      className="whitespace-nowrap font-semibold text-blue-700 hover:text-blue-800"
                     >
                       {rental.rentalCode}
                     </button>
