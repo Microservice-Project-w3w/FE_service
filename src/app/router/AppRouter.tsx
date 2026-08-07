@@ -81,6 +81,10 @@ import {
 } from "@/modules/rentals";
 
 import {
+  ManagerDeliveriesPage,
+} from "@/modules/deliveries";
+
+import {
   ModulePlaceholderPage,
 } from "@/shared/pages/ModulePlaceholderPage";
 
@@ -233,10 +237,7 @@ export const AppRouter = () => {
               <Route
                 path="deliveries"
                 element={
-                  <ModulePlaceholderPage
-                    title="Giao nhận"
-                    description="Theo dõi tiến độ giao và nhận thiết bị."
-                  />
+                  <ManagerDeliveriesPage />
                 }
               />
 
