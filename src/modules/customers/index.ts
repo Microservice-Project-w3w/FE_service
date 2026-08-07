@@ -33,3 +33,11 @@ export {
 export {
     CustomerContractDetailPage,
 } from "./pages/CustomerContractDetailPage";
+
+export {
+    CustomerInvoicesPage,
+} from "./pages/CustomerInvoicesPage";
+
+export {
+    CustomerInvoiceDetailPage,
+} from "./pages/CustomerInvoiceDetailPage";

@@ -59,6 +59,8 @@ import {
     CustomerContractsPage,
     CustomerEquipmentDetailPage,
     CustomerEquipmentPage,
+    CustomerInvoiceDetailPage,
+    CustomerInvoicesPage,
     CustomerQuotationDetailPage,
     CustomerQuotationsPage,
     CustomerRentalRequestCreatePage,
@@ -611,13 +613,19 @@ export const AppRouter = () => {
                                 }
                             />
 
+                            {/* Hóa đơn */}
                             <Route
                                 path="invoices"
                                 element={
-                                    <ModulePlaceholderPage
-                                        title="Hóa đơn"
-                                        description="Xem hóa đơn và tình trạng thanh toán."
-                                    />
+                                    <CustomerInvoicesPage />
+                                }
+                            />
+
+                            {/* Chi tiết hóa đơn */}
+                            <Route
+                                path="invoices/:invoiceId"
+                                element={
+                                    <CustomerInvoiceDetailPage />
                                 }
                             />
 
