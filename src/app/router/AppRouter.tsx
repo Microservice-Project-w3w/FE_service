@@ -77,6 +77,10 @@ import {
 } from "@/modules/contracts";
 
 import {
+  ManagerRentalsPage,
+} from "@/modules/rentals";
+
+import {
   ModulePlaceholderPage,
 } from "@/shared/pages/ModulePlaceholderPage";
 
@@ -222,10 +226,7 @@ export const AppRouter = () => {
               <Route
                 path="rentals"
                 element={
-                  <ModulePlaceholderPage
-                    title="Đơn thuê"
-                    description="Theo dõi tình trạng các đơn thuê tại chi nhánh."
-                  />
+                  <ManagerRentalsPage />
                 }
               />
 
