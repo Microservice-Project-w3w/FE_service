@@ -4,162 +4,184 @@ import { SystemSettingsPage } from "@/modules/settings";
 import { AdminReportsPage } from "@/modules/reports";
 import { EmployeesPage } from "@/modules/employees";
 import {
-  BrowserRouter,
-  Navigate,
-  Route,
-  Routes,
+    BrowserRouter,
+    Navigate,
+    Route,
+    Routes,
 } from "react-router";
 
 import {
-  AccountingLayout,
+    AccountingLayout,
 } from "@/app/layouts/AccountingLayout";
 
 import {
-  AdminLayout,
+    AdminLayout,
 } from "@/app/layouts/AdminLayout";
 
 import {
-  AuthLayout,
+    AuthLayout,
 } from "@/app/layouts/AuthLayout";
 
 import {
-  CustomerLayout,
+    CustomerLayout,
 } from "@/app/layouts/CustomerLayout";
 
 import {
-  ManagerLayout,
+    ManagerLayout,
 } from "@/app/layouts/ManagerLayout";
 
 import {
-  OperationsLayout,
+    OperationsLayout,
 } from "@/app/layouts/OperationsLayout";
 
 import {
-  SalesLayout,
+    SalesLayout,
 } from "@/app/layouts/SalesLayout";
 
 import {
-  RoleHomeRedirect,
+    RoleHomeRedirect,
 } from "@/core/router/RoleHomeRedirect";
 
 import {
-  GuestRoute,
+    GuestRoute,
 } from "@/core/router/guards/GuestRoute";
 
 import {
-  ProtectedRoute,
+    ProtectedRoute,
 } from "@/core/router/guards/ProtectedRoute";
 
 import {
-  RoleRoute,
+    RoleRoute,
 } from "@/core/router/guards/RoleRoute";
 
 import {
-  AccountsPage,
+    AccountsPage,
 } from "@/modules/accounts";
 
 import {
-  LoginPage,
-  RegisterPage,
+    LoginPage,
+    RegisterPage,
 } from "@/modules/auth";
 
 import {
-  DashboardPage,
-  ManagerDashboardPage,
+    CustomerContractDetailPage,
+    CustomerContractsPage,
+    CustomerEquipmentDetailPage,
+    CustomerEquipmentPage,
+    CustomerIncidentCreatePage,
+    CustomerIncidentDetailPage,
+    CustomerIncidentsPage,
+    CustomerInvoiceDetailPage,
+    CustomerInvoicesPage,
+    CustomerQuotationDetailPage,
+    CustomerQuotationsPage,
+    CustomerRentalRequestCreatePage,
+    CustomerRentalRequestDetailPage,
+    CustomerRentalRequestsPage,
+    CustomerReturnRequestCreatePage,
+    CustomerReturnRequestDetailPage,
+    CustomerReturnRequestsPage,
+} from "@/modules/customers";
+
+import {
+    DashboardPage,
+    ManagerDashboardPage,
 } from "@/modules/dashboard";
 
 import {
-  ManagerQuotationApprovalsPage,
+    ManagerQuotationApprovalsPage,
 } from "@/modules/quotations";
 
 import {
-  ManagerContractApprovalsPage,
+    ManagerContractApprovalsPage,
 } from "@/modules/contracts";
 
 import {
-  ManagerRentalsPage,
+    ManagerRentalsPage,
 } from "@/modules/rentals";
 
 import {
-  ManagerDeliveriesPage,
+    ManagerDeliveriesPage,
 } from "@/modules/deliveries";
 
 import {
-  ManagerReceivablesPage,
+    ManagerReceivablesPage,
 } from "@/modules/receivables";
 
 import {
-  ManagerEquipmentPage,
+    ManagerEquipmentPage,
 } from "@/modules/equipment";
 
 import {
-  ModulePlaceholderPage,
+    ModulePlaceholderPage,
+
 } from "@/shared/pages/ModulePlaceholderPage";
 
 import {
-  NotFoundPage,
+    NotFoundPage,
 } from "@/shared/pages/NotFoundPage";
 
 import {
-  UnauthorizedPage,
+    UnauthorizedPage,
 } from "@/shared/pages/UnauthorizedPage";
 
 export const AppRouter = () => {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route element={<GuestRoute />}>
-          <Route element={<AuthLayout />}>
-            <Route
-              path="login"
-              element={<LoginPage />}
-            />
+    return (
+        <BrowserRouter>
+            <Routes>
+                <Route element={<GuestRoute />}>
+                    <Route element={<AuthLayout />}>
+                        <Route
+                            path="login"
+                            element={<LoginPage />}
+                        />
 
-            <Route
-              path="register"
-              element={<RegisterPage />}
-            />
-          </Route>
-        </Route>
+                        <Route
+                            path="register"
+                            element={<RegisterPage />}
+                        />
+                    </Route>
+                </Route>
 
-        <Route element={<ProtectedRoute />}>
-          <Route
-            path="/"
-            element={<RoleHomeRedirect />}
-          />
+                <Route element={<ProtectedRoute />}>
+                    <Route
+                        path="/"
+                        element={<RoleHomeRedirect />}
+                    />
 
-          <Route
-            path="unauthorized"
-            element={<UnauthorizedPage />}
-          />
+                    <Route
+                        path="unauthorized"
+                        element={<UnauthorizedPage />}
+                    />
 
-          <Route
-            element={
-              <RoleRoute
-                allowedRoles={[
-                  "ADMIN",
-                ]}
-              />
-            }
-          >
-            <Route
-              path="admin"
-              element={<AdminLayout />}
-            >
-              <Route
-                index
-                element={
-                  <Navigate
-                    to="dashboard"
-                    replace
-                  />
-                }
-              />
+                    {/* ADMIN */}
+                    <Route
+                        element={
+                            <RoleRoute
+                                allowedRoles={[
+                                    "ADMIN",
+                                ]}
+                            />
+                        }
+                    >
+                        <Route
+                            path="admin"
+                            element={<AdminLayout />}
+                        >
+                            <Route
+                                index
+                                element={
+                                    <Navigate
+                                        to="dashboard"
+                                        replace
+                                    />
+                                }
+                            />
 
-              <Route
-                path="dashboard"
-                element={<DashboardPage />}
-              />
+                            <Route
+                                path="dashboard"
+                                element={<DashboardPage />}
+                            />
 
               <Route
                 path="accounts"
@@ -193,28 +215,30 @@ export const AppRouter = () => {
             </Route>
           </Route>
 
-          <Route
-            element={
-              <RoleRoute
-                allowedRoles={[
-                  "MANAGER",
-                ]}
-              />
-            }
-          >
-            <Route
-              path="manager"
-              element={<ManagerLayout />}
-            >
-              <Route
-                index
-                element={
-                  <Navigate
-                    to="dashboard"
-                    replace
-                  />
-                }
-              />
+
+                    {/* MANAGER */}
+                    <Route
+                        element={
+                            <RoleRoute
+                                allowedRoles={[
+                                    "MANAGER",
+                                ]}
+                            />
+                        }
+                    >
+                        <Route
+                            path="manager"
+                            element={<ManagerLayout />}
+                        >
+                            <Route
+                                index
+                                element={
+                                    <Navigate
+                                        to="dashboard"
+                                        replace
+                                    />
+                                }
+                            />
 
               <Route
                 path="dashboard"
@@ -265,322 +289,392 @@ export const AppRouter = () => {
             </Route>
           </Route>
 
-          <Route
-            element={
-              <RoleRoute
-                allowedRoles={[
-                  "SALES_STAFF",
-                ]}
-              />
-            }
-          >
-            <Route
-              path="sales"
-              element={<SalesLayout />}
-            >
-              <Route
-                index
-                element={
-                  <Navigate
-                    to="customers"
-                    replace
-                  />
-                }
-              />
 
-              <Route
-                path="customers"
-                element={
-                  <ModulePlaceholderPage
-                    title="Khách hàng"
-                    description="Quản lý thông tin và lịch sử giao dịch của khách hàng."
-                  />
-                }
-              />
+                    {/* SALES */}
+                    <Route
+                        element={
+                            <RoleRoute
+                                allowedRoles={[
+                                    "SALES_STAFF",
+                                ]}
+                            />
+                        }
+                    >
+                        <Route
+                            path="sales"
+                            element={<SalesLayout />}
+                        >
+                            <Route
+                                index
+                                element={
+                                    <Navigate
+                                        to="customers"
+                                        replace
+                                    />
+                                }
+                            />
 
-              <Route
-                path="rental-requests"
-                element={
-                  <ModulePlaceholderPage
-                    title="Yêu cầu thuê"
-                    description="Tạo và quản lý các yêu cầu thuê thiết bị."
-                  />
-                }
-              />
+                            <Route
+                                path="customers"
+                                element={
+                                    <ModulePlaceholderPage
+                                        title="Khách hàng"
+                                        description="Quản lý thông tin và lịch sử giao dịch của khách hàng."
+                                    />
+                                }
+                            />
 
-              <Route
-                path="quotations"
-                element={
-                  <ModulePlaceholderPage
-                    title="Báo giá"
-                    description="Tạo báo giá và gửi quản lý phê duyệt."
-                  />
-                }
-              />
+                            <Route
+                                path="rental-requests"
+                                element={
+                                    <ModulePlaceholderPage
+                                        title="Yêu cầu thuê"
+                                        description="Tạo và quản lý các yêu cầu thuê thiết bị."
+                                    />
+                                }
+                            />
 
-              <Route
-                path="rentals"
-                element={
-                  <ModulePlaceholderPage
-                    title="Đơn thuê"
-                    description="Tạo và theo dõi trạng thái đơn thuê."
-                  />
-                }
-              />
+                            <Route
+                                path="quotations"
+                                element={
+                                    <ModulePlaceholderPage
+                                        title="Báo giá"
+                                        description="Tạo báo giá và gửi quản lý phê duyệt."
+                                    />
+                                }
+                            />
 
-              <Route
-                path="contracts"
-                element={
-                  <ModulePlaceholderPage
-                    title="Hợp đồng"
-                    description="Tạo và theo dõi hợp đồng thuê thiết bị."
-                  />
-                }
-              />
-            </Route>
-          </Route>
+                            <Route
+                                path="rentals"
+                                element={
+                                    <ModulePlaceholderPage
+                                        title="Đơn thuê"
+                                        description="Tạo và theo dõi trạng thái đơn thuê."
+                                    />
+                                }
+                            />
 
-          <Route
-            element={
-              <RoleRoute
-                allowedRoles={[
-                  "OPERATIONS_STAFF",
-                ]}
-              />
-            }
-          >
-            <Route
-              path="operations"
-              element={<OperationsLayout />}
-            >
-              <Route
-                index
-                element={
-                  <Navigate
-                    to="equipment"
-                    replace
-                  />
-                }
-              />
+                            <Route
+                                path="contracts"
+                                element={
+                                    <ModulePlaceholderPage
+                                        title="Hợp đồng"
+                                        description="Tạo và theo dõi hợp đồng thuê thiết bị."
+                                    />
+                                }
+                            />
+                        </Route>
+                    </Route>
 
-              <Route
-                path="equipment"
-                element={
-                  <ModulePlaceholderPage
-                    title="Thiết bị và kho"
-                    description="Quản lý thiết bị, kho, nhập xuất, điều chuyển và kiểm kê."
-                  />
-                }
-              />
+                    {/* OPERATIONS */}
+                    <Route
+                        element={
+                            <RoleRoute
+                                allowedRoles={[
+                                    "OPERATIONS_STAFF",
+                                ]}
+                            />
+                        }
+                    >
+                        <Route
+                            path="operations"
+                            element={<OperationsLayout />}
+                        >
+                            <Route
+                                index
+                                element={
+                                    <Navigate
+                                        to="equipment"
+                                        replace
+                                    />
+                                }
+                            />
 
-              <Route
-                path="deliveries"
-                element={
-                  <ModulePlaceholderPage
-                    title="Giao thiết bị"
-                    description="Chuẩn bị thiết bị và thực hiện quy trình giao nhận."
-                  />
-                }
-              />
+                            <Route
+                                path="equipment"
+                                element={
+                                    <ModulePlaceholderPage
+                                        title="Thiết bị và kho"
+                                        description="Quản lý thiết bị, kho, nhập xuất, điều chuyển và kiểm kê."
+                                    />
+                                }
+                            />
 
-              <Route
-                path="returns"
-                element={
-                  <ModulePlaceholderPage
-                    title="Nhận trả thiết bị"
-                    description="Tiếp nhận thiết bị trả và đánh giá tình trạng."
-                  />
-                }
-              />
+                            <Route
+                                path="deliveries"
+                                element={
+                                    <ModulePlaceholderPage
+                                        title="Giao thiết bị"
+                                        description="Chuẩn bị thiết bị và thực hiện quy trình giao nhận."
+                                    />
+                                }
+                            />
 
-              <Route
-                path="maintenance"
-                element={
-                  <ModulePlaceholderPage
-                    title="Bảo trì và sửa chữa"
-                    description="Quản lý phiếu bảo trì, sửa chữa và cập nhật trạng thái thiết bị."
-                  />
-                }
-              />
-            </Route>
-          </Route>
+                            <Route
+                                path="returns"
+                                element={
+                                    <ModulePlaceholderPage
+                                        title="Nhận trả thiết bị"
+                                        description="Tiếp nhận thiết bị trả và đánh giá tình trạng."
+                                    />
+                                }
+                            />
 
-          <Route
-            element={
-              <RoleRoute
-                allowedRoles={[
-                  "ACCOUNTANT",
-                ]}
-              />
-            }
-          >
-            <Route
-              path="accounting"
-              element={<AccountingLayout />}
-            >
-              <Route
-                index
-                element={
-                  <Navigate
-                    to="invoices"
-                    replace
-                  />
-                }
-              />
+                            <Route
+                                path="maintenance"
+                                element={
+                                    <ModulePlaceholderPage
+                                        title="Bảo trì và sửa chữa"
+                                        description="Quản lý phiếu bảo trì, sửa chữa và cập nhật trạng thái thiết bị."
+                                    />
+                                }
+                            />
+                        </Route>
+                    </Route>
 
-              <Route
-                path="invoices"
-                element={
-                  <ModulePlaceholderPage
-                    title="Hóa đơn"
-                    description="Tạo và quản lý hóa đơn cho các hợp đồng thuê."
-                  />
-                }
-              />
+                    {/* ACCOUNTANT */}
+                    <Route
+                        element={
+                            <RoleRoute
+                                allowedRoles={[
+                                    "ACCOUNTANT",
+                                ]}
+                            />
+                        }
+                    >
+                        <Route
+                            path="accounting"
+                            element={<AccountingLayout />}
+                        >
+                            <Route
+                                index
+                                element={
+                                    <Navigate
+                                        to="invoices"
+                                        replace
+                                    />
+                                }
+                            />
 
-              <Route
-                path="payments"
-                element={
-                  <ModulePlaceholderPage
-                    title="Thanh toán"
-                    description="Ghi nhận và xác nhận các khoản thanh toán."
-                  />
-                }
-              />
+                            <Route
+                                path="invoices"
+                                element={
+                                    <ModulePlaceholderPage
+                                        title="Hóa đơn"
+                                        description="Tạo và quản lý hóa đơn cho các hợp đồng thuê."
+                                    />
+                                }
+                            />
 
-              <Route
-                path="deposits"
-                element={
-                  <ModulePlaceholderPage
-                    title="Tiền đặt cọc"
-                    description="Quản lý thu cọc, hoàn cọc và khấu trừ tiền cọc."
-                  />
-                }
-              />
+                            <Route
+                                path="payments"
+                                element={
+                                    <ModulePlaceholderPage
+                                        title="Thanh toán"
+                                        description="Ghi nhận và xác nhận các khoản thanh toán."
+                                    />
+                                }
+                            />
 
-              <Route
-                path="receivables"
-                element={
-                  <ModulePlaceholderPage
-                    title="Công nợ"
-                    description="Theo dõi các khoản phải thu và thanh toán quá hạn."
-                  />
-                }
-              />
+                            <Route
+                                path="deposits"
+                                element={
+                                    <ModulePlaceholderPage
+                                        title="Tiền đặt cọc"
+                                        description="Quản lý thu cọc, hoàn cọc và khấu trừ tiền cọc."
+                                    />
+                                }
+                            />
 
-              <Route
-                path="revenue-reports"
-                element={
-                  <ModulePlaceholderPage
-                    title="Báo cáo doanh thu"
-                    description="Theo dõi và tổng hợp số liệu doanh thu."
-                  />
-                }
-              />
-            </Route>
-          </Route>
+                            <Route
+                                path="receivables"
+                                element={
+                                    <ModulePlaceholderPage
+                                        title="Công nợ"
+                                        description="Theo dõi các khoản phải thu và thanh toán quá hạn."
+                                    />
+                                }
+                            />
 
-          <Route
-            element={
-              <RoleRoute
-                allowedRoles={[
-                  "CUSTOMER",
-                ]}
-              />
-            }
-          >
-            <Route
-              path="customer"
-              element={<CustomerLayout />}
-            >
-              <Route
-                index
-                element={
-                  <Navigate
-                    to="equipment"
-                    replace
-                  />
-                }
-              />
+                            <Route
+                                path="revenue-reports"
+                                element={
+                                    <ModulePlaceholderPage
+                                        title="Báo cáo doanh thu"
+                                        description="Theo dõi và tổng hợp số liệu doanh thu."
+                                    />
+                                }
+                            />
+                        </Route>
+                    </Route>
 
-              <Route
-                path="equipment"
-                element={
-                  <ModulePlaceholderPage
-                    title="Thiết bị"
-                    description="Tìm kiếm và xem các thiết bị có thể thuê."
-                  />
-                }
-              />
+                    {/* CUSTOMER */}
+                    <Route
+                        element={
+                            <RoleRoute
+                                allowedRoles={[
+                                    "CUSTOMER",
+                                ]}
+                            />
+                        }
+                    >
+                        <Route
+                            path="customer"
+                            element={<CustomerLayout />}
+                        >
+                            <Route
+                                index
+                                element={
+                                    <Navigate
+                                        to="equipment"
+                                        replace
+                                    />
+                                }
+                            />
 
-              <Route
-                path="rental-requests"
-                element={
-                  <ModulePlaceholderPage
-                    title="Yêu cầu thuê của tôi"
-                    description="Tạo và theo dõi các yêu cầu thuê thiết bị."
-                  />
-                }
-              />
+                            {/* Thiết bị */}
+                            <Route
+                                path="equipment"
+                                element={
+                                    <CustomerEquipmentPage />
+                                }
+                            />
 
-              <Route
-                path="quotations"
-                element={
-                  <ModulePlaceholderPage
-                    title="Báo giá của tôi"
-                    description="Xem, chấp nhận hoặc từ chối báo giá."
-                  />
-                }
-              />
+                            <Route
+                                path="equipment/:equipmentId"
+                                element={
+                                    <CustomerEquipmentDetailPage />
+                                }
+                            />
 
-              <Route
-                path="contracts"
-                element={
-                  <ModulePlaceholderPage
-                    title="Hợp đồng của tôi"
-                    description="Xem thông tin và trạng thái hợp đồng thuê."
-                  />
-                }
-              />
+                            {/* Tạo yêu cầu thuê từ thiết bị */}
+                            <Route
+                                path="equipment/:equipmentId/rental-request"
+                                element={
+                                    <CustomerRentalRequestCreatePage />
+                                }
+                            />
 
-              <Route
-                path="invoices"
-                element={
-                  <ModulePlaceholderPage
-                    title="Hóa đơn"
-                    description="Xem hóa đơn và tình trạng thanh toán."
-                  />
-                }
-              />
+                            {/* Yêu cầu thuê của tôi */}
+                            <Route
+                                path="rental-requests"
+                                element={
+                                    <CustomerRentalRequestsPage />
+                                }
+                            />
 
-              <Route
-                path="return-requests"
-                element={
-                  <ModulePlaceholderPage
-                    title="Yêu cầu trả"
-                    description="Tạo và theo dõi yêu cầu trả thiết bị."
-                  />
-                }
-              />
+                            {/* Chi tiết yêu cầu thuê */}
+                            <Route
+                                path="rental-requests/:requestId"
+                                element={
+                                    <CustomerRentalRequestDetailPage />
+                                }
+                            />
 
-              <Route
-                path="incidents"
-                element={
-                  <ModulePlaceholderPage
-                    title="Báo cáo sự cố"
-                    description="Gửi thông tin về sự cố trong quá trình sử dụng thiết bị."
-                  />
-                }
-              />
-            </Route>
-          </Route>
-        </Route>
+                            {/* Báo giá của tôi */}
+                            <Route
+                                path="quotations"
+                                element={
+                                    <CustomerQuotationsPage />
+                                }
+                            />
 
-        <Route
-          path="*"
-          element={<NotFoundPage />}
-        />
-      </Routes>
-    </BrowserRouter>
-  );
+                            {/* Chi tiết báo giá */}
+                            <Route
+                                path="quotations/:quotationId"
+                                element={
+                                    <CustomerQuotationDetailPage />
+                                }
+                            />
+
+                            {/* Hợp đồng của tôi */}
+                            <Route
+                                path="contracts"
+                                element={
+                                    <CustomerContractsPage />
+                                }
+                            />
+
+                            {/* Chi tiết hợp đồng */}
+                            <Route
+                                path="contracts/:contractId"
+                                element={
+                                    <CustomerContractDetailPage />
+                                }
+                            />
+
+                            {/* Hóa đơn */}
+                            <Route
+                                path="invoices"
+                                element={
+                                    <CustomerInvoicesPage />
+                                }
+                            />
+
+                            {/* Chi tiết hóa đơn */}
+                            <Route
+                                path="invoices/:invoiceId"
+                                element={
+                                    <CustomerInvoiceDetailPage />
+                                }
+                            />
+
+                            {/* Yêu cầu trả */}
+                            <Route
+                                path="return-requests"
+                                element={
+                                    <CustomerReturnRequestsPage />
+                                }
+                            />
+
+                            {/* Tạo yêu cầu trả */}
+                            <Route
+                                path="return-requests/create"
+                                element={
+                                    <CustomerReturnRequestCreatePage />
+                                }
+                            />
+
+                            {/* Chi tiết yêu cầu trả */}
+                            <Route
+                                path="return-requests/:returnRequestId"
+                                element={
+                                    <CustomerReturnRequestDetailPage />
+                                }
+                            />
+
+                            {/* Báo cáo sự cố */}
+                            <Route
+                                path="incidents"
+                                element={
+                                    <CustomerIncidentsPage />
+                                }
+                            />
+
+                            {/* Tạo báo cáo sự cố */}
+                            <Route
+                                path="incidents/create"
+                                element={
+                                    <CustomerIncidentCreatePage />
+                                }
+                            />
+
+                            {/* Chi tiết báo cáo sự cố */}
+                            <Route
+                                path="incidents/:incidentId"
+                                element={
+                                    <CustomerIncidentDetailPage />
+                                }
+                            />
+                        </Route>
+                    </Route>
+                </Route>
+
+                <Route
+                    path="*"
+                    element={<NotFoundPage />}
+                />
+            </Routes>
+        </BrowserRouter>
+    );
 };
