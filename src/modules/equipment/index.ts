@@ -1,2 +1,18 @@
-// Public API của module equipment.
-// Module khác chỉ được import thông qua file index.ts này.
+export {
+  ManagerEquipmentPage,
+} from "@/modules/equipment/pages/ManagerEquipmentPage";
+
+export {
+  managerEquipmentApi,
+} from "@/modules/equipment/api/manager-equipment.api";
+
+export type {
+  GetManagerEquipmentInput,
+  ManagerEquipment,
+  ManagerEquipmentCondition,
+  ManagerEquipmentListData,
+  ManagerEquipmentMaintenanceRecord,
+  ManagerEquipmentStatus,
+  ManagerEquipmentSummary,
+  ManagerMaintenanceStatus,
+} from "@/modules/equipment/types/manager-equipment.types";
