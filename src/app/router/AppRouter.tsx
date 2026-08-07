@@ -66,6 +66,9 @@ import {
     CustomerRentalRequestCreatePage,
     CustomerRentalRequestDetailPage,
     CustomerRentalRequestsPage,
+    CustomerReturnRequestCreatePage,
+    CustomerReturnRequestDetailPage,
+    CustomerReturnRequestsPage,
 } from "@/modules/customers";
 
 import {
@@ -629,13 +632,27 @@ export const AppRouter = () => {
                                 }
                             />
 
+                            {/* Yêu cầu trả */}
                             <Route
                                 path="return-requests"
                                 element={
-                                    <ModulePlaceholderPage
-                                        title="Yêu cầu trả"
-                                        description="Tạo và theo dõi yêu cầu trả thiết bị."
-                                    />
+                                    <CustomerReturnRequestsPage />
+                                }
+                            />
+
+                            {/* Tạo yêu cầu trả */}
+                            <Route
+                                path="return-requests/create"
+                                element={
+                                    <CustomerReturnRequestCreatePage />
+                                }
+                            />
+
+                            {/* Chi tiết yêu cầu trả */}
+                            <Route
+                                path="return-requests/:returnRequestId"
+                                element={
+                                    <CustomerReturnRequestDetailPage />
                                 }
                             />
 

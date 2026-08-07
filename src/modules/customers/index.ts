@@ -41,3 +41,14 @@ export {
 export {
     CustomerInvoiceDetailPage,
 } from "./pages/CustomerInvoiceDetailPage";
+export {
+    CustomerReturnRequestsPage,
+} from "./pages/CustomerReturnRequestsPage";
+
+export {
+    CustomerReturnRequestCreatePage,
+} from "./pages/CustomerReturnRequestCreatePage";
+
+export {
+    CustomerReturnRequestDetailPage,
+} from "./pages/CustomerReturnRequestDetailPage";
