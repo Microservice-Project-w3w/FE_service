@@ -57,6 +57,8 @@ import {
 import {
     CustomerEquipmentDetailPage,
     CustomerEquipmentPage,
+    CustomerQuotationDetailPage,
+    CustomerQuotationsPage,
     CustomerRentalRequestCreatePage,
     CustomerRentalRequestDetailPage,
     CustomerRentalRequestsPage,
@@ -107,6 +109,7 @@ export const AppRouter = () => {
                         element={<UnauthorizedPage />}
                     />
 
+                    {/* ADMIN */}
                     <Route
                         element={
                             <RoleRoute
@@ -197,6 +200,7 @@ export const AppRouter = () => {
                         </Route>
                     </Route>
 
+                    {/* MANAGER */}
                     <Route
                         element={
                             <RoleRoute
@@ -292,6 +296,7 @@ export const AppRouter = () => {
                         </Route>
                     </Route>
 
+                    {/* SALES */}
                     <Route
                         element={
                             <RoleRoute
@@ -367,6 +372,7 @@ export const AppRouter = () => {
                         </Route>
                     </Route>
 
+                    {/* OPERATIONS */}
                     <Route
                         element={
                             <RoleRoute
@@ -432,6 +438,7 @@ export const AppRouter = () => {
                         </Route>
                     </Route>
 
+                    {/* ACCOUNTANT */}
                     <Route
                         element={
                             <RoleRoute
@@ -507,6 +514,7 @@ export const AppRouter = () => {
                         </Route>
                     </Route>
 
+                    {/* CUSTOMER */}
                     <Route
                         element={
                             <RoleRoute
@@ -530,9 +538,12 @@ export const AppRouter = () => {
                                 }
                             />
 
+                            {/* Thiết bị */}
                             <Route
                                 path="equipment"
-                                element={<CustomerEquipmentPage />}
+                                element={
+                                    <CustomerEquipmentPage />
+                                }
                             />
 
                             <Route
@@ -542,6 +553,7 @@ export const AppRouter = () => {
                                 }
                             />
 
+                            {/* Tạo yêu cầu thuê từ thiết bị */}
                             <Route
                                 path="equipment/:equipmentId/rental-request"
                                 element={
@@ -549,6 +561,7 @@ export const AppRouter = () => {
                                 }
                             />
 
+                            {/* Yêu cầu thuê của tôi */}
                             <Route
                                 path="rental-requests"
                                 element={
@@ -556,6 +569,7 @@ export const AppRouter = () => {
                                 }
                             />
 
+                            {/* Chi tiết yêu cầu thuê */}
                             <Route
                                 path="rental-requests/:requestId"
                                 element={
@@ -563,13 +577,19 @@ export const AppRouter = () => {
                                 }
                             />
 
+                            {/* Báo giá của tôi */}
                             <Route
                                 path="quotations"
                                 element={
-                                    <ModulePlaceholderPage
-                                        title="Báo giá của tôi"
-                                        description="Xem, chấp nhận hoặc từ chối báo giá."
-                                    />
+                                    <CustomerQuotationsPage />
+                                }
+                            />
+
+                            {/* Chi tiết báo giá */}
+                            <Route
+                                path="quotations/:quotationId"
+                                element={
+                                    <CustomerQuotationDetailPage />
                                 }
                             />
 

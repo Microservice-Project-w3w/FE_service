@@ -17,3 +17,11 @@ export {
 export {
     CustomerRentalRequestDetailPage,
 } from "./pages/CustomerRentalRequestDetailPage";
+
+export {
+    CustomerQuotationsPage,
+} from "./pages/CustomerQuotationsPage";
+
+export {
+    CustomerQuotationDetailPage,
+} from "./pages/CustomerQuotationDetailPage";
