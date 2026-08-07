@@ -1,3 +1,8 @@
+import { BranchesPage } from "@/modules/branches";
+import { EquipmentCategoriesPage } from "@/modules/equipment-categories";
+import { SystemSettingsPage } from "@/modules/settings";
+import { AdminReportsPage } from "@/modules/reports";
+import { EmployeesPage } from "@/modules/employees";
 import {
     BrowserRouter,
     Navigate,
@@ -50,6 +55,10 @@ import {
 } from "@/core/router/guards/RoleRoute";
 
 import {
+    AccountsPage,
+} from "@/modules/accounts";
+
+import {
     LoginPage,
     RegisterPage,
 } from "@/modules/auth";
@@ -76,10 +85,36 @@ import {
 
 import {
     DashboardPage,
+    ManagerDashboardPage,
 } from "@/modules/dashboard";
 
 import {
+    ManagerQuotationApprovalsPage,
+} from "@/modules/quotations";
+
+import {
+    ManagerContractApprovalsPage,
+} from "@/modules/contracts";
+
+import {
+    ManagerRentalsPage,
+} from "@/modules/rentals";
+
+import {
+    ManagerDeliveriesPage,
+} from "@/modules/deliveries";
+
+import {
+    ManagerReceivablesPage,
+} from "@/modules/receivables";
+
+import {
+    ManagerEquipmentPage,
+} from "@/modules/equipment";
+
+import {
     ModulePlaceholderPage,
+
 } from "@/shared/pages/ModulePlaceholderPage";
 
 import {
@@ -148,67 +183,38 @@ export const AppRouter = () => {
                                 element={<DashboardPage />}
                             />
 
-                            <Route
-                                path="accounts"
-                                element={
-                                    <ModulePlaceholderPage
-                                        title="Quản lý tài khoản"
-                                        description="Quản lý tài khoản đăng nhập và trạng thái hoạt động."
-                                    />
-                                }
-                            />
+              <Route
+                path="accounts"
+                element={<AccountsPage />}
+              />
 
-                            <Route
-                                path="employees"
-                                element={
-                                    <ModulePlaceholderPage
-                                        title="Quản lý nhân viên"
-                                        description="Quản lý hồ sơ, vai trò và thông tin nhân viên."
-                                    />
-                                }
-                            />
+              <Route
+                path="employees"
+                element={<EmployeesPage />}
+              />
 
-                            <Route
-                                path="branches"
-                                element={
-                                    <ModulePlaceholderPage
-                                        title="Quản lý chi nhánh"
-                                        description="Quản lý thông tin và hoạt động của các chi nhánh."
-                                    />
-                                }
-                            />
+              <Route
+                path="branches"
+                element={<BranchesPage />}
+              />
 
-                            <Route
-                                path="categories"
-                                element={
-                                    <ModulePlaceholderPage
-                                        title="Quản lý danh mục"
-                                        description="Cấu hình danh mục thiết bị, bảng giá và chính sách."
-                                    />
-                                }
-                            />
+              <Route
+                path="categories"
+                element={<EquipmentCategoriesPage />}
+              />
 
-                            <Route
-                                path="settings"
-                                element={
-                                    <ModulePlaceholderPage
-                                        title="Cấu hình hệ thống"
-                                        description="Thiết lập thông tin và các cấu hình vận hành."
-                                    />
-                                }
-                            />
+              <Route
+                path="settings"
+                element={<SystemSettingsPage />}
+              />
 
-                            <Route
-                                path="reports"
-                                element={
-                                    <ModulePlaceholderPage
-                                        title="Báo cáo tổng thể"
-                                        description="Theo dõi số liệu tổng hợp toàn hệ thống."
-                                    />
-                                }
-                            />
-                        </Route>
-                    </Route>
+              <Route
+                path="reports"
+                element={<AdminReportsPage />}
+              />
+            </Route>
+          </Route>
+
 
                     {/* MANAGER */}
                     <Route
@@ -234,77 +240,55 @@ export const AppRouter = () => {
                                 }
                             />
 
-                            <Route
-                                path="dashboard"
-                                element={
-                                    <ModulePlaceholderPage
-                                        title="Dashboard quản lý"
-                                        description="Theo dõi hoạt động và tình hình của chi nhánh."
-                                    />
-                                }
-                            />
+              <Route
+                path="dashboard"
+                element={<ManagerDashboardPage />}
+              />
 
-                            <Route
-                                path="quotation-approvals"
-                                element={
-                                    <ModulePlaceholderPage
-                                        title="Báo giá chờ duyệt"
-                                        description="Phê duyệt hoặc từ chối các báo giá đang chờ xử lý."
-                                    />
-                                }
-                            />
+              <Route
+                path="quotation-approvals"
+                element={
+                  <ManagerQuotationApprovalsPage />
+                }
+              />
 
-                            <Route
-                                path="contract-approvals"
-                                element={
-                                    <ModulePlaceholderPage
-                                        title="Hợp đồng chờ duyệt"
-                                        description="Kiểm tra và phê duyệt các hợp đồng đang chờ."
-                                    />
-                                }
-                            />
+              <Route
+                path="contract-approvals"
+                element={
+                  <ManagerContractApprovalsPage />
+                }
+              />
 
-                            <Route
-                                path="rentals"
-                                element={
-                                    <ModulePlaceholderPage
-                                        title="Đơn thuê"
-                                        description="Theo dõi tình trạng các đơn thuê tại chi nhánh."
-                                    />
-                                }
-                            />
+              <Route
+                path="rentals"
+                element={
+                  <ManagerRentalsPage />
+                }
+              />
 
-                            <Route
-                                path="deliveries"
-                                element={
-                                    <ModulePlaceholderPage
-                                        title="Giao nhận"
-                                        description="Theo dõi tiến độ giao và nhận thiết bị."
-                                    />
-                                }
-                            />
+              <Route
+                path="deliveries"
+                element={
+                  <ManagerDeliveriesPage />
+                }
+              />
 
-                            <Route
-                                path="receivables"
-                                element={
-                                    <ModulePlaceholderPage
-                                        title="Công nợ"
-                                        description="Theo dõi công nợ và tình trạng thanh toán."
-                                    />
-                                }
-                            />
+              <Route
+                path="receivables"
+                element={
+                  <ManagerReceivablesPage />
+                }
+              />
 
-                            <Route
-                                path="equipment"
-                                element={
-                                    <ModulePlaceholderPage
-                                        title="Thiết bị"
-                                        description="Xem tình trạng thiết bị và lịch bảo trì."
-                                    />
-                                }
-                            />
-                        </Route>
-                    </Route>
+              <Route
+                path="equipment"
+                element={
+                  <ManagerEquipmentPage />
+                }
+              />
+            </Route>
+          </Route>
+
 
                     {/* SALES */}
                     <Route

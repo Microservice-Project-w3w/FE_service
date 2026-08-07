@@ -1,2 +1,20 @@
-// Public API của module branches.
-// Module khác chỉ được import thông qua file index.ts này.
+export {
+  branchesApi,
+} from "@/modules/branches/api/branches.api";
+
+export {
+  BranchesPage,
+} from "@/modules/branches/pages/BranchesPage";
+
+export {
+  BranchStatusBadge,
+} from "@/modules/branches/components/BranchStatusBadge";
+
+export type {
+  AssignBranchManagerInput,
+  Branch,
+  BranchListFilters,
+  BranchStatus,
+  CreateBranchInput,
+  UpdateBranchInput,
+} from "@/modules/branches/types/branch.types";
