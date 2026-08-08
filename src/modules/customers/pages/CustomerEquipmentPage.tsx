@@ -1,4 +1,6 @@
 import {
+    ChevronLeft,
+    ChevronRight,
     MapPin,
 } from "lucide-react";
 import {
@@ -26,7 +28,7 @@ type EquipmentSortOption =
     | "NEWEST"
     | "NAME_ASC";
 
-const ITEMS_PER_PAGE = 6;
+const ITEMS_PER_PAGE = 4;
 
 const BRANCH_OPTIONS = [
     {
@@ -267,6 +269,63 @@ export const CustomerEquipmentPage = () => {
         ),
     );
 
+    const paginationItems = useMemo(() => {
+        if (totalPages <= 5) {
+            return Array.from(
+                {
+                    length: totalPages,
+                },
+                (_, index) => index + 1,
+            );
+        }
+
+        const pages: Array<
+            number |
+            "ELLIPSIS_LEFT" |
+            "ELLIPSIS_RIGHT"
+        > = [1];
+
+        const startPage = Math.max(
+            2,
+            currentPage - 1,
+        );
+
+        const endPage = Math.min(
+            totalPages - 1,
+            currentPage + 1,
+        );
+
+        if (startPage > 2) {
+            pages.push(
+                "ELLIPSIS_LEFT",
+            );
+        }
+
+        for (
+            let page = startPage;
+            page <= endPage;
+            page += 1
+        ) {
+            pages.push(page);
+        }
+
+        if (
+            endPage <
+            totalPages - 1
+        ) {
+            pages.push(
+                "ELLIPSIS_RIGHT",
+            );
+        }
+
+        pages.push(totalPages);
+
+        return pages;
+    }, [
+        currentPage,
+        totalPages,
+    ]);
+
     const paginatedEquipments =
         useMemo(() => {
             const startIndex =
@@ -371,6 +430,14 @@ export const CustomerEquipmentPage = () => {
     const handlePageChange = (
         page: number,
     ): void => {
+        if (
+            page < 1 ||
+            page > totalPages ||
+            page === currentPage
+        ) {
+            return;
+        }
+
         setCurrentPage(page);
 
         window.scrollTo({
@@ -528,43 +595,96 @@ export const CustomerEquipmentPage = () => {
                 ITEMS_PER_PAGE && (
                     <nav
                         aria-label="Phân trang thiết bị"
-                        className="flex justify-center gap-2 pb-4"
+                        className="flex items-center justify-center gap-1.5 pb-4 pt-1"
                     >
-                        {Array.from(
-                            {
-                                length: totalPages,
-                            },
-                            (_, index) =>
-                                index + 1,
-                        ).map((page) => {
-                            const isActive =
-                                page ===
-                                currentPage;
+                        <button
+                            type="button"
+                            aria-label="Trang trước"
+                            disabled={
+                                currentPage === 1
+                            }
+                            onClick={() => {
+                                handlePageChange(
+                                    currentPage - 1,
+                                );
+                            }}
+                            className="flex size-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-30"
+                        >
+                            <ChevronLeft
+                                size={17}
+                                aria-hidden="true"
+                            />
+                        </button>
 
-                            return (
-                                <button
-                                    key={page}
-                                    type="button"
-                                    aria-current={
-                                        isActive
-                                            ? "page"
-                                            : undefined
-                                    }
-                                    onClick={() => {
-                                        handlePageChange(
-                                            page,
-                                        );
-                                    }}
-                                    className={
-                                        isActive
-                                            ? "flex size-10 items-center justify-center rounded-xl bg-blue-600 text-sm font-semibold text-white"
-                                            : "flex size-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
-                                    }
-                                >
-                                    {page}
-                                </button>
-                            );
-                        })}
+                        {paginationItems.map(
+                            (item) => {
+                                if (
+                                    item ===
+                                    "ELLIPSIS_LEFT" ||
+                                    item ===
+                                    "ELLIPSIS_RIGHT"
+                                ) {
+                                    return (
+                                        <span
+                                            key={item}
+                                            aria-hidden="true"
+                                            className="flex size-9 items-center justify-center text-sm font-semibold text-slate-400"
+                                        >
+                                            …
+                                        </span>
+                                    );
+                                }
+
+                                const isActive =
+                                    item ===
+                                    currentPage;
+
+                                return (
+                                    <button
+                                        key={item}
+                                        type="button"
+                                        aria-label={`Trang ${item}`}
+                                        aria-current={
+                                            isActive
+                                                ? "page"
+                                                : undefined
+                                        }
+                                        onClick={() => {
+                                            handlePageChange(
+                                                item,
+                                            );
+                                        }}
+                                        className={
+                                            isActive
+                                                ? "flex size-9 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold text-white shadow-sm"
+                                                : "flex size-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-sm font-semibold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                                        }
+                                    >
+                                        {item}
+                                    </button>
+                                );
+                            },
+                        )}
+
+                        <button
+                            type="button"
+                            aria-label="Trang sau"
+                            disabled={
+                                currentPage ===
+                                totalPages
+                            }
+                            onClick={() => {
+                                handlePageChange(
+                                    currentPage + 1,
+                                );
+                            }}
+                            className="flex size-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-30"
+                        >
+                            <ChevronRight
+                                size={17}
+                                aria-hidden="true"
+                            />
+                        </button>
                     </nav>
                 )}
         </main>

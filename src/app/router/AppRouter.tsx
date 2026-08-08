@@ -563,6 +563,14 @@ export const AppRouter = () => {
                                 }
                             />
 
+                            {/* Tạo yêu cầu thuê mới */}
+                            <Route
+                                path="rental-requests/create"
+                                element={
+                                    <CustomerRentalRequestCreatePage />
+                                }
+                            />
+
                             {/* Chi tiết yêu cầu thuê */}
                             <Route
                                 path="rental-requests/:requestId"
