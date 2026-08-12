@@ -3,6 +3,7 @@ import { EquipmentCategoriesPage } from "@/modules/equipment-categories";
 import { SystemSettingsPage } from "@/modules/settings";
 import { AdminReportsPage } from "@/modules/reports";
 import { EmployeesPage } from "@/modules/employees";
+
 import {
     BrowserRouter,
     Navigate,
@@ -81,11 +82,14 @@ import {
     CustomerReturnRequestCreatePage,
     CustomerReturnRequestDetailPage,
     CustomerReturnRequestsPage,
+    SalesCustomerDetailPage,
+    SalesCustomersPage,
 } from "@/modules/customers";
 
 import {
     DashboardPage,
     ManagerDashboardPage,
+    SalesDashboardPage,
 } from "@/modules/dashboard";
 
 import {
@@ -114,7 +118,6 @@ import {
 
 import {
     ModulePlaceholderPage,
-
 } from "@/shared/pages/ModulePlaceholderPage";
 
 import {
@@ -129,6 +132,7 @@ export const AppRouter = () => {
     return (
         <BrowserRouter>
             <Routes>
+                {/* GUEST */}
                 <Route element={<GuestRoute />}>
                     <Route element={<AuthLayout />}>
                         <Route
@@ -143,6 +147,7 @@ export const AppRouter = () => {
                     </Route>
                 </Route>
 
+                {/* PROTECTED */}
                 <Route element={<ProtectedRoute />}>
                     <Route
                         path="/"
@@ -180,41 +185,54 @@ export const AppRouter = () => {
 
                             <Route
                                 path="dashboard"
-                                element={<DashboardPage />}
+                                element={
+                                    <DashboardPage />
+                                }
                             />
 
-              <Route
-                path="accounts"
-                element={<AccountsPage />}
-              />
+                            <Route
+                                path="accounts"
+                                element={
+                                    <AccountsPage />
+                                }
+                            />
 
-              <Route
-                path="employees"
-                element={<EmployeesPage />}
-              />
+                            <Route
+                                path="employees"
+                                element={
+                                    <EmployeesPage />
+                                }
+                            />
 
-              <Route
-                path="branches"
-                element={<BranchesPage />}
-              />
+                            <Route
+                                path="branches"
+                                element={
+                                    <BranchesPage />
+                                }
+                            />
 
-              <Route
-                path="categories"
-                element={<EquipmentCategoriesPage />}
-              />
+                            <Route
+                                path="categories"
+                                element={
+                                    <EquipmentCategoriesPage />
+                                }
+                            />
 
-              <Route
-                path="settings"
-                element={<SystemSettingsPage />}
-              />
+                            <Route
+                                path="settings"
+                                element={
+                                    <SystemSettingsPage />
+                                }
+                            />
 
-              <Route
-                path="reports"
-                element={<AdminReportsPage />}
-              />
-            </Route>
-          </Route>
-
+                            <Route
+                                path="reports"
+                                element={
+                                    <AdminReportsPage />
+                                }
+                            />
+                        </Route>
+                    </Route>
 
                     {/* MANAGER */}
                     <Route
@@ -240,55 +258,56 @@ export const AppRouter = () => {
                                 }
                             />
 
-              <Route
-                path="dashboard"
-                element={<ManagerDashboardPage />}
-              />
+                            <Route
+                                path="dashboard"
+                                element={
+                                    <ManagerDashboardPage />
+                                }
+                            />
 
-              <Route
-                path="quotation-approvals"
-                element={
-                  <ManagerQuotationApprovalsPage />
-                }
-              />
+                            <Route
+                                path="quotation-approvals"
+                                element={
+                                    <ManagerQuotationApprovalsPage />
+                                }
+                            />
 
-              <Route
-                path="contract-approvals"
-                element={
-                  <ManagerContractApprovalsPage />
-                }
-              />
+                            <Route
+                                path="contract-approvals"
+                                element={
+                                    <ManagerContractApprovalsPage />
+                                }
+                            />
 
-              <Route
-                path="rentals"
-                element={
-                  <ManagerRentalsPage />
-                }
-              />
+                            <Route
+                                path="rentals"
+                                element={
+                                    <ManagerRentalsPage />
+                                }
+                            />
 
-              <Route
-                path="deliveries"
-                element={
-                  <ManagerDeliveriesPage />
-                }
-              />
+                            <Route
+                                path="deliveries"
+                                element={
+                                    <ManagerDeliveriesPage />
+                                }
+                            />
 
-              <Route
-                path="receivables"
-                element={
-                  <ManagerReceivablesPage />
-                }
-              />
+                            <Route
+                                path="receivables"
+                                element={
+                                    <ManagerReceivablesPage />
+                                }
+                            />
 
-              <Route
-                path="equipment"
-                element={
-                  <ManagerEquipmentPage />
-                }
-              />
-            </Route>
-          </Route>
-
+                            <Route
+                                path="equipment"
+                                element={
+                                    <ManagerEquipmentPage />
+                                }
+                            />
+                        </Route>
+                    </Route>
 
                     {/* SALES */}
                     <Route
@@ -304,26 +323,42 @@ export const AppRouter = () => {
                             path="sales"
                             element={<SalesLayout />}
                         >
+                            {/* Mặc định vào Tổng quan */}
                             <Route
                                 index
                                 element={
                                     <Navigate
-                                        to="customers"
+                                        to="dashboard"
                                         replace
                                     />
                                 }
                             />
 
+                            {/* Tổng quan */}
                             <Route
-                                path="customers"
+                                path="dashboard"
                                 element={
-                                    <ModulePlaceholderPage
-                                        title="Khách hàng"
-                                        description="Quản lý thông tin và lịch sử giao dịch của khách hàng."
-                                    />
+                                    <SalesDashboardPage />
                                 }
                             />
 
+                            {/* Khách hàng */}
+                            <Route
+                                path="customers"
+                                element={
+                                    <SalesCustomersPage />
+                                }
+                            />
+
+                            {/* Chi tiết khách hàng */}
+                            <Route
+                                path="customers/:customerId"
+                                element={
+                                    <SalesCustomerDetailPage />
+                                }
+                            />
+
+                            {/* Yêu cầu thuê */}
                             <Route
                                 path="rental-requests"
                                 element={
@@ -334,6 +369,7 @@ export const AppRouter = () => {
                                 }
                             />
 
+                            {/* Báo giá */}
                             <Route
                                 path="quotations"
                                 element={
@@ -344,6 +380,7 @@ export const AppRouter = () => {
                                 }
                             />
 
+                            {/* Đơn thuê */}
                             <Route
                                 path="rentals"
                                 element={
@@ -354,6 +391,7 @@ export const AppRouter = () => {
                                 }
                             />
 
+                            {/* Hợp đồng */}
                             <Route
                                 path="contracts"
                                 element={
@@ -678,6 +716,7 @@ export const AppRouter = () => {
                     </Route>
                 </Route>
 
+                {/* NOT FOUND */}
                 <Route
                     path="*"
                     element={<NotFoundPage />}

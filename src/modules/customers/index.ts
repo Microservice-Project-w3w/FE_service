@@ -41,6 +41,7 @@ export {
 export {
     CustomerInvoiceDetailPage,
 } from "./pages/CustomerInvoiceDetailPage";
+
 export {
     CustomerReturnRequestsPage,
 } from "./pages/CustomerReturnRequestsPage";
@@ -52,6 +53,7 @@ export {
 export {
     CustomerReturnRequestDetailPage,
 } from "./pages/CustomerReturnRequestDetailPage";
+
 export {
     CustomerIncidentsPage,
 } from "./pages/CustomerIncidentsPage";
@@ -63,3 +65,11 @@ export {
 export {
     CustomerIncidentDetailPage,
 } from "./pages/CustomerIncidentDetailPage";
+
+export {
+    SalesCustomersPage,
+} from "./pages/SalesCustomersPage";
+
+export {
+    SalesCustomerDetailPage,
+} from "./pages/SalesCustomerDetailPage";

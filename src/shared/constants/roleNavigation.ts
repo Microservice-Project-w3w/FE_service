@@ -31,8 +31,8 @@ export interface RoleNavigationGroup {
 }
 
 export const ROLE_NAVIGATION: Record<
-  UserRole,
-  RoleNavigationGroup[]
+    UserRole,
+    RoleNavigationGroup[]
 > = {
   ADMIN: [
     {
@@ -129,6 +129,11 @@ export const ROLE_NAVIGATION: Record<
     {
       label: "Kinh doanh",
       items: [
+        {
+          label: "Tổng quan",
+          path: "/sales/dashboard",
+          icon: LayoutDashboard,
+        },
         {
           label: "Khách hàng",
           path: "/sales/customers",
