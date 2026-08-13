@@ -102,6 +102,11 @@ import {
 
 import {
     ManagerRentalsPage,
+    SalesAllRentalRequestsPage,
+    SalesRentalRequestCreatePage,
+    SalesRentalRequestDetailPage,
+    SalesRentalRequestsPage,
+    SalesRequestedEquipmentPage,
 } from "@/modules/rentals";
 
 import {
@@ -323,7 +328,6 @@ export const AppRouter = () => {
                             path="sales"
                             element={<SalesLayout />}
                         >
-                            {/* Mặc định vào Tổng quan */}
                             <Route
                                 index
                                 element={
@@ -334,7 +338,6 @@ export const AppRouter = () => {
                                 }
                             />
 
-                            {/* Tổng quan */}
                             <Route
                                 path="dashboard"
                                 element={
@@ -342,7 +345,6 @@ export const AppRouter = () => {
                                 }
                             />
 
-                            {/* Khách hàng */}
                             <Route
                                 path="customers"
                                 element={
@@ -350,7 +352,6 @@ export const AppRouter = () => {
                                 }
                             />
 
-                            {/* Chi tiết khách hàng */}
                             <Route
                                 path="customers/:customerId"
                                 element={
@@ -358,18 +359,43 @@ export const AppRouter = () => {
                                 }
                             />
 
-                            {/* Yêu cầu thuê */}
+                            {/* YÊU CẦU THUÊ */}
                             <Route
                                 path="rental-requests"
                                 element={
-                                    <ModulePlaceholderPage
-                                        title="Yêu cầu thuê"
-                                        description="Tạo và quản lý các yêu cầu thuê thiết bị."
-                                    />
+                                    <SalesRentalRequestsPage />
                                 }
                             />
 
-                            {/* Báo giá */}
+                            <Route
+                                path="rental-requests/create"
+                                element={
+                                    <SalesRentalRequestCreatePage />
+                                }
+                            />
+
+                            <Route
+                                path="rental-requests/all"
+                                element={
+                                    <SalesAllRentalRequestsPage />
+                                }
+                            />
+
+                            <Route
+                                path="rental-requests/equipment"
+                                element={
+                                    <SalesRequestedEquipmentPage />
+                                }
+                            />
+
+                            <Route
+                                path="rental-requests/:requestId"
+                                element={
+                                    <SalesRentalRequestDetailPage />
+                                }
+                            />
+
+                            {/* BÁO GIÁ */}
                             <Route
                                 path="quotations"
                                 element={
@@ -380,7 +406,7 @@ export const AppRouter = () => {
                                 }
                             />
 
-                            {/* Đơn thuê */}
+                            {/* ĐƠN THUÊ */}
                             <Route
                                 path="rentals"
                                 element={
@@ -391,7 +417,7 @@ export const AppRouter = () => {
                                 }
                             />
 
-                            {/* Hợp đồng */}
+                            {/* HỢP ĐỒNG */}
                             <Route
                                 path="contracts"
                                 element={
@@ -570,7 +596,6 @@ export const AppRouter = () => {
                                 }
                             />
 
-                            {/* Thiết bị */}
                             <Route
                                 path="equipment"
                                 element={
@@ -585,7 +610,6 @@ export const AppRouter = () => {
                                 }
                             />
 
-                            {/* Tạo yêu cầu thuê từ thiết bị */}
                             <Route
                                 path="equipment/:equipmentId/rental-request"
                                 element={
@@ -593,7 +617,6 @@ export const AppRouter = () => {
                                 }
                             />
 
-                            {/* Yêu cầu thuê của tôi */}
                             <Route
                                 path="rental-requests"
                                 element={
@@ -601,7 +624,6 @@ export const AppRouter = () => {
                                 }
                             />
 
-                            {/* Tạo yêu cầu thuê mới */}
                             <Route
                                 path="rental-requests/create"
                                 element={
@@ -609,7 +631,6 @@ export const AppRouter = () => {
                                 }
                             />
 
-                            {/* Chi tiết yêu cầu thuê */}
                             <Route
                                 path="rental-requests/:requestId"
                                 element={
@@ -617,7 +638,6 @@ export const AppRouter = () => {
                                 }
                             />
 
-                            {/* Báo giá của tôi */}
                             <Route
                                 path="quotations"
                                 element={
@@ -625,7 +645,6 @@ export const AppRouter = () => {
                                 }
                             />
 
-                            {/* Chi tiết báo giá */}
                             <Route
                                 path="quotations/:quotationId"
                                 element={
@@ -633,7 +652,6 @@ export const AppRouter = () => {
                                 }
                             />
 
-                            {/* Hợp đồng của tôi */}
                             <Route
                                 path="contracts"
                                 element={
@@ -641,7 +659,6 @@ export const AppRouter = () => {
                                 }
                             />
 
-                            {/* Chi tiết hợp đồng */}
                             <Route
                                 path="contracts/:contractId"
                                 element={
@@ -649,7 +666,6 @@ export const AppRouter = () => {
                                 }
                             />
 
-                            {/* Hóa đơn */}
                             <Route
                                 path="invoices"
                                 element={
@@ -657,7 +673,6 @@ export const AppRouter = () => {
                                 }
                             />
 
-                            {/* Chi tiết hóa đơn */}
                             <Route
                                 path="invoices/:invoiceId"
                                 element={
@@ -665,7 +680,6 @@ export const AppRouter = () => {
                                 }
                             />
 
-                            {/* Yêu cầu trả */}
                             <Route
                                 path="return-requests"
                                 element={
@@ -673,7 +687,6 @@ export const AppRouter = () => {
                                 }
                             />
 
-                            {/* Tạo yêu cầu trả */}
                             <Route
                                 path="return-requests/create"
                                 element={
@@ -681,7 +694,6 @@ export const AppRouter = () => {
                                 }
                             />
 
-                            {/* Chi tiết yêu cầu trả */}
                             <Route
                                 path="return-requests/:returnRequestId"
                                 element={
@@ -689,7 +701,6 @@ export const AppRouter = () => {
                                 }
                             />
 
-                            {/* Báo cáo sự cố */}
                             <Route
                                 path="incidents"
                                 element={
@@ -697,7 +708,6 @@ export const AppRouter = () => {
                                 }
                             />
 
-                            {/* Tạo báo cáo sự cố */}
                             <Route
                                 path="incidents/create"
                                 element={
@@ -705,7 +715,6 @@ export const AppRouter = () => {
                                 }
                             />
 
-                            {/* Chi tiết báo cáo sự cố */}
                             <Route
                                 path="incidents/:incidentId"
                                 element={

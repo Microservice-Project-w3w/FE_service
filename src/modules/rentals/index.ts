@@ -22,3 +22,23 @@ export type {
   RentalPaymentStatus,
   RentalReservationStatus,
 } from "@/modules/rentals/types/manager-rental.types";
+
+export {
+  SalesRentalRequestsPage,
+} from "@/modules/rentals/pages/SalesRentalRequestsPage";
+
+export {
+  SalesRentalRequestDetailPage,
+} from "@/modules/rentals/pages/SalesRentalRequestDetailPage";
+
+export {
+  SalesRentalRequestCreatePage,
+} from "@/modules/rentals/pages/SalesRentalRequestCreatePage";
+
+export {
+  SalesAllRentalRequestsPage,
+} from "@/modules/rentals/pages/SalesAllRentalRequestsPage";
+
+export {
+  SalesRequestedEquipmentPage,
+} from "@/modules/rentals/pages/SalesRequestedEquipmentPage";
