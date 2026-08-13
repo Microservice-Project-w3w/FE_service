@@ -7,6 +7,7 @@ import {
   FileText,
   LayoutDashboard,
   PackageCheck,
+  Scale,
   Settings,
   Truck,
   Users,
@@ -209,6 +210,11 @@ export const ROLE_NAVIGATION: Record<
           label: "Công nợ",
           path: "/accounting/receivables",
           icon: ClipboardCheck,
+        },
+        {
+          label: "Đối soát",
+          path: "/accounting/reconciliation",
+          icon: Scale,
         },
         {
           label: "Báo cáo doanh thu",

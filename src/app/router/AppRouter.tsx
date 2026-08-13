@@ -113,6 +113,24 @@ import {
 } from "@/modules/equipment";
 
 import {
+    AccountantInvoicesPage,
+} from "@/modules/invoices";
+
+import {
+    AccountantDepositsPage,
+    AccountantPaymentsPage,
+} from "@/modules/payments";
+
+import {
+    AccountantReceivablesPage,
+    AccountantRevenueReportsPage,
+} from "@/modules/receivables";
+
+import {
+    AccountantReconciliationPage,
+} from "@/modules/reconciliation";
+
+import {
     ModulePlaceholderPage,
 
 } from "@/shared/pages/ModulePlaceholderPage";
@@ -458,52 +476,32 @@ export const AppRouter = () => {
 
                             <Route
                                 path="invoices"
-                                element={
-                                    <ModulePlaceholderPage
-                                        title="Hóa đơn"
-                                        description="Tạo và quản lý hóa đơn cho các hợp đồng thuê."
-                                    />
-                                }
+                                element={<AccountantInvoicesPage />}
                             />
 
                             <Route
                                 path="payments"
-                                element={
-                                    <ModulePlaceholderPage
-                                        title="Thanh toán"
-                                        description="Ghi nhận và xác nhận các khoản thanh toán."
-                                    />
-                                }
+                                element={<AccountantPaymentsPage />}
                             />
 
                             <Route
                                 path="deposits"
-                                element={
-                                    <ModulePlaceholderPage
-                                        title="Tiền đặt cọc"
-                                        description="Quản lý thu cọc, hoàn cọc và khấu trừ tiền cọc."
-                                    />
-                                }
+                                element={<AccountantDepositsPage />}
                             />
 
                             <Route
                                 path="receivables"
-                                element={
-                                    <ModulePlaceholderPage
-                                        title="Công nợ"
-                                        description="Theo dõi các khoản phải thu và thanh toán quá hạn."
-                                    />
-                                }
+                                element={<AccountantReceivablesPage />}
+                            />
+
+                            <Route
+                                path="reconciliation"
+                                element={<AccountantReconciliationPage />}
                             />
 
                             <Route
                                 path="revenue-reports"
-                                element={
-                                    <ModulePlaceholderPage
-                                        title="Báo cáo doanh thu"
-                                        description="Theo dõi và tổng hợp số liệu doanh thu."
-                                    />
-                                }
+                                element={<AccountantRevenueReportsPage />}
                             />
                         </Route>
                     </Route>
