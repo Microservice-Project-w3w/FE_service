@@ -415,7 +415,7 @@ export const SalesRentalRequestsPage =
 
                     <Link
                         to="/sales/rental-requests/create"
-                        className="inline-flex h-11 items-center justify-center gap-2 self-start rounded-xl bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 lg:self-auto"
+                        className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 text-sm font-semibold !text-white shadow-sm transition hover:bg-blue-700 hover:!text-white"
                     >
                         <PackagePlus
                             size={18}

@@ -94,6 +94,10 @@ import {
 
 import {
     ManagerQuotationApprovalsPage,
+    SalesQuotationActivitiesPage,
+    SalesQuotationCreatePage,
+    SalesQuotationDetailPage,
+    SalesQuotationsPage,
 } from "@/modules/quotations";
 
 import {
@@ -399,10 +403,28 @@ export const AppRouter = () => {
                             <Route
                                 path="quotations"
                                 element={
-                                    <ModulePlaceholderPage
-                                        title="Báo giá"
-                                        description="Tạo báo giá và gửi quản lý phê duyệt."
-                                    />
+                                    <SalesQuotationsPage />
+                                }
+                            />
+
+                            <Route
+                                path="quotations/create"
+                                element={
+                                    <SalesQuotationCreatePage />
+                                }
+                            />
+
+                            <Route
+                                path="quotations/activities"
+                                element={
+                                    <SalesQuotationActivitiesPage />
+                                }
+                            />
+
+                            <Route
+                                path="quotations/:quotationId"
+                                element={
+                                    <SalesQuotationDetailPage />
                                 }
                             />
 
