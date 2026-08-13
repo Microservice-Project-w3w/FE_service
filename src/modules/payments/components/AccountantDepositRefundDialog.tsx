@@ -1,0 +1,10 @@
+import { LoaderCircle, RotateCcw, X } from "lucide-react";
+import { createPortal } from "react-dom";
+import { formatPaymentCurrency } from "@/modules/payments/components/accountantPaymentFormatters";
+import type { AccountantDeposit } from "@/modules/payments/types/accountant-payment.types";
+
+interface Props { deposit: AccountantDeposit | null; isSubmitting: boolean; onClose: () => void; onConfirm: () => void; }
+export const AccountantDepositRefundDialog = ({ deposit, isSubmitting, onClose, onConfirm }: Props) => {
+  if (!deposit) return null; const amount = deposit.heldAmount - deposit.refundedAmount;
+  return createPortal(<div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm"><section role="alertdialog" className="w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl"><header className="flex items-start justify-between border-b border-slate-100 px-6 py-5"><div className="flex items-center gap-3"><span className="flex size-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600"><RotateCcw size={21} /></span><div><h2 className="font-bold text-slate-900">Xác nhận hoàn cọc</h2><p className="mt-1 text-xs text-slate-400">{deposit.invoiceCode}</p></div></div><button type="button" onClick={onClose} className="p-2 text-slate-400"><X size={18} /></button></header><div className="px-6 py-5 text-sm leading-6 text-slate-600">Xác nhận hoàn <strong className="text-slate-900">{formatPaymentCurrency(amount)}</strong> cho {deposit.customerName}. Trạng thái cọc sẽ cập nhật ngay trên giao diện.</div><footer className="flex justify-end gap-3 border-t border-slate-100 bg-slate-50 px-6 py-4"><button type="button" onClick={onClose} className="h-10 rounded-xl border border-slate-300 bg-white px-5 text-sm font-semibold">Quay lại</button><button type="button" disabled={isSubmitting} onClick={onConfirm} className="inline-flex h-10 items-center gap-2 rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white">{isSubmitting && <LoaderCircle size={17} className="animate-spin" />} Xác nhận hoàn</button></footer></section></div>, document.body);
+};
