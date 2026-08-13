@@ -1,0 +1,4 @@
+import type { AccountantReconciliationStatus } from "@/modules/reconciliation/types/accountant-reconciliation.types";
+const labels: Record<AccountantReconciliationStatus, string> = { PENDING: "Chờ đối soát", MATCHED: "Khớp", MISMATCH: "Lệch", RECONCILED: "Đã đối soát" };
+const classes: Record<AccountantReconciliationStatus, string> = { PENDING: "border-amber-200 bg-amber-50 text-amber-700", MATCHED: "border-blue-200 bg-blue-50 text-blue-700", MISMATCH: "border-rose-200 bg-rose-50 text-rose-700", RECONCILED: "border-emerald-200 bg-emerald-50 text-emerald-700" };
+export const AccountantReconciliationBadge = ({ status }: { status: AccountantReconciliationStatus }) => <span className={`inline-flex whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-semibold ${classes[status]}`}>{labels[status]}</span>;
