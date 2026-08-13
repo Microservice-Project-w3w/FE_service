@@ -1,39 +1,60 @@
 export {
-  ManagerQuotationApprovalsPage,
-} from "@/modules/quotations/pages/ManagerQuotationApprovalsPage";
+  ManagerRentalsPage,
+} from "@/modules/rentals/pages/ManagerRentalsPage";
 
 export {
-  managerQuotationApprovalsApi,
-} from "@/modules/quotations/api/manager-quotation-approvals.api";
+  managerRentalsApi,
+} from "@/modules/rentals/api/manager-rentals.api";
 
 export type {
-  ApproveManagerQuotationInput,
-  DepositType,
-  GetManagerQuotationsInput,
-  ManagerQuotation,
-  ManagerQuotationListData,
-  ManagerQuotationSummary,
-  QuotationApprovalAction,
-  QuotationApprovalHistory,
-  QuotationApprovalStatus,
-  QuotationLineItem,
-  QuotationPriority,
-  RejectManagerQuotationInput,
-  RentalPriceUnit,
-} from "@/modules/quotations/types/manager-quotation-approval.types";
+  CancelManagerRentalInput,
+  ConfirmRentalReservationInput,
+  ExtendManagerRentalInput,
+  GetManagerRentalsInput,
+  ManagerRental,
+  ManagerRentalEquipmentItem,
+  ManagerRentalHistory,
+  ManagerRentalHistoryAction,
+  ManagerRentalListData,
+  ManagerRentalPriority,
+  ManagerRentalStatus,
+  ManagerRentalSummary,
+  RentalPaymentStatus,
+  RentalReservationStatus,
+} from "@/modules/rentals/types/manager-rental.types";
 
 export {
-  SalesQuotationsPage,
-} from "@/modules/quotations/pages/SalesQuotationsPage";
+  SalesRentalRequestsPage,
+} from "@/modules/rentals/pages/SalesRentalRequestsPage";
 
 export {
-  SalesQuotationDetailPage,
-} from "@/modules/quotations/pages/SalesQuotationDetailPage";
+  SalesRentalRequestDetailPage,
+} from "@/modules/rentals/pages/SalesRentalRequestDetailPage";
 
 export {
-  SalesQuotationCreatePage,
-} from "@/modules/quotations/pages/SalesQuotationCreatePage";
+  SalesRentalRequestCreatePage,
+} from "@/modules/rentals/pages/SalesRentalRequestCreatePage";
 
 export {
-  SalesQuotationActivitiesPage,
-} from "@/modules/quotations/pages/SalesQuotationActivitiesPage";
+  SalesAllRentalRequestsPage,
+} from "@/modules/rentals/pages/SalesAllRentalRequestsPage";
+
+export {
+  SalesRequestedEquipmentPage,
+} from "@/modules/rentals/pages/SalesRequestedEquipmentPage";
+
+export {
+  SalesRentalsPage,
+} from "@/modules/rentals/pages/SalesRentalsPage";
+
+export {
+  SalesRentalCreatePage,
+} from "@/modules/rentals/pages/SalesRentalCreatePage";
+
+export {
+  SalesRentalDetailPage,
+} from "@/modules/rentals/pages/SalesRentalDetailPage";
+
+export {
+  SalesRentalActivitiesPage,
+} from "@/modules/rentals/pages/SalesRentalActivitiesPage";

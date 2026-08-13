@@ -42,3 +42,19 @@ export {
 export {
   SalesRequestedEquipmentPage,
 } from "@/modules/rentals/pages/SalesRequestedEquipmentPage";
+
+export {
+  SalesRentalsPage,
+} from "@/modules/rentals/pages/SalesRentalsPage";
+
+export {
+  SalesRentalCreatePage,
+} from "@/modules/rentals/pages/SalesRentalCreatePage";
+
+export {
+  SalesRentalActivitiesPage,
+} from "@/modules/rentals/pages/SalesRentalActivitiesPage";
+
+export {
+  SalesRentalDetailPage,
+} from "@/modules/rentals/pages/SalesRentalDetailPage";

@@ -94,11 +94,23 @@ import {
 
 import {
     ManagerQuotationApprovalsPage,
+} from "@/modules/quotations/pages/ManagerQuotationApprovalsPage";
+
+import {
     SalesQuotationActivitiesPage,
+} from "@/modules/quotations/pages/SalesQuotationActivitiesPage";
+
+import {
     SalesQuotationCreatePage,
+} from "@/modules/quotations/pages/SalesQuotationCreatePage";
+
+import {
     SalesQuotationDetailPage,
+} from "@/modules/quotations/pages/SalesQuotationDetailPage";
+
+import {
     SalesQuotationsPage,
-} from "@/modules/quotations";
+} from "@/modules/quotations/pages/SalesQuotationsPage";
 
 import {
     ManagerContractApprovalsPage,
@@ -107,9 +119,13 @@ import {
 import {
     ManagerRentalsPage,
     SalesAllRentalRequestsPage,
+    SalesRentalActivitiesPage,
+    SalesRentalCreatePage,
+    SalesRentalDetailPage,
     SalesRentalRequestCreatePage,
     SalesRentalRequestDetailPage,
     SalesRentalRequestsPage,
+    SalesRentalsPage,
     SalesRequestedEquipmentPage,
 } from "@/modules/rentals";
 
@@ -432,10 +448,28 @@ export const AppRouter = () => {
                             <Route
                                 path="rentals"
                                 element={
-                                    <ModulePlaceholderPage
-                                        title="Đơn thuê"
-                                        description="Tạo và theo dõi trạng thái đơn thuê."
-                                    />
+                                    <SalesRentalsPage />
+                                }
+                            />
+
+                            <Route
+                                path="rentals/create"
+                                element={
+                                    <SalesRentalCreatePage />
+                                }
+                            />
+
+                            <Route
+                                path="rentals/activities"
+                                element={
+                                    <SalesRentalActivitiesPage />
+                                }
+                            />
+
+                            <Route
+                                path="rentals/:rentalId"
+                                element={
+                                    <SalesRentalDetailPage />
                                 }
                             />
 
