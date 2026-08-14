@@ -35,10 +35,10 @@ export const AccountantInvoicesPage = () => {
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <button type="button" disabled={viewModel.isLoading || viewModel.filteredInvoices.length === 0} onClick={viewModel.exportInvoices} className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 disabled:opacity-50">
+          <button type="button" disabled={viewModel.isLoading || viewModel.filteredInvoices.length === 0} onClick={viewModel.exportInvoices} className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 disabled:opacity-50">
             <Download size={17} /> Xuất danh sách
           </button>
-          <button type="button" disabled={viewModel.isLoading} onClick={() => void viewModel.loadInvoices()} className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 disabled:opacity-50">
+          <button type="button" disabled={viewModel.isLoading} onClick={() => void viewModel.loadInvoices()} className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 disabled:opacity-50">
             <RefreshCw size={17} className={viewModel.isLoading ? "animate-spin" : ""} /> Làm mới
           </button>
         </div>
@@ -80,7 +80,7 @@ export const AccountantInvoicesPage = () => {
         onReset={viewModel.resetFilters}
       />
 
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex min-h-6 items-center justify-between gap-4">
         <p className="text-sm font-medium text-slate-500">Tìm thấy <span className="font-bold text-slate-800">{viewModel.filteredInvoices.length}</span> hóa đơn</p>
         <FileCheck2 size={18} className="text-slate-300" />
       </div>

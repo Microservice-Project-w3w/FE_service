@@ -23,7 +23,7 @@ interface AccountantInvoiceFiltersProps {
 }
 
 const controlClass =
-  "h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100 disabled:text-slate-400";
+  "h-12 rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100 disabled:text-slate-400";
 
 export const AccountantInvoiceFilters = ({
   branches,
@@ -41,7 +41,7 @@ export const AccountantInvoiceFilters = ({
   onReset,
 }: AccountantInvoiceFiltersProps) => (
   <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(260px,1.5fr)_repeat(4,minmax(150px,0.8fr))_auto]">
+    <div className="grid items-end gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-[minmax(260px,1.5fr)_repeat(4,minmax(150px,0.8fr))_auto]">
       <label className="relative block md:col-span-2 xl:col-span-1">
         <span className="sr-only">Tìm kiếm hóa đơn</span>
         <Search
@@ -54,7 +54,7 @@ export const AccountantInvoiceFilters = ({
           disabled={disabled}
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder="Mã hóa đơn, khách hàng, đơn thuê..."
-          className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100"
+          className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100"
         />
       </label>
 
@@ -82,7 +82,7 @@ export const AccountantInvoiceFilters = ({
         <input type="date" value={toDate} disabled={disabled} onChange={(event) => onToDateChange(event.target.value)} className={controlClass} />
       </label>
 
-      <button type="button" disabled={disabled} onClick={onReset} className="inline-flex h-11 self-end items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 disabled:opacity-50">
+      <button type="button" disabled={disabled} onClick={onReset} className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 disabled:opacity-50">
         <RotateCcw size={17} /> Đặt lại
       </button>
     </div>
