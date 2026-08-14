@@ -1,8 +1,22 @@
-import { BranchesPage } from "@/modules/branches";
-import { EquipmentCategoriesPage } from "@/modules/equipment-categories";
-import { SystemSettingsPage } from "@/modules/settings";
-import { AdminReportsPage } from "@/modules/reports";
-import { EmployeesPage } from "@/modules/employees";
+import {
+    BranchesPage,
+} from "@/modules/branches";
+
+import {
+    EquipmentCategoriesPage,
+} from "@/modules/equipment-categories";
+
+import {
+    SystemSettingsPage,
+} from "@/modules/settings";
+
+import {
+    AdminReportsPage,
+} from "@/modules/reports";
+
+import {
+    EmployeesPage,
+} from "@/modules/employees";
 
 import {
     BrowserRouter,
@@ -92,6 +106,12 @@ import {
     SalesDashboardPage,
 } from "@/modules/dashboard";
 
+/*
+ * QUOTATIONS
+ *
+ * Import trực tiếp để tránh lỗi barrel export
+ * từng gặp trước đó.
+ */
 import {
     ManagerQuotationApprovalsPage,
 } from "@/modules/quotations/pages/ManagerQuotationApprovalsPage";
@@ -112,10 +132,20 @@ import {
     SalesQuotationsPage,
 } from "@/modules/quotations/pages/SalesQuotationsPage";
 
+/*
+ * CONTRACTS
+ */
 import {
     ManagerContractApprovalsPage,
+    SalesContractActivitiesPage,
+    SalesContractCreatePage,
+    SalesContractDetailPage,
+    SalesContractsPage,
 } from "@/modules/contracts";
 
+/*
+ * RENTALS
+ */
 import {
     ManagerRentalsPage,
     SalesAllRentalRequestsPage,
@@ -157,34 +187,54 @@ export const AppRouter = () => {
     return (
         <BrowserRouter>
             <Routes>
-                {/* GUEST */}
-                <Route element={<GuestRoute />}>
-                    <Route element={<AuthLayout />}>
+                {/* ==================== GUEST ==================== */}
+                <Route
+                    element={
+                        <GuestRoute />
+                    }
+                >
+                    <Route
+                        element={
+                            <AuthLayout />
+                        }
+                    >
                         <Route
                             path="login"
-                            element={<LoginPage />}
+                            element={
+                                <LoginPage />
+                            }
                         />
 
                         <Route
                             path="register"
-                            element={<RegisterPage />}
+                            element={
+                                <RegisterPage />
+                            }
                         />
                     </Route>
                 </Route>
 
-                {/* PROTECTED */}
-                <Route element={<ProtectedRoute />}>
+                {/* ==================== PROTECTED ==================== */}
+                <Route
+                    element={
+                        <ProtectedRoute />
+                    }
+                >
                     <Route
                         path="/"
-                        element={<RoleHomeRedirect />}
+                        element={
+                            <RoleHomeRedirect />
+                        }
                     />
 
                     <Route
                         path="unauthorized"
-                        element={<UnauthorizedPage />}
+                        element={
+                            <UnauthorizedPage />
+                        }
                     />
 
-                    {/* ADMIN */}
+                    {/* ==================== ADMIN ==================== */}
                     <Route
                         element={
                             <RoleRoute
@@ -196,7 +246,9 @@ export const AppRouter = () => {
                     >
                         <Route
                             path="admin"
-                            element={<AdminLayout />}
+                            element={
+                                <AdminLayout />
+                            }
                         >
                             <Route
                                 index
@@ -259,7 +311,7 @@ export const AppRouter = () => {
                         </Route>
                     </Route>
 
-                    {/* MANAGER */}
+                    {/* ==================== MANAGER ==================== */}
                     <Route
                         element={
                             <RoleRoute
@@ -271,7 +323,9 @@ export const AppRouter = () => {
                     >
                         <Route
                             path="manager"
-                            element={<ManagerLayout />}
+                            element={
+                                <ManagerLayout />
+                            }
                         >
                             <Route
                                 index
@@ -334,7 +388,7 @@ export const AppRouter = () => {
                         </Route>
                     </Route>
 
-                    {/* SALES */}
+                    {/* ==================== SALES ==================== */}
                     <Route
                         element={
                             <RoleRoute
@@ -346,7 +400,9 @@ export const AppRouter = () => {
                     >
                         <Route
                             path="sales"
-                            element={<SalesLayout />}
+                            element={
+                                <SalesLayout />
+                            }
                         >
                             <Route
                                 index
@@ -358,6 +414,7 @@ export const AppRouter = () => {
                                 }
                             />
 
+                            {/* DASHBOARD */}
                             <Route
                                 path="dashboard"
                                 element={
@@ -365,6 +422,7 @@ export const AppRouter = () => {
                                 }
                             />
 
+                            {/* ==================== KHÁCH HÀNG ==================== */}
                             <Route
                                 path="customers"
                                 element={
@@ -379,7 +437,7 @@ export const AppRouter = () => {
                                 }
                             />
 
-                            {/* YÊU CẦU THUÊ */}
+                            {/* ==================== YÊU CẦU THUÊ ==================== */}
                             <Route
                                 path="rental-requests"
                                 element={
@@ -415,7 +473,7 @@ export const AppRouter = () => {
                                 }
                             />
 
-                            {/* BÁO GIÁ */}
+                            {/* ==================== BÁO GIÁ ==================== */}
                             <Route
                                 path="quotations"
                                 element={
@@ -444,7 +502,7 @@ export const AppRouter = () => {
                                 }
                             />
 
-                            {/* ĐƠN THUÊ */}
+                            {/* ==================== ĐƠN THUÊ ==================== */}
                             <Route
                                 path="rentals"
                                 element={
@@ -473,20 +531,38 @@ export const AppRouter = () => {
                                 }
                             />
 
-                            {/* HỢP ĐỒNG */}
+                            {/* ==================== HỢP ĐỒNG ==================== */}
                             <Route
                                 path="contracts"
                                 element={
-                                    <ModulePlaceholderPage
-                                        title="Hợp đồng"
-                                        description="Tạo và theo dõi hợp đồng thuê thiết bị."
-                                    />
+                                    <SalesContractsPage />
+                                }
+                            />
+
+                            <Route
+                                path="contracts/create"
+                                element={
+                                    <SalesContractCreatePage />
+                                }
+                            />
+
+                            <Route
+                                path="contracts/activities"
+                                element={
+                                    <SalesContractActivitiesPage />
+                                }
+                            />
+
+                            <Route
+                                path="contracts/:contractId"
+                                element={
+                                    <SalesContractDetailPage />
                                 }
                             />
                         </Route>
                     </Route>
 
-                    {/* OPERATIONS */}
+                    {/* ==================== OPERATIONS ==================== */}
                     <Route
                         element={
                             <RoleRoute
@@ -498,7 +574,9 @@ export const AppRouter = () => {
                     >
                         <Route
                             path="operations"
-                            element={<OperationsLayout />}
+                            element={
+                                <OperationsLayout />
+                            }
                         >
                             <Route
                                 index
@@ -552,7 +630,7 @@ export const AppRouter = () => {
                         </Route>
                     </Route>
 
-                    {/* ACCOUNTANT */}
+                    {/* ==================== ACCOUNTANT ==================== */}
                     <Route
                         element={
                             <RoleRoute
@@ -564,7 +642,9 @@ export const AppRouter = () => {
                     >
                         <Route
                             path="accounting"
-                            element={<AccountingLayout />}
+                            element={
+                                <AccountingLayout />
+                            }
                         >
                             <Route
                                 index
@@ -628,7 +708,7 @@ export const AppRouter = () => {
                         </Route>
                     </Route>
 
-                    {/* CUSTOMER */}
+                    {/* ==================== CUSTOMER ==================== */}
                     <Route
                         element={
                             <RoleRoute
@@ -640,7 +720,9 @@ export const AppRouter = () => {
                     >
                         <Route
                             path="customer"
-                            element={<CustomerLayout />}
+                            element={
+                                <CustomerLayout />
+                            }
                         >
                             <Route
                                 index
@@ -652,6 +734,7 @@ export const AppRouter = () => {
                                 }
                             />
 
+                            {/* THIẾT BỊ */}
                             <Route
                                 path="equipment"
                                 element={
@@ -673,6 +756,7 @@ export const AppRouter = () => {
                                 }
                             />
 
+                            {/* YÊU CẦU THUÊ */}
                             <Route
                                 path="rental-requests"
                                 element={
@@ -694,6 +778,7 @@ export const AppRouter = () => {
                                 }
                             />
 
+                            {/* BÁO GIÁ */}
                             <Route
                                 path="quotations"
                                 element={
@@ -708,6 +793,7 @@ export const AppRouter = () => {
                                 }
                             />
 
+                            {/* HỢP ĐỒNG */}
                             <Route
                                 path="contracts"
                                 element={
@@ -722,6 +808,7 @@ export const AppRouter = () => {
                                 }
                             />
 
+                            {/* HÓA ĐƠN */}
                             <Route
                                 path="invoices"
                                 element={
@@ -736,6 +823,7 @@ export const AppRouter = () => {
                                 }
                             />
 
+                            {/* YÊU CẦU TRẢ */}
                             <Route
                                 path="return-requests"
                                 element={
@@ -757,6 +845,7 @@ export const AppRouter = () => {
                                 }
                             />
 
+                            {/* BÁO CÁO SỰ CỐ */}
                             <Route
                                 path="incidents"
                                 element={
@@ -781,10 +870,12 @@ export const AppRouter = () => {
                     </Route>
                 </Route>
 
-                {/* NOT FOUND */}
+                {/* ==================== NOT FOUND ==================== */}
                 <Route
                     path="*"
-                    element={<NotFoundPage />}
+                    element={
+                        <NotFoundPage />
+                    }
                 />
             </Routes>
         </BrowserRouter>

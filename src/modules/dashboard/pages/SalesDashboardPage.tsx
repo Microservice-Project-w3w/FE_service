@@ -5,7 +5,6 @@ import type {
 import {
     ArrowUpRight,
     Building2,
-    CalendarDays,
     CheckCircle2,
     CircleDollarSign,
     ClipboardCheck,
@@ -19,6 +18,10 @@ import {
     TrendingUp,
     Users,
 } from "lucide-react";
+
+import {
+    useNavigate,
+} from "react-router";
 
 /* =========================================================
  * TYPES
@@ -515,6 +518,30 @@ const getPointPosition = (
  * ========================================================= */
 
 export const SalesDashboardPage = () => {
+    const navigate =
+        useNavigate();
+
+    const handleViewAllTasks =
+        (): void => {
+            navigate(
+                "/sales/rental-requests",
+            );
+        };
+
+    const handleViewAllActivities =
+        (): void => {
+            navigate(
+                "/sales/rental-requests/all",
+            );
+        };
+
+    const handleViewAllCustomers =
+        (): void => {
+            navigate(
+                "/sales/customers",
+            );
+        };
+
     return (
         <main className="space-y-5">
             {/* PAGE HEADER */}
@@ -533,24 +560,9 @@ export const SalesDashboardPage = () => {
                     </div>
 
                     <p className="mt-1.5 text-sm text-slate-500">
-                        Xin chào Trần Thị Kinh
-                        Doanh! Đây là tổng quan
-                        công việc của bạn hôm nay.
+                        Xin chào Trần Thị Kinh Doanh! Đây là tổng quan công việc của bạn hôm nay.
                     </p>
                 </div>
-
-                <button
-                    type="button"
-                    className="inline-flex h-11 items-center gap-2 self-start rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 lg:self-auto"
-                >
-                    <CalendarDays
-                        size={17}
-                        aria-hidden="true"
-                        className="text-slate-500"
-                    />
-
-                    Hôm nay: 12/08/2026
-                </button>
             </header>
 
             {/* KPI */}
@@ -871,6 +883,9 @@ export const SalesDashboardPage = () => {
 
                         <button
                             type="button"
+                            onClick={
+                                handleViewAllTasks
+                            }
                             className="text-xs font-bold text-blue-600 transition hover:text-blue-700"
                         >
                             Xem tất cả
@@ -896,11 +911,6 @@ export const SalesDashboardPage = () => {
                                         }
                                         className="group flex items-center gap-3 border-b border-slate-100 px-5 py-3.5 last:border-b-0 hover:bg-slate-50/70"
                                     >
-                                        <button
-                                            type="button"
-                                            aria-label="Đánh dấu hoàn thành"
-                                            className="flex size-5 shrink-0 items-center justify-center rounded-md border border-slate-300 bg-white transition hover:border-blue-400"
-                                        />
 
                                         <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
                                             <Icon
@@ -961,6 +971,9 @@ export const SalesDashboardPage = () => {
                     <div className="border-t border-slate-100 bg-slate-50/50 px-5 py-3 text-center">
                         <button
                             type="button"
+                            onClick={
+                                handleViewAllTasks
+                            }
                             className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700"
                         >
                             Xem tất cả công việc
@@ -993,6 +1006,9 @@ export const SalesDashboardPage = () => {
 
                         <button
                             type="button"
+                            onClick={
+                                handleViewAllActivities
+                            }
                             className="text-xs font-bold text-blue-600 hover:text-blue-700"
                         >
                             Xem tất cả
@@ -1066,6 +1082,9 @@ export const SalesDashboardPage = () => {
                     <div className="border-t border-slate-100 bg-slate-50/50 px-5 py-3 text-center">
                         <button
                             type="button"
+                            onClick={
+                                handleViewAllActivities
+                            }
                             className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700"
                         >
                             Xem tất cả hoạt động
@@ -1096,6 +1115,9 @@ export const SalesDashboardPage = () => {
 
                         <button
                             type="button"
+                            onClick={
+                                handleViewAllCustomers
+                            }
                             className="text-xs font-bold text-blue-600 hover:text-blue-700"
                         >
                             Xem tất cả
@@ -1211,6 +1233,9 @@ export const SalesDashboardPage = () => {
                     <div className="border-t border-slate-100 bg-slate-50/50 px-5 py-3 text-center">
                         <button
                             type="button"
+                            onClick={
+                                handleViewAllCustomers
+                            }
                             className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700"
                         >
                             Xem tất cả khách hàng
