@@ -1,3 +1,4 @@
+
 import {
     BranchesPage,
 } from "@/modules/branches";
@@ -169,6 +170,7 @@ import {
 
 import {
     ManagerEquipmentPage,
+    OperationsEquipmentPage,
 } from "@/modules/equipment";
 
 import {
@@ -591,10 +593,7 @@ export const AppRouter = () => {
                             <Route
                                 path="equipment"
                                 element={
-                                    <ModulePlaceholderPage
-                                        title="Thiết bị và kho"
-                                        description="Quản lý thiết bị, kho, nhập xuất, điều chuyển và kiểm kê."
-                                    />
+                                    <OperationsEquipmentPage />
                                 }
                             />
 

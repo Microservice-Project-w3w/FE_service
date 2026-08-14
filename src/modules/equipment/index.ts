@@ -16,3 +16,6 @@ export type {
   ManagerEquipmentSummary,
   ManagerMaintenanceStatus,
 } from "@/modules/equipment/types/manager-equipment.types";
+export {
+  OperationsEquipmentPage,
+} from "@/modules/equipment/pages/OperationsEquipmentPage";
