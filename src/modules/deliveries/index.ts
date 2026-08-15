@@ -20,3 +20,6 @@ export type {
   ManagerDeliveryTask,
   ManagerDeliveryTaskType,
 } from "@/modules/deliveries/types/manager-delivery.types";
+export {
+  OperationsDeliveriesPage,
+} from "@/modules/deliveries/pages/OperationsDeliveriesPage";

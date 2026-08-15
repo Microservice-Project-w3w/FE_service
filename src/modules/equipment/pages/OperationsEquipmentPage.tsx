@@ -196,6 +196,7 @@ export const OperationsEquipmentPage =
             | "AUDIT"
             | "DETAIL"
             | "STOCK_ALERTS"
+            | "CAPACITY"
             | null
         >(null);
 
@@ -397,8 +398,8 @@ export const OperationsEquipmentPage =
                             <button
                                 type="button"
                                 onClick={() => {
-                                    window.alert(
-                                        "Mở báo cáo chi tiết công suất kho.",
+                                    setModal(
+                                        "CAPACITY",
                                     );
                                 }}
                                 className="text-[11px] font-bold text-blue-600 hover:text-blue-700"
@@ -959,7 +960,16 @@ export const OperationsEquipmentPage =
                                     : modal ===
                                     "STOCK_ALERTS"
                                         ? "Danh sách cảnh báo tồn kho"
-                                        : "Chi tiết thiết bị"
+                                        : modal ===
+                                        "CAPACITY"
+                                            ? "Chi tiết công suất kho"
+                                            : "Chi tiết thiết bị"
+                        }
+                        size={
+                            modal ===
+                            "CAPACITY"
+                                ? "LARGE"
+                                : "DEFAULT"
                         }
                         onClose={() => {
                             setModal(
@@ -968,6 +978,9 @@ export const OperationsEquipmentPage =
                         }}
                     >
                         {modal ===
+                        "CAPACITY" ? (
+                            <WarehouseCapacityDetails />
+                        ) : modal ===
                         "STOCK_ALERTS" ? (
                             <StockAlertsContent
                                 onViewEquipment={(
@@ -1176,6 +1189,217 @@ const WarehouseCapacity = ({
     );
 };
 
+const WarehouseCapacityDetails = () => {
+    const warehouses = [
+        {
+            name: "Hà Nội",
+            current: 620,
+            capacity: 1000,
+            available: 380,
+            ready: 438,
+            rented: 112,
+            transferring: 42,
+            maintenance: 28,
+            warning: 9,
+        },
+        {
+            name: "Đà Nẵng",
+            current: 280,
+            capacity: 600,
+            available: 320,
+            ready: 192,
+            rented: 49,
+            transferring: 23,
+            maintenance: 16,
+            warning: 6,
+        },
+        {
+            name: "TP.HCM",
+            current: 480,
+            capacity: 1200,
+            available: 720,
+            ready: 337,
+            rented: 78,
+            transferring: 61,
+            maintenance: 24,
+            warning: 13,
+        },
+    ];
+
+    return (
+        <div className="space-y-4">
+            <div className="grid gap-3 sm:grid-cols-3">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                    <p className="text-[11px] text-slate-400">
+                        Tổng sức chứa
+                    </p>
+
+                    <p className="mt-1 text-xl font-bold text-slate-950">
+                        2.800 thiết bị
+                    </p>
+                </div>
+
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                    <p className="text-[11px] text-slate-400">
+                        Đang sử dụng
+                    </p>
+
+                    <p className="mt-1 text-xl font-bold text-blue-600">
+                        1.380 thiết bị
+                    </p>
+                </div>
+
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                    <p className="text-[11px] text-slate-400">
+                        Còn trống
+                    </p>
+
+                    <p className="mt-1 text-xl font-bold text-emerald-600">
+                        1.420 vị trí
+                    </p>
+                </div>
+            </div>
+
+            <div className="overflow-hidden rounded-xl border border-slate-200">
+                <div className="grid grid-cols-[120px_130px_minmax(180px,1fr)_90px_90px_90px_90px_80px] gap-3 bg-slate-50 px-4 py-2.5 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                    <span>Kho</span>
+                    <span>Sử dụng</span>
+                    <span>Công suất</span>
+                    <span>Sẵn sàng</span>
+                    <span>Cho thuê</span>
+                    <span>Điều chuyển</span>
+                    <span>Bảo trì</span>
+                    <span>Cảnh báo</span>
+                </div>
+
+                {warehouses.map((warehouse) => {
+                    const percent = Math.round(
+                        (warehouse.current /
+                            warehouse.capacity) *
+                        100,
+                    );
+
+                    return (
+                        <div
+                            key={warehouse.name}
+                            className="grid grid-cols-[120px_130px_minmax(180px,1fr)_90px_90px_90px_90px_80px] items-center gap-3 border-t border-slate-100 px-4 py-3 text-xs"
+                        >
+                            <span className="inline-flex items-center gap-2 font-semibold text-slate-800">
+                                <Building2 size={14} className="text-slate-400" />
+                                {warehouse.name}
+                            </span>
+
+                            <div>
+                                <p className="font-semibold text-slate-800">
+                                    {warehouse.current} / {warehouse.capacity}
+                                </p>
+
+                                <p className="mt-0.5 text-[10px] text-slate-400">
+                                    Còn {warehouse.available} vị trí
+                                </p>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                                <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-100">
+                                    <div
+                                        className="h-full rounded-full bg-blue-600"
+                                        style={{
+                                            width: `${percent}%`,
+                                        }}
+                                    />
+                                </div>
+
+                                <span className="w-9 text-right font-bold text-blue-600">
+                                    {percent}%
+                                </span>
+                            </div>
+
+                            <span className="font-semibold text-emerald-700">
+                                {warehouse.ready}
+                            </span>
+
+                            <span className="font-semibold text-blue-700">
+                                {warehouse.rented}
+                            </span>
+
+                            <span className="font-semibold text-amber-700">
+                                {warehouse.transferring}
+                            </span>
+
+                            <span className="font-semibold text-violet-700">
+                                {warehouse.maintenance}
+                            </span>
+
+                            <span className="font-bold text-rose-600">
+                                {warehouse.warning}
+                            </span>
+                        </div>
+                    );
+                })}
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-3">
+                {warehouses.map((warehouse) => {
+                    const percent = Math.round(
+                        (warehouse.current /
+                            warehouse.capacity) *
+                        100,
+                    );
+
+                    return (
+                        <div
+                            key={`${warehouse.name}-summary`}
+                            className="rounded-xl border border-slate-200 p-3"
+                        >
+                            <div className="flex items-center justify-between">
+                                <p className="text-sm font-bold text-slate-900">
+                                    Kho {warehouse.name}
+                                </p>
+
+                                <span
+                                    className={[
+                                        "rounded-full px-2 py-1 text-[10px] font-bold",
+                                        percent >= 80
+                                            ? "bg-rose-50 text-rose-700"
+                                            : percent >= 60
+                                                ? "bg-amber-50 text-amber-700"
+                                                : "bg-emerald-50 text-emerald-700",
+                                    ].join(" ")}
+                                >
+                                    {percent >= 80
+                                        ? "Gần đầy"
+                                        : percent >= 60
+                                            ? "Theo dõi"
+                                            : "Ổn định"}
+                                </span>
+                            </div>
+
+                            <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-100">
+                                <div
+                                    className="h-full rounded-full bg-blue-600"
+                                    style={{
+                                        width: `${percent}%`,
+                                    }}
+                                />
+                            </div>
+
+                            <div className="mt-3 flex items-center justify-between text-[11px] text-slate-500">
+                                <span>
+                                    Đã dùng {warehouse.current}
+                                </span>
+
+                                <span>
+                                    Còn {warehouse.available}
+                                </span>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+};
+
 const StockAlertsContent = ({
                                 onViewEquipment,
                             }: {
@@ -1277,31 +1501,41 @@ const Modal = ({
                    title,
                    onClose,
                    children,
+                   size = "DEFAULT",
                }: {
     title: string;
     onClose: () => void;
-    children:
-        ReactNode;
+    children: ReactNode;
+    size?: "DEFAULT" | "LARGE";
 }) => (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/30 p-4">
-        <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl">
-            <div className="mb-4 flex items-center justify-between">
-                <h2 className="font-bold text-slate-950">
-                    {title}
-                </h2>
+        <div
+            className={[
+                "w-full rounded-2xl bg-white p-5 shadow-xl",
+                size === "LARGE"
+                    ? "max-w-4xl"
+                    : "max-w-md",
+            ].join(" ")}
+        >
+            <div className="mb-4 flex items-start justify-between gap-4">
+                <div>
+                    <h2 className="font-bold text-slate-950">
+                        {title}
+                    </h2>
+
+                    {size === "LARGE" ? (
+                        <p className="mt-1 text-xs text-slate-400">
+                            Theo dõi mức sử dụng, dung lượng còn trống và tình trạng vận hành của từng kho.
+                        </p>
+                    ) : null}
+                </div>
 
                 <button
                     type="button"
-                    onClick={
-                        onClose
-                    }
-                    className="flex size-8 items-center justify-center rounded-lg transition hover:bg-slate-100"
+                    onClick={onClose}
+                    className="flex size-8 shrink-0 items-center justify-center rounded-lg transition hover:bg-slate-100"
                 >
-                    <X
-                        size={
-                            16
-                        }
-                    />
+                    <X size={16} />
                 </button>
             </div>
 
@@ -1309,6 +1543,7 @@ const Modal = ({
         </div>
     </div>
 );
+
 
 const Info = ({
                   label,

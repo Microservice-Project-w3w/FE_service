@@ -162,8 +162,8 @@ import {
 
 import {
     ManagerDeliveriesPage,
+    OperationsDeliveriesPage,
 } from "@/modules/deliveries";
-
 import {
     ManagerReceivablesPage,
 } from "@/modules/receivables";
@@ -600,10 +600,7 @@ export const AppRouter = () => {
                             <Route
                                 path="deliveries"
                                 element={
-                                    <ModulePlaceholderPage
-                                        title="Giao thiết bị"
-                                        description="Chuẩn bị thiết bị và thực hiện quy trình giao nhận."
-                                    />
+                                    <OperationsDeliveriesPage />
                                 }
                             />
 
