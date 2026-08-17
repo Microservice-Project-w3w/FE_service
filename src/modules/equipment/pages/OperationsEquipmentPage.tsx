@@ -38,6 +38,18 @@ interface EquipmentRow {
     quantity: number;
 }
 
+type WarehouseActionType =
+    | "INBOUND"
+    | "AUDIT";
+
+interface WarehouseActionSuccess {
+    type: WarehouseActionType;
+    title: string;
+    description: string;
+    reference: string;
+    warehouse: string;
+}
+
 const STATUS_CONFIG: Record<
     EquipmentStatus,
     {
@@ -207,6 +219,24 @@ export const OperationsEquipmentPage =
             useState<EquipmentRow | null>(
                 null,
             );
+
+        const [
+            success,
+            setSuccess,
+        ] =
+            useState<WarehouseActionSuccess | null>(
+                null,
+            );
+
+        const [
+            recentActivities,
+            setRecentActivities,
+        ] = useState([
+            "Nhập kho • Máy ảnh Sony A7S III",
+            "Xuất kho • Ống kính Sony 24-70mm",
+            "Điều chuyển • Đèn LED Nanlite",
+            "Kiểm kê • Kho Đà Nẵng",
+        ]);
 
         const filtered =
             useMemo(() => {
@@ -912,12 +942,7 @@ export const OperationsEquipmentPage =
                             </h2>
 
                             <div className="mt-3 space-y-3">
-                                {[
-                                    "Nhập kho • Máy ảnh Sony A7S III",
-                                    "Xuất kho • Ống kính Sony 24-70mm",
-                                    "Điều chuyển • Đèn LED Nanlite",
-                                    "Kiểm kê • Kho Đà Nẵng",
-                                ].map(
+                                {recentActivities.map(
                                     (
                                         activity,
                                     ) => (
@@ -1040,49 +1065,168 @@ export const OperationsEquipmentPage =
                                 ) => {
                                     event.preventDefault();
 
-                                    window.alert(
-                                        modal ===
-                                        "INBOUND"
-                                            ? "Đã tạo phiếu nhập kho."
-                                            : "Đã tạo phiếu kiểm kê.",
+                                    const formData =
+                                        new FormData(
+                                            event.currentTarget,
+                                        );
+
+                                    const reference =
+                                        String(
+                                            formData.get(
+                                                "reference",
+                                            ) ?? "",
+                                        ).trim();
+
+                                    const selectedWarehouse =
+                                        String(
+                                            formData.get(
+                                                "warehouse",
+                                            ) ?? "",
+                                        );
+
+                                    const actionType: WarehouseActionType =
+                                        modal === "INBOUND"
+                                            ? "INBOUND"
+                                            : "AUDIT";
+
+                                    const warehouseLabel =
+                                        selectedWarehouse.replace(
+                                            /^Kho\s+/,
+                                            "",
+                                        );
+
+                                    setSuccess({
+                                        type: actionType,
+                                        title:
+                                            actionType === "INBOUND"
+                                                ? "Nhập kho thành công"
+                                                : "Tạo phiếu kiểm kê thành công",
+                                        description:
+                                            actionType === "INBOUND"
+                                                ? "Phiếu nhập kho đã được ghi nhận và sẵn sàng để xử lý."
+                                                : "Phiếu kiểm kê đã được tạo và sẵn sàng để thực hiện.",
+                                        reference,
+                                        warehouse:
+                                        warehouseLabel,
+                                    });
+
+                                    setRecentActivities(
+                                        (
+                                            current,
+                                        ) => [
+                                            actionType === "INBOUND"
+                                                ? `Nhập kho • ${warehouseLabel}`
+                                                : `Kiểm kê • ${warehouseLabel}`,
+                                            ...current,
+                                        ].slice(
+                                            0,
+                                            4,
+                                        ),
                                     );
 
                                     setModal(
                                         null,
                                     );
                                 }}
-                                className="space-y-3"
+                                className="space-y-4"
                             >
-                                <input
-                                    required
-                                    placeholder="Mã phiếu / ghi chú"
-                                    className="h-10 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-blue-500"
-                                />
+                                <div>
+                                    <label className="mb-1.5 block text-xs font-semibold text-slate-700">
+                                        {modal === "INBOUND"
+                                            ? "Mã phiếu nhập / ghi chú"
+                                            : "Mã phiếu kiểm kê / ghi chú"}
+                                    </label>
 
-                                <select className="h-10 w-full rounded-xl border border-slate-200 px-3 text-sm">
-                                    <option>
-                                        Kho Hà Nội
-                                    </option>
+                                    <input
+                                        name="reference"
+                                        required
+                                        minLength={2}
+                                        placeholder={
+                                            modal === "INBOUND"
+                                                ? "VD: NK-2026-001 hoặc ghi chú nhập kho"
+                                                : "VD: KK-2026-001 hoặc ghi chú kiểm kê"
+                                        }
+                                        className="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                    />
+                                </div>
 
-                                    <option>
-                                        Kho Đà Nẵng
-                                    </option>
+                                <div>
+                                    <label className="mb-1.5 block text-xs font-semibold text-slate-700">
+                                        {modal === "INBOUND"
+                                            ? "Kho nhận"
+                                            : "Kho kiểm kê"}
+                                    </label>
 
-                                    <option>
-                                        Kho TP.HCM
-                                    </option>
-                                </select>
+                                    <select
+                                        name="warehouse"
+                                        className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                    >
+                                        <option>
+                                            Kho Hà Nội
+                                        </option>
 
-                                <button
-                                    type="submit"
-                                    className="h-10 w-full rounded-xl bg-blue-600 text-sm font-bold !text-white hover:bg-blue-700"
+                                        <option>
+                                            Kho Đà Nẵng
+                                        </option>
+
+                                        <option>
+                                            Kho TP.HCM
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div
+                                    className={[
+                                        "rounded-xl border px-3 py-2.5 text-[11px] leading-5",
+                                        modal === "INBOUND"
+                                            ? "border-blue-100 bg-blue-50 text-blue-700"
+                                            : "border-violet-100 bg-violet-50 text-violet-700",
+                                    ].join(
+                                        " ",
+                                    )}
                                 >
-                                    Xác nhận
-                                </button>
+                                    {modal === "INBOUND"
+                                        ? "Sau khi xác nhận, hệ thống sẽ ghi nhận phiếu nhập kho và cập nhật hoạt động gần đây."
+                                        : "Sau khi xác nhận, hệ thống sẽ tạo phiếu kiểm kê cho kho đã chọn."}
+                                </div>
+
+                                <div className="flex gap-2 pt-1">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setModal(
+                                                null,
+                                            );
+                                        }}
+                                        className="h-10 flex-1 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                                    >
+                                        Hủy
+                                    </button>
+
+                                    <button
+                                        type="submit"
+                                        className="h-10 flex-[1.35] rounded-xl bg-blue-600 text-sm font-bold !text-white transition hover:bg-blue-700"
+                                    >
+                                        {modal === "INBOUND"
+                                            ? "Xác nhận nhập kho"
+                                            : "Tạo phiếu kiểm kê"}
+                                    </button>
+                                </div>
                             </form>
                         )}
                     </Modal>
                 )}
+
+                {success ? (
+                    <WarehouseActionSuccessDialog
+                        data={success}
+                        onClose={() => {
+                            setSuccess(
+                                null,
+                            );
+                        }}
+                    />
+                ) : null}
             </main>
         );
     };
@@ -1540,6 +1684,88 @@ const Modal = ({
             </div>
 
             {children}
+        </div>
+    </div>
+);
+
+
+const WarehouseActionSuccessDialog = ({
+                                          data,
+                                          onClose,
+                                      }: {
+    data: WarehouseActionSuccess;
+    onClose: () => void;
+}) => (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[2px]">
+        <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
+            <div className="text-center">
+                <span className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+                    <CheckCircle2
+                        size={34}
+                    />
+                </span>
+
+                <h2 className="mt-4 text-xl font-bold text-slate-950">
+                    {data.title}
+                </h2>
+
+                <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-500">
+                    {data.description}
+                </p>
+            </div>
+
+            <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50/70">
+                <div className="flex items-center justify-between gap-4 border-b border-slate-200 px-4 py-3">
+                    <span className="text-xs text-slate-500">
+                        Loại thao tác
+                    </span>
+
+                    <span className="text-right text-xs font-bold text-slate-800">
+                        {data.type === "INBOUND"
+                            ? "Nhập kho"
+                            : "Kiểm kê"}
+                    </span>
+                </div>
+
+                <div className="flex items-center justify-between gap-4 border-b border-slate-200 px-4 py-3">
+                    <span className="text-xs text-slate-500">
+                        Mã phiếu / Ghi chú
+                    </span>
+
+                    <span className="max-w-[230px] truncate text-right text-xs font-bold text-slate-800">
+                        {data.reference}
+                    </span>
+                </div>
+
+                <div className="flex items-center justify-between gap-4 px-4 py-3">
+                    <span className="text-xs text-slate-500">
+                        Kho
+                    </span>
+
+                    <span className="text-right text-xs font-bold text-slate-800">
+                        {data.warehouse}
+                    </span>
+                </div>
+            </div>
+
+            <div className="mt-4 flex items-start gap-2 rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-2.5">
+                <PackageCheck
+                    size={16}
+                    className="mt-0.5 shrink-0 text-emerald-600"
+                />
+
+                <p className="text-[11px] leading-5 text-emerald-700">
+                    Thao tác đã được ghi nhận thành công trên dữ liệu demo của trang Thiết bị và kho.
+                </p>
+            </div>
+
+            <button
+                type="button"
+                onClick={onClose}
+                className="mt-5 h-11 w-full rounded-xl bg-blue-600 text-sm font-bold !text-white transition hover:bg-blue-700"
+            >
+                Hoàn tất
+            </button>
         </div>
     </div>
 );

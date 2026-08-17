@@ -23,3 +23,6 @@ export type {
 export {
   OperationsDeliveriesPage,
 } from "@/modules/deliveries/pages/OperationsDeliveriesPage";
+export {
+  OperationsReturnsPage,
+} from "@/modules/deliveries/pages/OperationsReturnsPage";

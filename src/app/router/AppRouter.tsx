@@ -1,4 +1,3 @@
-
 import {
     BranchesPage,
 } from "@/modules/branches";
@@ -163,7 +162,9 @@ import {
 import {
     ManagerDeliveriesPage,
     OperationsDeliveriesPage,
+    OperationsReturnsPage,
 } from "@/modules/deliveries";
+
 import {
     ManagerReceivablesPage,
 } from "@/modules/receivables";
@@ -172,6 +173,11 @@ import {
     ManagerEquipmentPage,
     OperationsEquipmentPage,
 } from "@/modules/equipment";
+
+import {
+    OperationsMaintenancePage,
+} from "@/modules/maintenance";
+
 
 import {
     ModulePlaceholderPage,
@@ -607,20 +613,14 @@ export const AppRouter = () => {
                             <Route
                                 path="returns"
                                 element={
-                                    <ModulePlaceholderPage
-                                        title="Nhận trả thiết bị"
-                                        description="Tiếp nhận thiết bị trả và đánh giá tình trạng."
-                                    />
+                                    <OperationsReturnsPage />
                                 }
                             />
 
                             <Route
                                 path="maintenance"
                                 element={
-                                    <ModulePlaceholderPage
-                                        title="Bảo trì và sửa chữa"
-                                        description="Quản lý phiếu bảo trì, sửa chữa và cập nhật trạng thái thiết bị."
-                                    />
+                                    <OperationsMaintenancePage />
                                 }
                             />
                         </Route>

@@ -45,6 +45,21 @@ interface RecentActivity {
     tone: "GREEN" | "BLUE" | "ORANGE";
 }
 
+interface CreateDeliveryPayload {
+    customerId: string;
+    address: string;
+    staffName: string;
+    deliveryDateTime: string;
+    equipmentCount: number;
+    note: string;
+}
+
+interface DeliverySuccessState {
+    title: string;
+    description: string;
+    item: DeliveryRow;
+}
+
 const DELIVERY_STATUS_CONFIG: Record<
     DeliveryStatus,
     {
@@ -263,6 +278,54 @@ const CUSTOMER_OPTIONS = [
 
 const PAGE_SIZE = 5;
 
+
+const getPaginationItems = (
+    currentPage: number,
+    totalPages: number,
+): Array<number | "ELLIPSIS_LEFT" | "ELLIPSIS_RIGHT"> => {
+    if (totalPages <= 7) {
+        return Array.from(
+            { length: totalPages },
+            (_, index) => index + 1,
+        );
+    }
+
+    if (currentPage <= 4) {
+        return [
+            1,
+            2,
+            3,
+            4,
+            5,
+            "ELLIPSIS_RIGHT",
+            totalPages,
+        ];
+    }
+
+    if (currentPage >= totalPages - 3) {
+        return [
+            1,
+            "ELLIPSIS_LEFT",
+            totalPages - 4,
+            totalPages - 3,
+            totalPages - 2,
+            totalPages - 1,
+            totalPages,
+        ];
+    }
+
+    return [
+        1,
+        "ELLIPSIS_LEFT",
+        currentPage - 1,
+        currentPage,
+        currentPage + 1,
+        "ELLIPSIS_RIGHT",
+        totalPages,
+    ];
+};
+
+
 export const OperationsDeliveriesPage =
     () => {
         const [
@@ -293,6 +356,28 @@ export const OperationsDeliveriesPage =
         ] = useState(1);
 
         const [
+            deliveries,
+            setDeliveries,
+        ] = useState<DeliveryRow[]>(
+            DELIVERY_DATA,
+        );
+
+        const [
+            recentActivities,
+            setRecentActivities,
+        ] = useState<RecentActivity[]>(
+            RECENT_ACTIVITIES,
+        );
+
+        const [
+            success,
+            setSuccess,
+        ] =
+            useState<DeliverySuccessState | null>(
+                null,
+            );
+
+        const [
             modal,
             setModal,
         ] = useState<
@@ -319,7 +404,7 @@ export const OperationsDeliveriesPage =
                         .trim()
                         .toLowerCase();
 
-                return DELIVERY_DATA.filter(
+                return deliveries.filter(
                     (item) => {
                         const matchesSearch =
                             keyword ===
@@ -354,6 +439,7 @@ export const OperationsDeliveriesPage =
                 status,
                 staff,
                 dateFilter,
+                deliveries,
             ]);
 
         const totalPages =
@@ -408,615 +494,618 @@ export const OperationsDeliveriesPage =
             );
         };
 
+        const createDelivery = (
+            payload: CreateDeliveryPayload,
+        ): void => {
+            const nextNumber =
+                deliveries.reduce(
+                    (
+                        maxNumber,
+                        item,
+                    ) => {
+                        const parsed =
+                            Number(
+                                item.code
+                                    .split(
+                                        "-",
+                                    )
+                                    .at(
+                                        -1,
+                                    ),
+                            );
+
+                        return Number.isFinite(
+                            parsed,
+                        )
+                            ? Math.max(
+                                maxNumber,
+                                parsed,
+                            )
+                            : maxNumber;
+                    },
+                    0,
+                ) + 1;
+
+            const customer =
+                CUSTOMER_OPTIONS.find(
+                    (item) =>
+                        item.id ===
+                        payload.customerId,
+                ) ??
+                CUSTOMER_OPTIONS[0];
+
+            const time =
+                payload.deliveryDateTime
+                    .split("T")[1]
+                    ?.slice(
+                        0,
+                        5,
+                    ) || "--:--";
+
+            const newDelivery: DeliveryRow =
+                {
+                    id:
+                        `delivery-new-${Date.now()}`,
+                    code:
+                        `DG-2026-${String(
+                            nextNumber,
+                        ).padStart(
+                            3,
+                            "0",
+                        )}`,
+                    customer:
+                    customer.name,
+                    address:
+                    payload.address,
+                    time,
+                    staff:
+                    payload.staffName,
+                    status:
+                        "WAITING_PICKUP",
+                    equipmentCount:
+                    payload.equipmentCount,
+                };
+
+            setDeliveries(
+                (
+                    current,
+                ) => [
+                    newDelivery,
+                    ...current,
+                ],
+            );
+
+            setRecentActivities(
+                (
+                    current,
+                ) => [
+                    {
+                        id:
+                            `activity-new-${Date.now()}`,
+                        icon:
+                        PackageCheck,
+                        title:
+                            `Tạo mới lệnh giao ${newDelivery.code} cho ${newDelivery.customer}`,
+                        meta:
+                            `Vừa xong • Lê Văn Vận Hành`,
+                        tone:
+                            "ORANGE",
+                    },
+                    ...current,
+                ],
+            );
+
+            setSelected(
+                newDelivery,
+            );
+            setPage(1);
+            setModal(null);
+            setSuccess({
+                title:
+                    "Tạo lệnh giao thành công",
+                description:
+                    "Lệnh giao mới đã được tạo và đang chờ lấy hàng để bắt đầu giao.",
+                item:
+                newDelivery,
+            });
+        };
+
+        const updateDeliveryStatus = (
+            item: DeliveryRow,
+            nextStatus: DeliveryStatus,
+        ): void => {
+            const updatedItem: DeliveryRow =
+                {
+                    ...item,
+                    status:
+                    nextStatus,
+                };
+
+            setDeliveries(
+                (
+                    current,
+                ) =>
+                    current.map(
+                        (
+                            delivery,
+                        ) =>
+                            delivery.id ===
+                            item.id
+                                ? updatedItem
+                                : delivery,
+                    ),
+            );
+
+            setSelected(
+                updatedItem,
+            );
+
+            const isCompleted =
+                nextStatus ===
+                "COMPLETED";
+
+            setRecentActivities(
+                (
+                    current,
+                ) => [
+                    {
+                        id:
+                            `activity-status-${Date.now()}`,
+                        icon:
+                            isCompleted
+                                ? CheckCircle2
+                                : Truck,
+                        title:
+                            isCompleted
+                                ? `Hoàn thành giao lệnh ${item.code} cho ${item.customer}`
+                                : `Bắt đầu giao lệnh ${item.code} cho ${item.customer}`,
+                        meta:
+                            `Vừa xong • ${item.staff}`,
+                        tone:
+                            isCompleted
+                                ? "GREEN"
+                                : "BLUE",
+                    },
+                    ...current,
+                ],
+            );
+
+            setModal(null);
+            setSuccess({
+                title:
+                    isCompleted
+                        ? "Hoàn thành giao thiết bị"
+                        : "Bắt đầu giao thành công",
+                description:
+                    isCompleted
+                        ? `Lệnh ${item.code} đã được xác nhận bàn giao thành công.`
+                        : `Lệnh ${item.code} đã chuyển sang trạng thái đang giao.`,
+                item:
+                updatedItem,
+            });
+        };
+
+        const deliveryStats = useMemo(
+            () => ({
+                total: deliveries.length,
+                delivering: deliveries.filter(
+                    (item) =>
+                        item.status ===
+                        "DELIVERING",
+                ).length,
+                waiting: deliveries.filter(
+                    (item) =>
+                        item.status ===
+                        "WAITING_PICKUP",
+                ).length,
+                completed: deliveries.filter(
+                    (item) =>
+                        item.status ===
+                        "COMPLETED",
+                ).length,
+            }),
+            [deliveries],
+        );
+
+        const paginationItems =
+            getPaginationItems(
+                safePage,
+                totalPages,
+            );
+
         return (
-            <main className="space-y-4">
+            <main className="flex h-[calc(100vh-104px)] flex-col gap-3 overflow-hidden">
                 {/* HEADER */}
-                <header className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <header className="flex shrink-0 flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
                     <div>
-                        <h1 className="text-[26px] font-bold tracking-tight text-slate-950">
+                        <h1 className="text-[23px] font-bold leading-tight tracking-tight text-slate-950">
                             Giao thiết bị
                         </h1>
 
-                        <p className="mt-1 text-xs text-slate-500">
-                            Theo dõi lịch giao,
-                            tài xế, điều phối và
-                            trạng thái bàn giao
-                            thiết bị.
+                        <p className="mt-0.5 text-[11px] text-slate-500">
+                            Theo dõi lịch giao, nhân viên phụ trách và trạng thái bàn giao thiết bị.
                         </p>
                     </div>
 
                     <button
                         type="button"
                         onClick={() => {
-                            setModal(
-                                "CREATE",
-                            );
+                            setModal("CREATE");
                         }}
-                        className="inline-flex h-10 items-center gap-2 self-start rounded-xl bg-blue-600 px-4 text-sm font-semibold !text-white shadow-sm transition hover:bg-blue-700 hover:!text-white lg:self-auto"
+                        className="inline-flex h-10 items-center gap-2 self-start rounded-xl bg-blue-600 px-4 text-sm font-semibold !text-white shadow-sm transition hover:bg-blue-700 lg:self-auto"
                     >
-                        <Plus
-                            size={
-                                16
-                            }
-                        />
-
+                        <Plus size={16} />
                         Tạo lệnh giao mới
                     </button>
                 </header>
 
                 {/* KPI */}
-                <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <section className="grid h-[74px] shrink-0 gap-3 sm:grid-cols-2 xl:grid-cols-4">
                     <KpiCard
-                        icon={
-                            CalendarDays
-                        }
-                        label="Lịch giao hôm nay"
-                        value="12"
+                        icon={CalendarDays}
+                        label="Lệnh giao hôm nay"
+                        value={String(deliveryStats.total)}
                         tone="BLUE"
                         sparkline="0,22 10,20 20,17 30,22 40,9 50,19 60,11 70,20 80,17 90,14 100,18 110,16 120,13"
                     />
 
                     <KpiCard
-                        icon={
-                            Truck
-                        }
+                        icon={Truck}
                         label="Đang giao"
-                        value="5"
+                        value={String(deliveryStats.delivering)}
                         tone="GREEN"
                         sparkline="0,20 12,17 24,18 36,14 48,20 60,18 72,12 84,17 96,16 108,7 120,19"
                     />
 
                     <KpiCard
-                        icon={
-                            Clock3
-                        }
-                        label="Chờ xuất kho"
-                        value="4"
+                        icon={Clock3}
+                        label="Chờ lấy hàng"
+                        value={String(deliveryStats.waiting)}
                         tone="ORANGE"
                         sparkline="0,18 12,13 24,20 36,8 48,12 60,21 72,11 84,15 96,13 108,17 120,12"
                     />
 
                     <KpiCard
-                        icon={
-                            CheckCircle2
-                        }
+                        icon={CheckCircle2}
                         label="Hoàn thành"
-                        value="23"
+                        value={String(deliveryStats.completed)}
                         tone="GREEN"
                         sparkline="0,20 12,17 24,18 36,14 48,9 60,16 72,12 84,7 96,17 108,13 120,14"
                     />
                 </section>
 
                 {/* MAIN CONTENT */}
-                <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
-                    <div className="min-w-0 space-y-3">
+                <section className="grid min-h-0 flex-1 gap-3 xl:grid-cols-[minmax(0,1fr)_285px]">
+                    <div className="flex min-h-0 h-full min-w-0 flex-col gap-3">
                         {/* FILTER BAR */}
-                        <section className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-                            <div className="flex flex-col gap-2 xl:flex-row">
-                                <label className="relative min-w-0 flex-1">
+                        <section className="shrink-0 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+                            <div className="grid gap-2 lg:grid-cols-[minmax(260px,1fr)_150px_170px_120px_100px]">
+                                <label className="relative min-w-0">
                                     <Search
-                                        size={
-                                            15
-                                        }
+                                        size={15}
                                         className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
                                     />
-
                                     <input
-                                        value={
-                                            search
-                                        }
-                                        onChange={(
-                                            event,
-                                        ) => {
-                                            setSearch(
-                                                event
-                                                    .target
-                                                    .value,
-                                            );
-
-                                            setPage(
-                                                1,
-                                            );
+                                        value={search}
+                                        onChange={(event) => {
+                                            setSearch(event.target.value);
+                                            setPage(1);
                                         }}
                                         placeholder="Tìm theo mã lệnh, khách hàng, địa điểm..."
-                                        className="h-9 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-xs outline-none transition focus:border-blue-500"
+                                        className="h-9 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-xs outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-50"
                                     />
                                 </label>
 
                                 <select
-                                    value={
-                                        status
-                                    }
-                                    onChange={(
-                                        event,
-                                    ) => {
+                                    value={status}
+                                    onChange={(event) => {
                                         setStatus(
-                                            event
-                                                .target
-                                                .value as
-                                                DeliveryStatus |
-                                                "ALL",
+                                            event.target.value as
+                                                | DeliveryStatus
+                                                | "ALL",
                                         );
-
-                                        setPage(
-                                            1,
-                                        );
+                                        setPage(1);
                                     }}
-                                    className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-semibold text-slate-700"
+                                    className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-semibold text-slate-700 outline-none focus:border-blue-500"
                                 >
-                                    <option value="ALL">
-                                        Trạng thái
-                                    </option>
-                                    <option value="WAITING_PICKUP">
-                                        Chờ lấy hàng
-                                    </option>
-                                    <option value="DELIVERING">
-                                        Đang giao
-                                    </option>
-                                    <option value="COMPLETED">
-                                        Hoàn thành
-                                    </option>
-                                    <option value="DELAYED">
-                                        Trễ lịch
-                                    </option>
+                                    <option value="ALL">Trạng thái: Tất cả</option>
+                                    <option value="WAITING_PICKUP">Chờ lấy hàng</option>
+                                    <option value="DELIVERING">Đang giao</option>
+                                    <option value="COMPLETED">Hoàn thành</option>
+                                    <option value="DELAYED">Trễ lịch</option>
                                 </select>
 
                                 <select
-                                    value={
-                                        staff
-                                    }
-                                    onChange={(
-                                        event,
-                                    ) => {
-                                        setStaff(
-                                            event
-                                                .target
-                                                .value,
-                                        );
-
-                                        setPage(
-                                            1,
-                                        );
+                                    value={staff}
+                                    onChange={(event) => {
+                                        setStaff(event.target.value);
+                                        setPage(1);
                                     }}
-                                    className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-semibold text-slate-700"
+                                    className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-semibold text-slate-700 outline-none focus:border-blue-500"
                                 >
-                                    <option value="ALL">
-                                        Nhân viên giao
-                                    </option>
-                                    <option value="Nguyễn Văn Hùng">
-                                        Nguyễn Văn Hùng
-                                    </option>
-                                    <option value="Trần Minh Đức">
-                                        Trần Minh Đức
-                                    </option>
-                                    <option value="Phạm Quốc Tuấn">
-                                        Phạm Quốc Tuấn
-                                    </option>
+                                    <option value="ALL">Nhân viên: Tất cả</option>
+                                    <option value="Nguyễn Văn Hùng">Nguyễn Văn Hùng</option>
+                                    <option value="Trần Minh Đức">Trần Minh Đức</option>
+                                    <option value="Phạm Quốc Tuấn">Phạm Quốc Tuấn</option>
                                 </select>
 
                                 <select
-                                    value={
-                                        dateFilter
-                                    }
-                                    onChange={(
-                                        event,
-                                    ) => {
-                                        setDateFilter(
-                                            event
-                                                .target
-                                                .value,
-                                        );
-                                        setPage(
-                                            1,
-                                        );
+                                    value={dateFilter}
+                                    onChange={(event) => {
+                                        setDateFilter(event.target.value);
+                                        setPage(1);
                                     }}
-                                    className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-semibold text-slate-700"
+                                    className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-semibold text-slate-700 outline-none focus:border-blue-500"
                                 >
-                                    <option value="TODAY">
-                                        Hôm nay
-                                    </option>
-                                    <option value="WEEK">
-                                        Tuần này
-                                    </option>
-                                    <option value="MONTH">
-                                        Tháng này
-                                    </option>
+                                    <option value="TODAY">Hôm nay</option>
+                                    <option value="WEEK">Tuần này</option>
+                                    <option value="MONTH">Tháng này</option>
                                 </select>
 
                                 <button
                                     type="button"
-                                    onClick={
-                                        resetFilters
-                                    }
+                                    onClick={resetFilters}
                                     className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-[11px] font-semibold text-slate-600 transition hover:bg-slate-50"
                                 >
-                                    <RefreshCw
-                                        size={
-                                            13
-                                        }
-                                    />
-
-                                    Làm mới
+                                    <RefreshCw size={13} />
+                                    Đặt lại
                                 </button>
                             </div>
                         </section>
 
                         {/* TABLE CARD */}
-                        <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                            <div className="border-b border-slate-100 px-4 py-3">
-                                <h2 className="text-sm font-bold text-slate-900">
-                                    Danh sách lệnh giao
-                                </h2>
+                        <article className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                            <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-4 py-3">
+                                <div>
+                                    <h2 className="text-sm font-bold text-slate-900">
+                                        Danh sách lệnh giao
+                                    </h2>
+                                    <p className="mt-0.5 text-[10px] text-slate-400">
+                                        Theo dõi và xử lý các lệnh giao đang phát sinh.
+                                    </p>
+                                </div>
+
+                                <span className="rounded-lg bg-slate-50 px-2.5 py-1 text-[10px] font-semibold text-slate-500">
+                                    {filtered.length} lệnh
+                                </span>
                             </div>
 
-                            <div className="overflow-x-auto">
-                                <div className="min-w-[820px]">
-                                    <div className="grid grid-cols-[110px_1fr_1.3fr_70px_120px_100px_100px] gap-3 bg-slate-50 px-4 py-2.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">
-                                        <span>
-                                            Mã lệnh
-                                        </span>
-                                        <span>
-                                            Khách hàng
-                                        </span>
-                                        <span>
-                                            Điểm giao
-                                        </span>
-                                        <span>
-                                            Thời gian
-                                        </span>
-                                        <span>
-                                            Nhân viên giao
-                                        </span>
-                                        <span>
-                                            Trạng thái
-                                        </span>
-                                        <span className="text-right">
-                                            Thao tác
-                                        </span>
+                            <div className="min-h-0 flex-1 overflow-hidden bg-white">
+                                <div className="flex h-full min-w-0 flex-col">
+                                    <div className="grid shrink-0 grid-cols-[98px_minmax(105px,0.95fr)_minmax(145px,1.35fr)_68px_125px_98px_96px] gap-2.5 bg-slate-50 px-4 py-2.5 text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                                        <span>Mã lệnh</span>
+                                        <span>Khách hàng</span>
+                                        <span>Điểm giao</span>
+                                        <span>Thời gian</span>
+                                        <span>Nhân viên giao</span>
+                                        <span>Trạng thái</span>
+                                        <span className="text-right">Thao tác</span>
                                     </div>
 
-                                    {visibleRows.map(
-                                        (
-                                            item,
-                                        ) => (
-                                            <div
-                                                key={
-                                                    item.id
-                                                }
-                                                className="grid grid-cols-[110px_1fr_1.3fr_70px_120px_100px_100px] items-center gap-3 border-t border-slate-100 px-4 py-3 text-[11px] transition hover:bg-slate-50/70"
+                                    {visibleRows.map((item) => (
+                                        <div
+                                            key={item.id}
+                                            className="grid min-h-[50px] flex-1 grid-cols-[98px_minmax(105px,0.95fr)_minmax(145px,1.35fr)_68px_125px_98px_96px] items-center gap-2.5 border-t border-slate-100 px-4 py-2.5 text-[11px] transition hover:bg-slate-50/70"
+                                        >
+                                            <button
+                                                type="button"
+                                                onClick={() => openDetail(item)}
+                                                className="truncate text-left font-bold text-blue-600 hover:underline"
                                             >
+                                                {item.code}
+                                            </button>
+
+                                            <span className="truncate font-semibold text-slate-800">
+                                                {item.customer}
+                                            </span>
+
+                                            <span className="truncate text-slate-600">
+                                                {item.address}
+                                            </span>
+
+                                            <span className="font-semibold text-slate-700">
+                                                {item.time}
+                                            </span>
+
+                                            <div className="flex min-w-0 items-center gap-2">
+                                                <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[9px] font-bold text-slate-600">
+                                                    {item.staff
+                                                        .split(" ")
+                                                        .slice(-2)
+                                                        .map((word) => word[0])
+                                                        .join("")}
+                                                </span>
+                                                <span className="truncate text-slate-700">
+                                                    {item.staff}
+                                                </span>
+                                            </div>
+
+                                            <span
+                                                className={[
+                                                    "w-fit whitespace-nowrap rounded-full px-2 py-1 text-[9px] font-bold",
+                                                    DELIVERY_STATUS_CONFIG[item.status]
+                                                        .className,
+                                                ].join(" ")}
+                                            >
+                                                {
+                                                    DELIVERY_STATUS_CONFIG[item.status]
+                                                        .label
+                                                }
+                                            </span>
+
+                                            <div className="flex items-center justify-end gap-1">
                                                 <button
                                                     type="button"
-                                                    onClick={() => {
-                                                        openDetail(
-                                                            item,
-                                                        );
-                                                    }}
-                                                    className="truncate text-left font-bold text-blue-600 hover:underline"
+                                                    onClick={() => openDetail(item)}
+                                                    className="inline-flex h-8 items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 text-[10px] font-semibold text-blue-600 transition hover:bg-blue-50"
                                                 >
-                                                    {
-                                                        item.code
-                                                    }
+                                                    <Eye size={12} />
+                                                    Chi tiết
                                                 </button>
 
-                                                <span className="truncate font-semibold text-slate-800">
-                                                    {
-                                                        item.customer
-                                                    }
-                                                </span>
-
-                                                <span className="truncate text-slate-600">
-                                                    {
-                                                        item.address
-                                                    }
-                                                </span>
-
-                                                <span className="font-semibold text-slate-700">
-                                                    {
-                                                        item.time
-                                                    }
-                                                </span>
-
-                                                <div className="flex min-w-0 items-center gap-2">
-                                                    <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[9px] font-bold text-slate-600">
-                                                        {
-                                                            item.staff
-                                                                .split(
-                                                                    " ",
-                                                                )
-                                                                .slice(
-                                                                    -2,
-                                                                )
-                                                                .map(
-                                                                    (
-                                                                        word,
-                                                                    ) =>
-                                                                        word[0],
-                                                                )
-                                                                .join(
-                                                                    "",
-                                                                )
-                                                        }
-                                                    </span>
-
-                                                    <span className="truncate text-slate-700">
-                                                        {
-                                                            item.staff
-                                                        }
-                                                    </span>
-                                                </div>
-
-                                                <span
-                                                    className={[
-                                                        "w-fit whitespace-nowrap rounded-full px-2 py-1 text-[9px] font-bold",
-                                                        DELIVERY_STATUS_CONFIG[
-                                                            item
-                                                                .status
-                                                            ]
-                                                            .className,
-                                                    ].join(
-                                                        " ",
-                                                    )}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => openActions(item)}
+                                                    className="flex size-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100"
+                                                    aria-label={`Thêm thao tác cho ${item.code}`}
                                                 >
-                                                    {
-                                                        DELIVERY_STATUS_CONFIG[
-                                                            item
-                                                                .status
-                                                            ]
-                                                            .label
-                                                    }
-                                                </span>
-
-                                                <div className="flex items-center justify-end gap-1">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            openDetail(
-                                                                item,
-                                                            );
-                                                        }}
-                                                        className="inline-flex h-8 items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 text-[10px] font-semibold text-blue-600 transition hover:bg-blue-50"
-                                                    >
-                                                        <Eye
-                                                            size={
-                                                                12
-                                                            }
-                                                        />
-
-                                                        Chi tiết
-                                                    </button>
-
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            openActions(
-                                                                item,
-                                                            );
-                                                        }}
-                                                        className="flex size-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100"
-                                                        aria-label={`Thêm thao tác cho ${item.code}`}
-                                                    >
-                                                        <MoreVertical
-                                                            size={
-                                                                15
-                                                            }
-                                                        />
-                                                    </button>
-                                                </div>
+                                                    <MoreVertical size={15} />
+                                                </button>
                                             </div>
-                                        ),
-                                    )}
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
 
-                            <footer className="flex flex-col gap-2 border-t border-slate-100 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-                                <p className="text-[10px] text-slate-500">
+                            <footer className="mt-auto flex shrink-0 flex-col gap-2 border-t border-slate-200 bg-white px-4 py-2.5 sm:flex-row sm:items-center sm:justify-between">
+                                <div className="text-[10px] text-slate-500">
                                     Hiển thị{" "}
-                                    {(safePage -
-                                            1) *
-                                        PAGE_SIZE +
-                                        1}{" "}
-                                    đến{" "}
-                                    {Math.min(
-                                        safePage *
-                                        PAGE_SIZE,
-                                        filtered.length,
-                                    )}{" "}
+                                    <strong className="font-semibold text-slate-700">
+                                        {filtered.length === 0
+                                            ? 0
+                                            : (safePage - 1) * PAGE_SIZE + 1}
+                                        –
+                                        {Math.min(
+                                            safePage * PAGE_SIZE,
+                                            filtered.length,
+                                        )}
+                                    </strong>{" "}
                                     trong tổng số{" "}
-                                    {
-                                        filtered.length
-                                    }{" "}
+                                    <strong className="font-semibold text-slate-700">
+                                        {filtered.length}
+                                    </strong>{" "}
                                     kết quả
-                                </p>
+                                </div>
 
-                                <div className="flex gap-1">
+                                <nav className="flex items-center gap-1">
                                     <button
                                         type="button"
-                                        disabled={
-                                            safePage ===
-                                            1
-                                        }
-                                        onClick={() => {
+                                        disabled={safePage === 1}
+                                        onClick={() =>
                                             setPage(
-                                                safePage -
-                                                1,
-                                            );
-                                        }}
-                                        className="flex size-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 disabled:opacity-40"
+                                                Math.max(1, safePage - 1),
+                                            )
+                                        }
+                                        className="inline-flex h-8 items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 text-[10px] font-semibold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
                                     >
-                                        <ChevronLeft
-                                            size={
-                                                13
-                                            }
-                                        />
+                                        <ChevronLeft size={13} />
+                                        Trước
                                     </button>
 
-                                    {Array.from(
-                                        {
-                                            length:
-                                            totalPages,
-                                        },
-                                        (
-                                            _,
-                                            index,
-                                        ) =>
-                                            index +
-                                            1,
-                                    ).map(
-                                        (
-                                            pageNumber,
-                                        ) => (
+                                    {paginationItems.map((item, index) => {
+                                        if (
+                                            item === "ELLIPSIS_LEFT" ||
+                                            item === "ELLIPSIS_RIGHT"
+                                        ) {
+                                            return (
+                                                <span
+                                                    key={`${item}-${index}`}
+                                                    className="flex size-8 items-center justify-center text-[11px] font-semibold text-slate-400"
+                                                >
+                                                    …
+                                                </span>
+                                            );
+                                        }
+
+                                        return (
                                             <button
-                                                key={
-                                                    pageNumber
-                                                }
+                                                key={item}
                                                 type="button"
-                                                onClick={() => {
-                                                    setPage(
-                                                        pageNumber,
-                                                    );
-                                                }}
+                                                onClick={() => setPage(item)}
                                                 className={
-                                                    pageNumber ===
-                                                    safePage
-                                                        ? "flex size-8 items-center justify-center rounded-lg bg-blue-600 text-[11px] font-bold !text-white"
-                                                        : "flex size-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-[11px] font-semibold text-slate-600"
+                                                    item === safePage
+                                                        ? "flex size-8 items-center justify-center rounded-lg bg-blue-600 text-[10px] font-bold !text-white shadow-sm"
+                                                        : "flex size-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-[10px] font-semibold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600"
                                                 }
                                             >
-                                                {
-                                                    pageNumber
-                                                }
+                                                {item}
                                             </button>
-                                        ),
-                                    )}
+                                        );
+                                    })}
 
                                     <button
                                         type="button"
-                                        disabled={
-                                            safePage ===
-                                            totalPages
-                                        }
-                                        onClick={() => {
+                                        disabled={safePage === totalPages}
+                                        onClick={() =>
                                             setPage(
-                                                safePage +
-                                                1,
-                                            );
-                                        }}
-                                        className="flex size-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 disabled:opacity-40"
+                                                Math.min(
+                                                    totalPages,
+                                                    safePage + 1,
+                                                ),
+                                            )
+                                        }
+                                        className="inline-flex h-8 items-center gap-1 rounded-lg border border-slate-200 bg-white px-2.5 text-[10px] font-semibold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
                                     >
-                                        <ChevronRight
-                                            size={
-                                                13
-                                            }
-                                        />
+                                        Sau
+                                        <ChevronRight size={13} />
                                     </button>
-                                </div>
+                                </nav>
                             </footer>
                         </article>
                     </div>
 
                     {/* RIGHT COLUMN */}
-                    <aside className="space-y-3">
-                        <article className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                            <h2 className="text-sm font-bold text-slate-900">
-                                Lịch giao hôm nay
-                            </h2>
-
-                            <div className="mt-4 space-y-3">
-                                {DELIVERY_DATA.slice(
-                                    0,
-                                    4,
-                                ).map(
-                                    (
-                                        item,
-                                        index,
-                                    ) => (
-                                        <button
-                                            key={
-                                                item.id
-                                            }
-                                            type="button"
-                                            onClick={() => {
-                                                openDetail(
-                                                    item,
-                                                );
-                                            }}
-                                            className="grid w-full grid-cols-[42px_16px_1fr_auto] items-start gap-2 text-left"
-                                        >
-                                            <span className="pt-0.5 text-[10px] font-semibold text-slate-600">
-                                                {
-                                                    item.time
-                                                }
-                                            </span>
-
-                                            <span className="relative flex justify-center pt-1">
-                                                <span className="size-2 rounded-full border-2 border-blue-500 bg-white" />
-
-                                                {index <
-                                                3 ? (
-                                                    <span className="absolute top-3 h-9 w-px bg-blue-100" />
-                                                ) : null}
-                                            </span>
-
-                                            <div className="min-w-0">
-                                                <p className="truncate text-[11px] font-bold text-slate-800">
-                                                    {
-                                                        item.customer
-                                                    }
-                                                </p>
-
-                                                <p className="mt-0.5 truncate text-[9px] text-slate-400">
-                                                    {
-                                                        item.address
-                                                    }
-                                                </p>
-                                            </div>
-
-                                            <span
-                                                className={[
-                                                    "rounded-full px-2 py-1 text-[8px] font-bold",
-                                                    DELIVERY_STATUS_CONFIG[
-                                                        item
-                                                            .status
-                                                        ]
-                                                        .className,
-                                                ].join(
-                                                    " ",
-                                                )}
-                                            >
-                                                {
-                                                    DELIVERY_STATUS_CONFIG[
-                                                        item
-                                                            .status
-                                                        ]
-                                                        .label
-                                                }
-                                            </span>
-                                        </button>
-                                    ),
-                                )}
+                    <aside className="flex min-h-0 flex-col gap-3">
+                        <article className="min-h-0 flex-[1.2] overflow-hidden rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm">
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-sm font-bold text-slate-900">
+                                    Lịch giao hôm nay
+                                </h2>
+                                <button
+                                    type="button"
+                                    onClick={() => setModal("SCHEDULE")}
+                                    className="text-[10px] font-bold text-blue-600 hover:text-blue-700"
+                                >
+                                    Xem tất cả
+                                </button>
                             </div>
 
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setModal(
-                                        "SCHEDULE",
-                                    );
-                                }}
-                                className="mt-3 inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 hover:text-blue-700"
-                            >
-                                Xem tất cả lịch giao
+                            <div className="mt-3 space-y-2.5">
+                                {deliveries.slice(0, 4).map((item, index) => (
+                                    <button
+                                        key={item.id}
+                                        type="button"
+                                        onClick={() => openDetail(item)}
+                                        className="grid w-full grid-cols-[42px_16px_1fr_auto] items-start gap-2 rounded-lg px-1 py-1 text-left transition hover:bg-slate-50"
+                                    >
+                                        <span className="pt-0.5 text-[10px] font-semibold text-slate-600">
+                                            {item.time}
+                                        </span>
 
-                                <ChevronRight
-                                    size={
-                                        12
-                                    }
-                                />
-                            </button>
+                                        <span className="relative flex justify-center pt-1">
+                                            <span className="size-2 rounded-full border-2 border-blue-500 bg-white" />
+                                            {index < 3 ? (
+                                                <span className="absolute top-3 h-9 w-px bg-blue-100" />
+                                            ) : null}
+                                        </span>
+
+                                        <div className="min-w-0">
+                                            <p className="truncate text-[11px] font-bold text-slate-800">
+                                                {item.customer}
+                                            </p>
+                                            <p className="mt-0.5 truncate text-[9px] text-slate-400">
+                                                {item.address}
+                                            </p>
+                                        </div>
+
+                                        <span
+                                            className={[
+                                                "rounded-full px-2 py-1 text-[8px] font-bold",
+                                                DELIVERY_STATUS_CONFIG[item.status]
+                                                    .className,
+                                            ].join(" ")}
+                                        >
+                                            {
+                                                DELIVERY_STATUS_CONFIG[item.status]
+                                                    .label
+                                            }
+                                        </span>
+                                    </button>
+                                ))}
+                            </div>
                         </article>
 
-                        <article className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                        <article className="shrink-0 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm">
                             <h2 className="text-sm font-bold text-slate-900">
                                 Hiệu suất đội giao
                             </h2>
@@ -1028,14 +1117,12 @@ export const OperationsDeliveriesPage =
                                     helper="+6%"
                                     positive
                                 />
-
                                 <Performance
                                     label="Bàn giao thành công"
                                     value="18"
                                     helper="+3"
                                     positive
                                 />
-
                                 <Performance
                                     label="Sự cố"
                                     value="1"
@@ -1044,45 +1131,28 @@ export const OperationsDeliveriesPage =
                             </div>
                         </article>
 
-                        <article className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                            <h2 className="text-sm font-bold text-slate-900">
-                                Hoạt động gần đây
-                            </h2>
-
-                            <div className="mt-3 space-y-3">
-                                {RECENT_ACTIVITIES.map(
-                                    (
-                                        item,
-                                    ) => (
-                                        <ActivityLine
-                                            key={
-                                                item.id
-                                            }
-                                            item={
-                                                item
-                                            }
-                                        />
-                                    ),
-                                )}
+                        <article className="min-h-0 flex-1 overflow-hidden rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm">
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-sm font-bold text-slate-900">
+                                    Hoạt động gần đây
+                                </h2>
+                                <button
+                                    type="button"
+                                    onClick={() => setModal("ACTIVITY")}
+                                    className="text-[10px] font-bold text-blue-600 hover:text-blue-700"
+                                >
+                                    Xem tất cả
+                                </button>
                             </div>
 
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setModal(
-                                        "ACTIVITY",
-                                    );
-                                }}
-                                className="mt-3 inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 hover:text-blue-700"
-                            >
-                                Xem tất cả hoạt động
-
-                                <ChevronRight
-                                    size={
-                                        12
-                                    }
-                                />
-                            </button>
+                            <div className="mt-2 space-y-2">
+                                {recentActivities.slice(0, 3).map((item) => (
+                                    <ActivityLine
+                                        key={item.id}
+                                        item={item}
+                                    />
+                                ))}
+                            </div>
                         </article>
                     </aside>
                 </section>
@@ -1091,80 +1161,93 @@ export const OperationsDeliveriesPage =
                 {modal && (
                     <Modal
                         title={
-                            modal ===
-                            "CREATE"
+                            modal === "CREATE"
                                 ? "Tạo lệnh giao mới"
-                                : modal ===
-                                "DETAIL"
+                                : modal === "DETAIL"
                                     ? "Chi tiết lệnh giao"
-                                    : modal ===
-                                    "SCHEDULE"
+                                    : modal === "SCHEDULE"
                                         ? "Tất cả lịch giao"
-                                        : modal ===
-                                        "ACTIVITY"
+                                        : modal === "ACTIVITY"
                                             ? "Tất cả hoạt động"
                                             : "Thao tác lệnh giao"
                         }
                         size={
-                            modal ===
-                            "ACTIVITY"
+                            modal === "ACTIVITY"
                                 ? "LARGE"
                                 : "DEFAULT"
                         }
                         onClose={() => {
-                            setModal(
-                                null,
-                            );
+                            setModal(null);
                         }}
                     >
-                        {modal ===
-                        "CREATE" ? (
+                        {modal === "CREATE" ? (
                             <CreateDeliveryForm
-                                onDone={() => {
-                                    setModal(
-                                        null,
-                                    );
-                                }}
+                                onDone={createDelivery}
                             />
-                        ) : modal ===
-                        "DETAIL" &&
-                        selected ? (
+                        ) : modal === "DETAIL" && selected ? (
                             <DeliveryDetail
-                                item={
-                                    selected
-                                }
-                            />
-                        ) : modal ===
-                        "SCHEDULE" ? (
-                            <ScheduleList
-                                onSelect={(
-                                    item,
-                                ) => {
-                                    setSelected(
-                                        item,
+                                item={selected}
+                                onStart={() => {
+                                    updateDeliveryStatus(
+                                        selected,
+                                        "DELIVERING",
                                     );
-                                    setModal(
-                                        "DETAIL",
+                                }}
+                                onComplete={() => {
+                                    updateDeliveryStatus(
+                                        selected,
+                                        "COMPLETED",
                                     );
                                 }}
                             />
-                        ) : modal ===
-                        "ACTIVITY" ? (
-                            <ActivityList />
+                        ) : modal === "SCHEDULE" ? (
+                            <ScheduleList
+                                items={deliveries}
+                                onSelect={(item) => {
+                                    setSelected(item);
+                                    setModal("DETAIL");
+                                }}
+                            />
+                        ) : modal === "ACTIVITY" ? (
+                            <ActivityList
+                                recentItems={recentActivities}
+                            />
                         ) : selected ? (
                             <ActionMenu
-                                item={
-                                    selected
-                                }
+                                item={selected}
                                 onDetail={() => {
-                                    setModal(
-                                        "DETAIL",
+                                    setModal("DETAIL");
+                                }}
+                                onStart={() => {
+                                    updateDeliveryStatus(
+                                        selected,
+                                        "DELIVERING",
+                                    );
+                                }}
+                                onComplete={() => {
+                                    updateDeliveryStatus(
+                                        selected,
+                                        "COMPLETED",
                                     );
                                 }}
                             />
                         ) : null}
                     </Modal>
                 )}
+
+                {success ? (
+                    <DeliverySuccessDialog
+                        data={success}
+                        onClose={() => {
+                            setSuccess(null);
+                        }}
+                        onView={() => {
+                            setSuccess(null);
+                            setSelected(success.item);
+                            setModal("DETAIL");
+                        }}
+                    />
+                ) : null}
             </main>
         );
     };
@@ -1207,10 +1290,10 @@ const KpiCard = ({
     }[tone];
 
     return (
-        <article className="flex min-h-[92px] items-center rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+        <article className="flex h-full items-center rounded-2xl border border-slate-200 bg-white px-3.5 py-2 shadow-sm">
             <span
                 className={[
-                    "flex size-10 shrink-0 items-center justify-center rounded-xl",
+                    "flex size-9 shrink-0 items-center justify-center rounded-xl",
                     config.icon,
                 ].join(" ")}
             >
@@ -1226,7 +1309,7 @@ const KpiCard = ({
                     {label}
                 </p>
 
-                <p className="mt-1 text-[22px] font-bold leading-none text-slate-950">
+                <p className="mt-0.5 text-[19px] font-bold leading-none text-slate-950">
                     {value}
                 </p>
             </div>
@@ -1234,7 +1317,7 @@ const KpiCard = ({
             <svg
                 viewBox="0 0 120 30"
                 preserveAspectRatio="none"
-                className="ml-auto h-8 w-20 shrink-0"
+                className="ml-auto h-7 w-16 shrink-0"
                 aria-hidden="true"
             >
                 <polyline
@@ -1384,10 +1467,145 @@ const Modal = ({
     </div>
 );
 
+
+const DeliverySuccessDialog = ({
+                                   data,
+                                   onClose,
+                                   onView,
+                               }: {
+    data: DeliverySuccessState;
+    onClose: () => void;
+    onView: () => void;
+}) => (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[2px]">
+        <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl">
+            <div className="text-center">
+                <span className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+                    <CheckCircle2
+                        size={
+                            34
+                        }
+                    />
+                </span>
+
+                <h2 className="mt-4 text-xl font-bold text-slate-950">
+                    {
+                        data.title
+                    }
+                </h2>
+
+                <p className="mt-2 text-sm leading-6 text-slate-500">
+                    {
+                        data.description
+                    }
+                </p>
+            </div>
+
+            <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50/70">
+                <SuccessInfo
+                    label="Mã lệnh"
+                    value={
+                        data.item.code
+                    }
+                />
+                <SuccessInfo
+                    label="Khách hàng"
+                    value={
+                        data.item.customer
+                    }
+                />
+                <SuccessInfo
+                    label="Điểm giao"
+                    value={
+                        data.item.address
+                    }
+                />
+                <SuccessInfo
+                    label="Nhân viên giao"
+                    value={
+                        data.item.staff
+                    }
+                />
+                <SuccessInfo
+                    label="Thời gian"
+                    value={
+                        data.item.time
+                    }
+                />
+                <SuccessInfo
+                    label="Số thiết bị"
+                    value={`${data.item.equipmentCount} thiết bị`}
+                />
+                <SuccessInfo
+                    label="Trạng thái"
+                    value={
+                        DELIVERY_STATUS_CONFIG[
+                            data.item
+                                .status
+                            ].label
+                    }
+                    last
+                />
+            </div>
+
+            <div className="mt-6 grid grid-cols-2 gap-2">
+                <button
+                    type="button"
+                    onClick={
+                        onClose
+                    }
+                    className="h-11 rounded-xl border border-slate-200 bg-white text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+                >
+                    Đóng
+                </button>
+
+                <button
+                    type="button"
+                    onClick={
+                        onView
+                    }
+                    className="h-11 rounded-xl bg-blue-600 text-sm font-bold !text-white transition hover:bg-blue-700"
+                >
+                    Xem chi tiết
+                </button>
+            </div>
+        </div>
+    </div>
+);
+
+const SuccessInfo = ({
+                         label,
+                         value,
+                         last = false,
+                     }: {
+    label: string;
+    value: string;
+    last?: boolean;
+}) => (
+    <div
+        className={[
+            "flex items-start justify-between gap-4 px-4 py-3 text-sm",
+            last
+                ? ""
+                : "border-b border-slate-200",
+        ].join(" ")}
+    >
+        <span className="text-slate-500">
+            {label}
+        </span>
+
+        <span className="max-w-[65%] text-right font-semibold text-slate-900">
+            {value}
+        </span>
+    </div>
+);
+
 const CreateDeliveryForm = ({
                                 onDone,
                             }: {
-    onDone: () => void;
+    onDone: (
+        payload: CreateDeliveryPayload,
+    ) => void;
 }) => {
     const [
         customerId,
@@ -1411,9 +1629,19 @@ const CreateDeliveryForm = ({
     );
 
     const [
+        deliveryDateTime,
+        setDeliveryDateTime,
+    ] = useState("");
+
+    const [
         equipmentCount,
         setEquipmentCount,
     ] = useState("4");
+
+    const [
+        note,
+        setNote,
+    ] = useState("");
 
     const selectedCustomer =
         CUSTOMER_OPTIONS.find(
@@ -1451,11 +1679,19 @@ const CreateDeliveryForm = ({
             ) => {
                 event.preventDefault();
 
-                window.alert(
-                    `Đã tạo lệnh giao cho ${selectedCustomer.name}.\nNhân viên giao: ${staffName}`,
-                );
-
-                onDone();
+                onDone({
+                    customerId,
+                    address:
+                        address.trim(),
+                    staffName,
+                    deliveryDateTime,
+                    equipmentCount:
+                        Number(
+                            equipmentCount,
+                        ),
+                    note:
+                        note.trim(),
+                });
             }}
             className="space-y-4"
         >
@@ -1586,6 +1822,18 @@ const CreateDeliveryForm = ({
                     <input
                         type="datetime-local"
                         required
+                        value={
+                            deliveryDateTime
+                        }
+                        onChange={(
+                            event,
+                        ) => {
+                            setDeliveryDateTime(
+                                event
+                                    .target
+                                    .value,
+                            );
+                        }}
                         className="h-10 w-full rounded-xl border border-slate-200 px-3 text-sm text-slate-800 outline-none transition focus:border-blue-500"
                     />
                 </div>
@@ -1625,6 +1873,18 @@ const CreateDeliveryForm = ({
                     rows={
                         3
                     }
+                    value={
+                        note
+                    }
+                    onChange={(
+                        event,
+                    ) => {
+                        setNote(
+                            event
+                                .target
+                                .value,
+                        );
+                    }}
                     placeholder="Ví dụ: liên hệ khách trước 30 phút, giao tại sảnh B..."
                     className="w-full resize-none rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-blue-500"
                 />
@@ -1642,97 +1902,140 @@ const CreateDeliveryForm = ({
 
 const DeliveryDetail = ({
                             item,
+                            onStart,
+                            onComplete,
                         }: {
     item: DeliveryRow;
-}) => (
-    <div className="space-y-3">
-        <Info
-            label="Mã lệnh"
-            value={
-                item.code
-            }
-        />
+    onStart: () => void;
+    onComplete: () => void;
+}) => {
+    const canStart =
+        item.status ===
+        "WAITING_PICKUP" ||
+        item.status ===
+        "DELAYED";
 
-        <Info
-            label="Khách hàng"
-            value={
-                item.customer
-            }
-        />
+    const canComplete =
+        item.status ===
+        "DELIVERING";
 
-        <Info
-            label="Điểm giao"
-            value={
-                item.address
-            }
-        />
+    return (
+        <div className="space-y-3">
+            <Info
+                label="Mã lệnh"
+                value={
+                    item.code
+                }
+            />
 
-        <Info
-            label="Thời gian"
-            value={
-                item.time
-            }
-        />
+            <Info
+                label="Khách hàng"
+                value={
+                    item.customer
+                }
+            />
 
-        <Info
-            label="Nhân viên"
-            value={
-                item.staff
-            }
-        />
+            <Info
+                label="Điểm giao"
+                value={
+                    item.address
+                }
+            />
 
-        <Info
-            label="Số thiết bị"
-            value={`${item.equipmentCount} thiết bị`}
-        />
+            <Info
+                label="Thời gian"
+                value={
+                    item.time
+                }
+            />
 
-        <Info
-            label="Trạng thái"
-            value={
-                DELIVERY_STATUS_CONFIG[
-                    item
-                        .status
-                    ].label
-            }
-        />
+            <Info
+                label="Nhân viên"
+                value={
+                    item.staff
+                }
+            />
 
-        <div className="grid grid-cols-2 gap-2 pt-2">
-            <button
-                type="button"
-                onClick={() => {
-                    window.alert(
-                        "Đã bắt đầu giao.",
-                    );
-                }}
-                className="h-9 rounded-xl bg-blue-600 text-xs font-bold !text-white"
-            >
-                Bắt đầu giao
-            </button>
+            <Info
+                label="Số thiết bị"
+                value={`${item.equipmentCount} thiết bị`}
+            />
 
-            <button
-                type="button"
-                onClick={() => {
-                    window.alert(
-                        "Đã xác nhận giao thành công.",
-                    );
-                }}
-                className="h-9 rounded-xl bg-emerald-600 text-xs font-bold !text-white"
-            >
-                Hoàn thành
-            </button>
+            <Info
+                label="Trạng thái"
+                value={
+                    DELIVERY_STATUS_CONFIG[
+                        item
+                            .status
+                        ].label
+                }
+            />
+
+            {item.status ===
+            "COMPLETED" ? (
+                <div className="flex items-center gap-3 rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-3 text-emerald-700">
+                    <CheckCircle2
+                        size={
+                            18
+                        }
+                    />
+
+                    <div>
+                        <p className="text-xs font-bold">
+                            Lệnh giao đã hoàn thành
+                        </p>
+                        <p className="mt-0.5 text-[11px] text-emerald-600">
+                            Thiết bị đã được bàn giao và lệnh đã được đóng.
+                        </p>
+                    </div>
+                </div>
+            ) : (
+                <div className="grid grid-cols-2 gap-2 pt-2">
+                    <button
+                        type="button"
+                        disabled={
+                            !canStart
+                        }
+                        onClick={
+                            onStart
+                        }
+                        className="h-9 rounded-xl bg-blue-600 text-xs font-bold !text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:!text-slate-400"
+                    >
+                        {item.status ===
+                        "DELIVERING"
+                            ? "Đang giao"
+                            : "Bắt đầu giao"}
+                    </button>
+
+                    <button
+                        type="button"
+                        disabled={
+                            !canComplete
+                        }
+                        onClick={
+                            onComplete
+                        }
+                        className="h-9 rounded-xl bg-emerald-600 text-xs font-bold !text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:!text-slate-400"
+                    >
+                        Hoàn thành
+                    </button>
+                </div>
+            )}
         </div>
-    </div>
-);
+    );
+};
 
 const ScheduleList = ({
+                          items,
                           onSelect,
                       }: {
+    items: DeliveryRow[];
     onSelect: (
         item: DeliveryRow,
     ) => void;
 }) => (
     <div className="max-h-[440px] space-y-2 overflow-y-auto pr-1">
-        {DELIVERY_DATA.map(
+        {items.map(
             (
                 item,
             ) => (
@@ -1794,9 +2097,13 @@ const ScheduleList = ({
     </div>
 );
 
-const ActivityList = () => {
+const ActivityList = ({
+                          recentItems,
+                      }: {
+    recentItems: RecentActivity[];
+}) => {
     const activities = [
-        ...RECENT_ACTIVITIES,
+        ...recentItems,
         {
             id: "activity-4",
             icon: CheckCircle2,
@@ -1892,64 +2199,85 @@ const ActivityList = () => {
 const ActionMenu = ({
                         item,
                         onDetail,
+                        onStart,
+                        onComplete,
                     }: {
     item: DeliveryRow;
     onDetail: () => void;
-}) => (
-    <div className="space-y-2">
-        <button
-            type="button"
-            onClick={
-                onDetail
-            }
-            className="flex h-10 w-full items-center gap-2 rounded-xl border border-slate-200 px-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-        >
-            <Eye
-                size={
-                    15
+    onStart: () => void;
+    onComplete: () => void;
+}) => {
+    const canStart =
+        item.status ===
+        "WAITING_PICKUP" ||
+        item.status ===
+        "DELAYED";
+
+    const canComplete =
+        item.status ===
+        "DELIVERING";
+
+    return (
+        <div className="space-y-2">
+            <button
+                type="button"
+                onClick={
+                    onDetail
                 }
-            />
+                className="flex h-10 w-full items-center gap-2 rounded-xl border border-slate-200 px-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            >
+                <Eye
+                    size={
+                        15
+                    }
+                />
 
-            Xem chi tiết
-        </button>
+                Xem chi tiết
+            </button>
 
-        <button
-            type="button"
-            onClick={() => {
-                window.alert(
-                    `Bắt đầu giao ${item.code}`,
-                );
-            }}
-            className="flex h-10 w-full items-center gap-2 rounded-xl border border-slate-200 px-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-        >
-            <Truck
-                size={
-                    15
+            <button
+                type="button"
+                disabled={
+                    !canStart
                 }
-            />
-
-            Bắt đầu giao
-        </button>
-
-        <button
-            type="button"
-            onClick={() => {
-                window.alert(
-                    `Đánh dấu ${item.code} hoàn thành`,
-                );
-            }}
-            className="flex h-10 w-full items-center gap-2 rounded-xl border border-slate-200 px-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-        >
-            <CheckCircle2
-                size={
-                    15
+                onClick={
+                    onStart
                 }
-            />
+                className="flex h-10 w-full items-center gap-2 rounded-xl border border-slate-200 px-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+            >
+                <Truck
+                    size={
+                        15
+                    }
+                />
 
-            Xác nhận hoàn thành
-        </button>
-    </div>
-);
+                {item.status ===
+                "DELIVERING"
+                    ? "Đang giao"
+                    : "Bắt đầu giao"}
+            </button>
+
+            <button
+                type="button"
+                disabled={
+                    !canComplete
+                }
+                onClick={
+                    onComplete
+                }
+                className="flex h-10 w-full items-center gap-2 rounded-xl border border-slate-200 px-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+            >
+                <CheckCircle2
+                    size={
+                        15
+                    }
+                />
+
+                Xác nhận hoàn thành
+            </button>
+        </div>
+    );
+};
 
 const Info = ({
                   label,
