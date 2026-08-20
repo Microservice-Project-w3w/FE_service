@@ -7,6 +7,10 @@ export {
 } from "@/modules/dashboard/pages/ManagerDashboardPage";
 
 export {
+  SalesDashboardPage,
+} from "@/modules/dashboard/pages/SalesDashboardPage";
+
+export {
   managerDashboardApi,
 } from "@/modules/dashboard/api/manager-dashboard.api";
 

@@ -20,6 +20,9 @@ import {
     CustomerInvoiceList,
 } from "../components/CustomerInvoiceList";
 import {
+    CustomerInvoicePaymentModal,
+} from "../components/CustomerInvoicePaymentModal";
+import {
     CustomerInvoiceSummary,
 } from "../components/CustomerInvoiceSummary";
 import {
@@ -99,8 +102,16 @@ export const CustomerInvoicesPage = () => {
 
     const [
         invoices,
+        setInvoices,
     ] = useState<CustomerInvoiceItem[]>(
-        CUSTOMER_INVOICE_MOCKS,
+        () => [...CUSTOMER_INVOICE_MOCKS],
+    );
+
+    const [
+        paymentInvoice,
+        setPaymentInvoice,
+    ] = useState<CustomerInvoiceItem | null>(
+        null,
     );
 
     const [
@@ -285,9 +296,65 @@ export const CustomerInvoicesPage = () => {
     const handlePayment = (
         invoice: CustomerInvoiceItem,
     ): void => {
-        console.log(
-            "Thanh toán hóa đơn:",
-            invoice,
+        setPaymentInvoice(invoice);
+    };
+
+    const handleClosePaymentModal =
+        (): void => {
+            setPaymentInvoice(null);
+        };
+
+    const handleSubmitPayment = (
+        paymentMethod: string,
+    ): void => {
+        if (!paymentInvoice) {
+            return;
+        }
+
+        const paidAt =
+            new Date().toISOString();
+
+        const updatedInvoice:
+            CustomerInvoiceItem = {
+            ...paymentInvoice,
+            paidAmount:
+            paymentInvoice.totalAmount,
+            remainingAmount: 0,
+            status: "PAID",
+            paymentMethod,
+            paidAt,
+            overdueDays: undefined,
+        };
+
+        setInvoices(
+            (currentInvoices) =>
+                currentInvoices.map(
+                    (invoice) =>
+                        invoice.id ===
+                        updatedInvoice.id
+                            ? updatedInvoice
+                            : invoice,
+                ),
+        );
+
+        const mockIndex =
+            CUSTOMER_INVOICE_MOCKS.findIndex(
+                (invoice) =>
+                    invoice.id ===
+                    updatedInvoice.id,
+            );
+
+        if (mockIndex >= 0) {
+            Object.assign(
+                CUSTOMER_INVOICE_MOCKS[
+                    mockIndex
+                    ],
+                updatedInvoice,
+            );
+        }
+
+        setPaymentInvoice(
+            updatedInvoice,
         );
     };
 
@@ -311,182 +378,201 @@ export const CustomerInvoicesPage = () => {
     };
 
     return (
-        <main className="space-y-5">
-            <header>
-                <h1 className="text-3xl font-bold text-slate-950">
-                    Hóa đơn
-                </h1>
+        <>
+            <main className="space-y-5">
+                <header>
+                    <h1 className="text-3xl font-bold text-slate-950">
+                        Hóa đơn
+                    </h1>
 
-                <p className="mt-1.5 text-sm text-slate-500">
-                    Theo dõi hóa đơn, thời hạn thanh toán và các khoản còn phải trả.
-                </p>
-            </header>
+                    <p className="mt-1.5 text-sm text-slate-500">
+                        Theo dõi hóa đơn, thời hạn thanh toán và các khoản còn phải trả.
+                    </p>
+                </header>
 
-            <CustomerInvoiceSummary
-                totalAmount={
-                    summary.totalAmount
-                }
-                paidAmount={
-                    summary.paidAmount
-                }
-                remainingAmount={
-                    summary.remainingAmount
-                }
-                overdueCount={
-                    summary.overdueCount
-                }
-            />
-
-            <CustomerInvoiceFilters
-                searchTerm={searchTerm}
-                status={status}
-                dateFilter={dateFilter}
-                onSearchChange={
-                    handleSearchChange
-                }
-                onStatusChange={
-                    handleStatusChange
-                }
-                onDateFilterChange={
-                    handleDateFilterChange
-                }
-                onReset={
-                    handleResetFilters
-                }
-            />
-
-            <section className="flex items-center justify-between">
-                <p className="text-sm font-semibold text-slate-700">
-                    Tìm thấy{" "}
-                    {
-                        filteredInvoices.length
-                    }{" "}
-                    hóa đơn
-                </p>
-            </section>
-
-            {paginatedInvoices.length > 0 ? (
-                <CustomerInvoiceList
-                    invoices={
-                        paginatedInvoices
+                <CustomerInvoiceSummary
+                    totalAmount={
+                        summary.totalAmount
                     }
-                    onViewDetail={
-                        handleViewDetail
+                    paidAmount={
+                        summary.paidAmount
                     }
-                    onPayment={
-                        handlePayment
+                    remainingAmount={
+                        summary.remainingAmount
+                    }
+                    overdueCount={
+                        summary.overdueCount
                     }
                 />
-            ) : (
-                <section className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
-                    <SearchX
-                        size={34}
-                        aria-hidden="true"
-                        className="mx-auto text-slate-400"
-                    />
 
-                    <h2 className="mt-4 text-base font-bold text-slate-900">
-                        Không tìm thấy hóa đơn
-                    </h2>
+                <CustomerInvoiceFilters
+                    searchTerm={searchTerm}
+                    status={status}
+                    dateFilter={dateFilter}
+                    onSearchChange={
+                        handleSearchChange
+                    }
+                    onStatusChange={
+                        handleStatusChange
+                    }
+                    onDateFilterChange={
+                        handleDateFilterChange
+                    }
+                    onReset={
+                        handleResetFilters
+                    }
+                />
 
-                    <p className="mt-2 text-sm text-slate-500">
-                        Hãy thử thay đổi từ khóa hoặc bộ lọc hiện tại.
-                    </p>
-
-                    <button
-                        type="button"
-                        onClick={
-                            handleResetFilters
-                        }
-                        className="mt-5 inline-flex h-10 items-center justify-center rounded-xl border border-blue-200 bg-blue-50 px-4 text-sm font-semibold text-blue-700 transition hover:bg-blue-100"
-                    >
-                        Đặt lại bộ lọc
-                    </button>
-                </section>
-            )}
-
-            {totalPages > 1 && (
-                <nav
-                    aria-label="Phân trang hóa đơn"
-                    className="flex items-center justify-center gap-1.5 pb-5 pt-2"
-                >
-                    <button
-                        type="button"
-                        aria-label="Trang trước"
-                        disabled={
-                            currentPage === 1
-                        }
-                        onClick={() => {
-                            handlePageChange(
-                                currentPage - 1,
-                            );
-                        }}
-                        className="flex size-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-30"
-                    >
-                        <ChevronLeft
-                            size={17}
-                            aria-hidden="true"
-                        />
-                    </button>
-
-                    {Array.from(
+                <section className="flex items-center justify-between">
+                    <p className="text-sm font-semibold text-slate-700">
+                        Tìm thấy{" "}
                         {
-                            length: totalPages,
-                        },
-                        (_, index) =>
-                            index + 1,
-                    ).map((page) => {
-                        const isActive =
-                            page ===
-                            currentPage;
+                            filteredInvoices.length
+                        }{" "}
+                        hóa đơn
+                    </p>
+                </section>
 
-                        return (
-                            <button
-                                key={page}
-                                type="button"
-                                aria-label={`Đi đến trang ${page}`}
-                                aria-current={
-                                    isActive
-                                        ? "page"
-                                        : undefined
-                                }
-                                onClick={() => {
-                                    handlePageChange(
-                                        page,
-                                    );
-                                }}
-                                className={
-                                    isActive
-                                        ? "flex size-9 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold text-white shadow-sm"
-                                        : "flex size-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-sm font-semibold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
-                                }
-                            >
-                                {page}
-                            </button>
-                        );
-                    })}
-
-                    <button
-                        type="button"
-                        aria-label="Trang sau"
-                        disabled={
-                            currentPage ===
-                            totalPages
+                {paginatedInvoices.length >
+                0 ? (
+                    <CustomerInvoiceList
+                        invoices={
+                            paginatedInvoices
                         }
-                        onClick={() => {
-                            handlePageChange(
-                                currentPage + 1,
-                            );
-                        }}
-                        className="flex size-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-30"
-                    >
-                        <ChevronRight
-                            size={17}
+                        onViewDetail={
+                            handleViewDetail
+                        }
+                        onPayment={
+                            handlePayment
+                        }
+                    />
+                ) : (
+                    <section className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
+                        <SearchX
+                            size={34}
                             aria-hidden="true"
+                            className="mx-auto text-slate-400"
                         />
-                    </button>
-                </nav>
-            )}
-        </main>
+
+                        <h2 className="mt-4 text-base font-bold text-slate-900">
+                            Không tìm thấy hóa đơn
+                        </h2>
+
+                        <p className="mt-2 text-sm text-slate-500">
+                            Hãy thử thay đổi từ khóa hoặc bộ lọc hiện tại.
+                        </p>
+
+                        <button
+                            type="button"
+                            onClick={
+                                handleResetFilters
+                            }
+                            className="mt-5 inline-flex h-10 items-center justify-center rounded-xl border border-blue-200 bg-blue-50 px-4 text-sm font-semibold text-blue-700 transition hover:bg-blue-100"
+                        >
+                            Đặt lại bộ lọc
+                        </button>
+                    </section>
+                )}
+
+                {totalPages > 1 && (
+                    <nav
+                        aria-label="Phân trang hóa đơn"
+                        className="flex items-center justify-center gap-1.5 pb-5 pt-2"
+                    >
+                        <button
+                            type="button"
+                            aria-label="Trang trước"
+                            disabled={
+                                currentPage === 1
+                            }
+                            onClick={() => {
+                                handlePageChange(
+                                    currentPage - 1,
+                                );
+                            }}
+                            className="flex size-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-30"
+                        >
+                            <ChevronLeft
+                                size={17}
+                                aria-hidden="true"
+                            />
+                        </button>
+
+                        {Array.from(
+                            {
+                                length:
+                                totalPages,
+                            },
+                            (_, index) =>
+                                index + 1,
+                        ).map((page) => {
+                            const isActive =
+                                page ===
+                                currentPage;
+
+                            return (
+                                <button
+                                    key={page}
+                                    type="button"
+                                    aria-label={`Đi đến trang ${page}`}
+                                    aria-current={
+                                        isActive
+                                            ? "page"
+                                            : undefined
+                                    }
+                                    onClick={() => {
+                                        handlePageChange(
+                                            page,
+                                        );
+                                    }}
+                                    className={
+                                        isActive
+                                            ? "flex size-9 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold text-white shadow-sm"
+                                            : "flex size-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-sm font-semibold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                                    }
+                                >
+                                    {page}
+                                </button>
+                            );
+                        })}
+
+                        <button
+                            type="button"
+                            aria-label="Trang sau"
+                            disabled={
+                                currentPage ===
+                                totalPages
+                            }
+                            onClick={() => {
+                                handlePageChange(
+                                    currentPage + 1,
+                                );
+                            }}
+                            className="flex size-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-30"
+                        >
+                            <ChevronRight
+                                size={17}
+                                aria-hidden="true"
+                            />
+                        </button>
+                    </nav>
+                )}
+            </main>
+
+            <CustomerInvoicePaymentModal
+                invoice={
+                    paymentInvoice
+                }
+                open={
+                    paymentInvoice !== null
+                }
+                onClose={
+                    handleClosePaymentModal
+                }
+                onSubmit={
+                    handleSubmitPayment
+                }
+            />
+        </>
     );
 };

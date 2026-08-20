@@ -18,6 +18,9 @@ import {
 } from "react-router";
 
 import {
+    CustomerRentalRequestCancelModal,
+} from "../components/CustomerRentalRequestCancelModal";
+import {
     CustomerRentalRequestCard,
 } from "../components/CustomerRentalRequestCard";
 import {
@@ -115,6 +118,13 @@ export const CustomerRentalRequestsPage = () => {
         currentPage,
         setCurrentPage,
     ] = useState(1);
+
+    const [
+        cancelRequest,
+        setCancelRequest,
+    ] = useState<CustomerRentalRequestItem | null>(
+        null,
+    );
 
     const filteredRequests = useMemo(() => {
         const normalizedSearch =
@@ -281,26 +291,45 @@ export const CustomerRentalRequestsPage = () => {
     const handleCancelRequest = (
         request: CustomerRentalRequestItem,
     ): void => {
-        const confirmed = window.confirm(
-            `Bạn có chắc muốn hủy yêu cầu ${request.requestCode} không?`,
+        setCancelRequest(request);
+    };
+
+    const handleCloseCancelModal =
+        (): void => {
+            setCancelRequest(null);
+        };
+
+    const handleConfirmCancel = (
+        request: CustomerRentalRequestItem,
+        reason: string,
+    ): void => {
+        console.log(
+            "Hủy yêu cầu thuê:",
+            {
+                requestId: request.id,
+                requestCode:
+                request.requestCode,
+                reason,
+            },
         );
 
-        if (!confirmed) {
-            return;
-        }
-
-        setRequests((currentRequests) =>
-            currentRequests.map(
-                (currentRequest) =>
-                    currentRequest.id ===
-                    request.id
-                        ? {
-                            ...currentRequest,
-                            status: "CANCELLED",
-                        }
-                        : currentRequest,
-            ),
+        setRequests(
+            (currentRequests) =>
+                currentRequests.map(
+                    (currentRequest) =>
+                        currentRequest.id ===
+                        request.id
+                            ? {
+                                ...currentRequest,
+                                status: "CANCELLED",
+                                rejectionReason:
+                                reason,
+                            }
+                            : currentRequest,
+                ),
         );
+
+        setCancelRequest(null);
     };
 
     const handlePageChange = (
@@ -385,44 +414,45 @@ export const CustomerRentalRequestsPage = () => {
     ];
 
     return (
-        <main className="space-y-5">
-            <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold text-slate-950">
-                        Yêu cầu thuê của tôi
-                    </h1>
+        <>
+            <main className="space-y-5">
+                <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div>
+                        <h1 className="text-3xl font-bold text-slate-950">
+                            Yêu cầu thuê của tôi
+                        </h1>
 
-                    <p className="mt-1.5 text-sm text-slate-500">
-                        Theo dõi trạng thái và quản lý
-                        các yêu cầu thuê thiết bị.
-                    </p>
-                </div>
+                        <p className="mt-1.5 text-sm text-slate-500">
+                            Theo dõi trạng thái và quản lý
+                            các yêu cầu thuê thiết bị.
+                        </p>
+                    </div>
 
-                <Link
-                    to="/customer/equipment"
-                    className="inline-flex h-11 items-center justify-center gap-2 self-start rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-200 lg:self-auto"
-                >
-                    <Plus
-                        size={18}
-                        aria-hidden="true"
-                        className="text-white"
-                    />
+                    <Link
+                        to="/customer/rental-requests/create"
+                        className="inline-flex h-11 items-center justify-center gap-2 self-start rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-200 lg:self-auto"
+                    >
+                        <Plus
+                            size={18}
+                            aria-hidden="true"
+                            className="text-white"
+                        />
 
-                    <span className="text-white">
+                        <span className="text-white">
                         Tạo yêu cầu mới
                     </span>
-                </Link>
-            </header>
+                    </Link>
+                </header>
 
-            <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                {statisticItems.map((item) => {
-                    const Icon = item.icon;
+                <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                    {statisticItems.map((item) => {
+                        const Icon = item.icon;
 
-                    return (
-                        <article
-                            key={item.label}
-                            className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm"
-                        >
+                        return (
+                            <article
+                                key={item.label}
+                                className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm"
+                            >
                             <span
                                 className={[
                                     "flex size-11 shrink-0 items-center justify-center rounded-xl",
@@ -435,181 +465,195 @@ export const CustomerRentalRequestsPage = () => {
                                 />
                             </span>
 
-                            <div className="min-w-0">
-                                <div className="flex items-baseline gap-2">
-                                    <p className="text-xl font-bold text-slate-950">
-                                        {item.value}
-                                    </p>
+                                <div className="min-w-0">
+                                    <div className="flex items-baseline gap-2">
+                                        <p className="text-xl font-bold text-slate-950">
+                                            {item.value}
+                                        </p>
 
-                                    <p className="truncate text-sm font-semibold text-slate-800">
-                                        {item.label}
+                                        <p className="truncate text-sm font-semibold text-slate-800">
+                                            {item.label}
+                                        </p>
+                                    </div>
+
+                                    <p className="mt-0.5 truncate text-xs text-slate-500">
+                                        {item.description}
                                     </p>
                                 </div>
-
-                                <p className="mt-0.5 truncate text-xs text-slate-500">
-                                    {item.description}
-                                </p>
-                            </div>
-                        </article>
-                    );
-                })}
-            </section>
-
-            <CustomerRentalRequestFilters
-                searchTerm={searchTerm}
-                status={status}
-                dateFilter={dateFilter}
-                onSearchChange={
-                    handleSearchChange
-                }
-                onStatusChange={
-                    handleStatusChange
-                }
-                onDateFilterChange={
-                    handleDateFilterChange
-                }
-                onReset={handleResetFilters}
-            />
-
-            <section className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm font-semibold text-slate-700">
-                    Tìm thấy{" "}
-                    {filteredRequests.length} yêu cầu
-                </p>
-
-                {filteredRequests.length > 0 && (
-                    <p className="text-xs text-slate-500">
-                        Hiển thị{" "}
-                        {firstVisibleItem}–
-                        {lastVisibleItem} trong{" "}
-                        {filteredRequests.length} yêu cầu
-                    </p>
-                )}
-            </section>
-
-            {paginatedRequests.length > 0 ? (
-                <section className="space-y-3">
-                    {paginatedRequests.map(
-                        (request) => (
-                            <CustomerRentalRequestCard
-                                key={request.id}
-                                request={request}
-                                onViewDetail={
-                                    handleViewDetail
-                                }
-                                onViewQuotation={
-                                    handleViewQuotation
-                                }
-                                onCancelRequest={
-                                    handleCancelRequest
-                                }
-                            />
-                        ),
-                    )}
-                </section>
-            ) : (
-                <section className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
-                    <SearchX
-                        size={34}
-                        aria-hidden="true"
-                        className="mx-auto text-slate-400"
-                    />
-
-                    <h2 className="mt-4 text-base font-bold text-slate-900">
-                        Không tìm thấy yêu cầu
-                    </h2>
-
-                    <p className="mt-2 text-sm text-slate-500">
-                        Hãy thử thay đổi từ khóa hoặc
-                        bộ lọc hiện tại.
-                    </p>
-
-                    <button
-                        type="button"
-                        onClick={handleResetFilters}
-                        className="mt-5 inline-flex h-10 items-center justify-center rounded-xl border border-blue-200 bg-blue-50 px-4 text-sm font-semibold text-blue-700 transition hover:bg-blue-100"
-                    >
-                        Đặt lại bộ lọc
-                    </button>
-                </section>
-            )}
-
-            {totalPages > 1 && (
-                <nav
-                    aria-label="Phân trang yêu cầu thuê"
-                    className="flex items-center justify-center gap-1.5 pb-5 pt-2"
-                >
-                    <button
-                        type="button"
-                        aria-label="Trang trước"
-                        disabled={
-                            currentPage === 1
-                        }
-                        onClick={() => {
-                            handlePageChange(
-                                currentPage - 1,
-                            );
-                        }}
-                        className="flex size-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-30"
-                    >
-                        ‹
-                    </button>
-
-                    {Array.from(
-                        {
-                            length: totalPages,
-                        },
-                        (_, index) =>
-                            index + 1,
-                    ).map((page) => {
-                        const isActive =
-                            page === currentPage;
-
-                        return (
-                            <button
-                                key={page}
-                                type="button"
-                                aria-label={`Đi đến trang ${page}`}
-                                aria-current={
-                                    isActive
-                                        ? "page"
-                                        : undefined
-                                }
-                                onClick={() => {
-                                    handlePageChange(
-                                        page,
-                                    );
-                                }}
-                                className={
-                                    isActive
-                                        ? "flex size-9 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold text-white shadow-sm"
-                                        : "flex size-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-sm font-semibold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
-                                }
-                            >
-                                {page}
-                            </button>
+                            </article>
                         );
                     })}
+                </section>
 
-                    <button
-                        type="button"
-                        aria-label="Trang sau"
-                        disabled={
-                            currentPage ===
-                            totalPages
-                        }
-                        onClick={() => {
-                            handlePageChange(
-                                currentPage + 1,
-                            );
-                        }}
-                        className="flex size-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-30"
+                <CustomerRentalRequestFilters
+                    searchTerm={searchTerm}
+                    status={status}
+                    dateFilter={dateFilter}
+                    onSearchChange={
+                        handleSearchChange
+                    }
+                    onStatusChange={
+                        handleStatusChange
+                    }
+                    onDateFilterChange={
+                        handleDateFilterChange
+                    }
+                    onReset={handleResetFilters}
+                />
+
+                <section className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="text-sm font-semibold text-slate-700">
+                        Tìm thấy{" "}
+                        {filteredRequests.length} yêu cầu
+                    </p>
+
+                    {filteredRequests.length > 0 && (
+                        <p className="text-xs text-slate-500">
+                            Hiển thị{" "}
+                            {firstVisibleItem}–
+                            {lastVisibleItem} trong{" "}
+                            {filteredRequests.length} yêu cầu
+                        </p>
+                    )}
+                </section>
+
+                {paginatedRequests.length > 0 ? (
+                    <section className="space-y-3">
+                        {paginatedRequests.map(
+                            (request) => (
+                                <CustomerRentalRequestCard
+                                    key={request.id}
+                                    request={request}
+                                    onViewDetail={
+                                        handleViewDetail
+                                    }
+                                    onViewQuotation={
+                                        handleViewQuotation
+                                    }
+                                    onCancelRequest={
+                                        handleCancelRequest
+                                    }
+                                />
+                            ),
+                        )}
+                    </section>
+                ) : (
+                    <section className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
+                        <SearchX
+                            size={34}
+                            aria-hidden="true"
+                            className="mx-auto text-slate-400"
+                        />
+
+                        <h2 className="mt-4 text-base font-bold text-slate-900">
+                            Không tìm thấy yêu cầu
+                        </h2>
+
+                        <p className="mt-2 text-sm text-slate-500">
+                            Hãy thử thay đổi từ khóa hoặc
+                            bộ lọc hiện tại.
+                        </p>
+
+                        <button
+                            type="button"
+                            onClick={handleResetFilters}
+                            className="mt-5 inline-flex h-10 items-center justify-center rounded-xl border border-blue-200 bg-blue-50 px-4 text-sm font-semibold text-blue-700 transition hover:bg-blue-100"
+                        >
+                            Đặt lại bộ lọc
+                        </button>
+                    </section>
+                )}
+
+                {totalPages > 1 && (
+                    <nav
+                        aria-label="Phân trang yêu cầu thuê"
+                        className="flex items-center justify-center gap-1.5 pb-5 pt-2"
                     >
-                        ›
-                    </button>
-                </nav>
-            )}
+                        <button
+                            type="button"
+                            aria-label="Trang trước"
+                            disabled={
+                                currentPage === 1
+                            }
+                            onClick={() => {
+                                handlePageChange(
+                                    currentPage - 1,
+                                );
+                            }}
+                            className="flex size-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-30"
+                        >
+                            ‹
+                        </button>
 
-        </main>
+                        {Array.from(
+                            {
+                                length: totalPages,
+                            },
+                            (_, index) =>
+                                index + 1,
+                        ).map((page) => {
+                            const isActive =
+                                page === currentPage;
+
+                            return (
+                                <button
+                                    key={page}
+                                    type="button"
+                                    aria-label={`Đi đến trang ${page}`}
+                                    aria-current={
+                                        isActive
+                                            ? "page"
+                                            : undefined
+                                    }
+                                    onClick={() => {
+                                        handlePageChange(
+                                            page,
+                                        );
+                                    }}
+                                    className={
+                                        isActive
+                                            ? "flex size-9 items-center justify-center rounded-lg bg-blue-600 text-sm font-bold text-white shadow-sm"
+                                            : "flex size-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-sm font-semibold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                                    }
+                                >
+                                    {page}
+                                </button>
+                            );
+                        })}
+
+                        <button
+                            type="button"
+                            aria-label="Trang sau"
+                            disabled={
+                                currentPage ===
+                                totalPages
+                            }
+                            onClick={() => {
+                                handlePageChange(
+                                    currentPage + 1,
+                                );
+                            }}
+                            className="flex size-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-30"
+                        >
+                            ›
+                        </button>
+                    </nav>
+                )}
+
+            </main>
+
+            <CustomerRentalRequestCancelModal
+                request={cancelRequest}
+                open={
+                    cancelRequest !== null
+                }
+                onClose={
+                    handleCloseCancelModal
+                }
+                onConfirm={
+                    handleConfirmCancel
+                }
+            />
+        </>
     );
 };

@@ -23,3 +23,21 @@ export type {
   PaymentMilestoneStatus,
   RejectManagerContractInput,
 } from "@/modules/contracts/types/manager-contract-approval.types";
+
+/* ==================== SALES CONTRACTS ==================== */
+
+export {
+  SalesContractsPage,
+} from "@/modules/contracts/pages/SalesContractsPage";
+
+export {
+  SalesContractCreatePage,
+} from "@/modules/contracts/pages/SalesContractCreatePage";
+
+export {
+  SalesContractDetailPage,
+} from "@/modules/contracts/pages/SalesContractDetailPage";
+
+export {
+  SalesContractActivitiesPage,
+} from "@/modules/contracts/pages/SalesContractActivitiesPage";
