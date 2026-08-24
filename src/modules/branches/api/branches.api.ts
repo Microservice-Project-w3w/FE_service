@@ -1,422 +1,96 @@
-import {
-  readBranches,
-  resetBranches,
-  writeBranches,
-} from "@/modules/branches/api/branches.storage";
-
+import { authenticatedRequest } from "@/modules/auth/api/authenticatedClient";
 import type {
-  AssignBranchManagerInput,
-  Branch,
-  BranchListFilters,
-  BranchStatus,
-  CreateBranchInput,
-  UpdateBranchInput,
+  AssignBranchManagerInput, Branch, BranchListFilters, BranchStatus,
+  CreateBranchInput, UpdateBranchInput,
 } from "@/modules/branches/types/branch.types";
 
-const delay = async (
-  milliseconds = 150,
-): Promise<void> => {
-  await new Promise<void>((resolve) => {
-    window.setTimeout(resolve, milliseconds);
-  });
-};
-
-const normalizeText = (
-  value: string,
-): string => {
-  return value
-    .trim()
-    .toLocaleLowerCase("vi");
-};
-
-const createId = (): string => {
-  return `branch-${Date.now()}-${Math.random()
-    .toString(36)
-    .slice(2, 8)}`;
-};
-
-const ensureUniqueBranch = (
-  branches: Branch[],
-  input: CreateBranchInput,
-  ignoredId?: string,
-): void => {
-  const normalizedCode = normalizeText(
-    input.branchCode,
-  );
-
-  const normalizedEmail = normalizeText(
-    input.email,
-  );
-
-  const normalizedPhone =
-    input.phone.replace(/\s+/g, "");
-
-  const duplicatedCode = branches.some(
-    (branch) =>
-      branch.id !== ignoredId &&
-      normalizeText(branch.branchCode) ===
-        normalizedCode,
-  );
-
-  if (duplicatedCode) {
-    throw new Error(
-      "Mã chi nhánh đã tồn tại.",
-    );
-  }
-
-  const duplicatedEmail = branches.some(
-    (branch) =>
-      branch.id !== ignoredId &&
-      normalizeText(branch.email) ===
-        normalizedEmail,
-  );
-
-  if (duplicatedEmail) {
-    throw new Error(
-      "Email chi nhánh đã tồn tại.",
-    );
-  }
-
-  const duplicatedPhone = branches.some(
-    (branch) =>
-      branch.id !== ignoredId &&
-      branch.phone.replace(/\s+/g, "") ===
-        normalizedPhone,
-  );
-
-  if (duplicatedPhone) {
-    throw new Error(
-      "Số điện thoại chi nhánh đã tồn tại.",
-    );
-  }
-};
+interface OrganizationDto { id: number; }
+interface BranchDto {
+  id: number; organizationId: number; branchCode: string; branchName: string;
+  email: string | null; phone: string | null; address: string | null;
+  status: BranchStatus; createdAt: string; updatedAt: string;
+}
+const toBranch = (dto: BranchDto): Branch => ({
+  id: String(dto.id), organizationId: String(dto.organizationId),
+  branchCode: dto.branchCode, name: dto.branchName, phone: dto.phone ?? "",
+  email: dto.email ?? "", address: dto.address ?? "", province: "",
+  managerEmployeeId: null, managerName: null, managerEmail: null,
+  employeeCount: 0, activeRentalCount: 0, status: dto.status,
+  openedAt: "", description: "", createdAt: dto.createdAt, updatedAt: dto.updatedAt,
+});
+const normalizeText = (value: string): string => value.trim().toLocaleLowerCase("vi");
+const branchPath = (organizationId: string, id?: string): string =>
+  `/api/v1/organizations/${Number(organizationId)}/branches${id ? `/${id}` : ""}`;
+const requestBody = (input: CreateBranchInput | UpdateBranchInput, status: BranchStatus) => ({
+  branchCode: input.branchCode.trim().toUpperCase(),
+  branchName: input.name.trim(), email: input.email.trim() || null,
+  phone: input.phone.trim() || null,
+  address: [input.address.trim(), input.province.trim()].filter(Boolean).join(", "),
+  status,
+});
+const unsupported = (action: string): never => { throw new Error(`${action} chưa được backend hỗ trợ.`); };
 
 export const branchesApi = {
-  async list(
-    filters?: BranchListFilters,
-  ): Promise<Branch[]> {
-    await delay();
-
-    const branches = readBranches();
-
-    if (!filters) {
-      return branches;
-    }
-
-    const normalizedSearch = normalizeText(
-      filters.search,
-    );
-
+  async list(filters?: BranchListFilters): Promise<Branch[]> {
+    const organizations = await authenticatedRequest<OrganizationDto[]>("GET", "/api/v1/organizations");
+    const groups = await Promise.all(organizations.map((organization) =>
+      authenticatedRequest<BranchDto[]>("GET", branchPath(String(organization.id))),
+    ));
+    const branches = groups.flat().map(toBranch);
+    if (!filters) return branches;
+    const search = normalizeText(filters.search);
     return branches.filter((branch) => {
-      const matchesSearch =
-        normalizedSearch.length === 0 ||
-        [
-          branch.branchCode,
-          branch.name,
-          branch.email,
-          branch.phone,
-          branch.address,
-          branch.province,
-          branch.managerName ?? "",
-        ].some((value) =>
-          normalizeText(value).includes(
-            normalizedSearch,
-          ),
-        );
-
-      const matchesStatus =
-        filters.status === "ALL" ||
-        branch.status === filters.status;
-
-      const matchesProvince =
-        filters.province === "ALL" ||
-        branch.province ===
-          filters.province;
-
-      return (
-        matchesSearch &&
-        matchesStatus &&
-        matchesProvince
-      );
+      const matchesSearch = search.length === 0 || [
+        branch.branchCode, branch.name, branch.email, branch.phone, branch.address,
+      ].some((value) => normalizeText(value).includes(search));
+      return matchesSearch &&
+        (filters.status === "ALL" || branch.status === filters.status) &&
+        (filters.province === "ALL" || branch.province === filters.province);
     });
   },
 
-  async getById(
-    id: string,
-  ): Promise<Branch> {
-    await delay();
-
-    const branch = readBranches().find(
-      (item) => item.id === id,
-    );
-
-    if (!branch) {
-      throw new Error(
-        "Không tìm thấy chi nhánh.",
-      );
-    }
-
+  async getById(id: string): Promise<Branch> {
+    const branch = (await this.list()).find((item) => item.id === id);
+    if (!branch) throw new Error("Không tìm thấy chi nhánh.");
     return branch;
   },
 
-  async create(
-    input: CreateBranchInput,
-  ): Promise<Branch> {
-    await delay();
-
-    const branches = readBranches();
-
-    ensureUniqueBranch(branches, input);
-
-    const now = new Date().toISOString();
-
-    const branch: Branch = {
-      id: createId(),
-      organizationId:
-        input.organizationId,
-      branchCode:
-        input.branchCode.trim().toUpperCase(),
-      name: input.name.trim(),
-      phone: input.phone.trim(),
-      email: normalizeText(input.email),
-      address: input.address.trim(),
-      province: input.province.trim(),
-      managerEmployeeId:
-        input.managerEmployeeId ?? null,
-      managerName:
-        input.managerName?.trim() || null,
-      managerEmail:
-        input.managerEmail
-          ? normalizeText(
-              input.managerEmail,
-            )
-          : null,
-      employeeCount: 0,
-      activeRentalCount: 0,
-      status: "ACTIVE",
-      openedAt: input.openedAt,
-      description:
-        input.description.trim(),
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    writeBranches([
-      branch,
-      ...branches,
-    ]);
-
-    return branch;
+  async create(input: CreateBranchInput): Promise<Branch> {
+    return toBranch(await authenticatedRequest<BranchDto>(
+      "POST", branchPath(input.organizationId), { body: requestBody(input, "ACTIVE") },
+    ));
   },
 
-  async update(
-    id: string,
-    input: UpdateBranchInput,
-  ): Promise<Branch> {
-    await delay();
-
-    const branches = readBranches();
-
-    const currentBranch = branches.find(
-      (branch) => branch.id === id,
-    );
-
-    if (!currentBranch) {
-      throw new Error(
-        "Không tìm thấy chi nhánh.",
-      );
-    }
-
-    ensureUniqueBranch(
-      branches,
-      input,
-      id,
-    );
-
-    const updatedBranch: Branch = {
-      ...currentBranch,
-      organizationId:
-        input.organizationId,
-      branchCode:
-        input.branchCode.trim().toUpperCase(),
-      name: input.name.trim(),
-      phone: input.phone.trim(),
-      email: normalizeText(input.email),
-      address: input.address.trim(),
-      province: input.province.trim(),
-      managerEmployeeId:
-        input.managerEmployeeId ?? null,
-      managerName:
-        input.managerName?.trim() || null,
-      managerEmail:
-        input.managerEmail
-          ? normalizeText(
-              input.managerEmail,
-            )
-          : null,
-      openedAt: input.openedAt,
-      description:
-        input.description.trim(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    writeBranches(
-      branches.map((branch) =>
-        branch.id === id
-          ? updatedBranch
-          : branch,
-      ),
-    );
-
-    return updatedBranch;
+  async update(id: string, input: UpdateBranchInput): Promise<Branch> {
+    const current = await this.getById(id);
+    return toBranch(await authenticatedRequest<BranchDto>(
+      "PUT", branchPath(input.organizationId, id), { body: requestBody(input, current.status) },
+    ));
   },
 
-  async assignManager(
-    id: string,
-    input: AssignBranchManagerInput,
-  ): Promise<Branch> {
-    await delay();
-
-    const branches = readBranches();
-
-    const currentBranch = branches.find(
-      (branch) => branch.id === id,
-    );
-
-    if (!currentBranch) {
-      throw new Error(
-        "Không tìm thấy chi nhánh.",
-      );
-    }
-
-    const managerAssignedElsewhere =
-      input.managerEmployeeId !== null &&
-      branches.some(
-        (branch) =>
-          branch.id !== id &&
-          branch.managerEmployeeId ===
-            input.managerEmployeeId,
-      );
-
-    if (managerAssignedElsewhere) {
-      throw new Error(
-        "Nhân viên này đang quản lý một chi nhánh khác.",
-      );
-    }
-
-    const updatedBranch: Branch = {
-      ...currentBranch,
-      managerEmployeeId:
-        input.managerEmployeeId,
-      managerName:
-        input.managerName,
-      managerEmail:
-        input.managerEmail,
-      updatedAt: new Date().toISOString(),
-    };
-
-    writeBranches(
-      branches.map((branch) =>
-        branch.id === id
-          ? updatedBranch
-          : branch,
-      ),
-    );
-
-    return updatedBranch;
+  async assignManager(_id: string, _input: AssignBranchManagerInput): Promise<Branch> {
+    return unsupported("Gán quản lý chi nhánh");
   },
 
-  async updateStatus(
-    id: string,
-    status: BranchStatus,
-  ): Promise<Branch> {
-    await delay();
-
-    const branches = readBranches();
-
-    const currentBranch = branches.find(
-      (branch) => branch.id === id,
-    );
-
-    if (!currentBranch) {
-      throw new Error(
-        "Không tìm thấy chi nhánh.",
-      );
-    }
-
-    if (
-      status === "INACTIVE" &&
-      currentBranch.activeRentalCount > 0
-    ) {
-      throw new Error(
-        "Không thể ngừng hoạt động chi nhánh đang có đơn thuê.",
-      );
-    }
-
-    const updatedBranch: Branch = {
-      ...currentBranch,
-      status,
-      updatedAt: new Date().toISOString(),
-    };
-
-    writeBranches(
-      branches.map((branch) =>
-        branch.id === id
-          ? updatedBranch
-          : branch,
-      ),
-    );
-
-    return updatedBranch;
+  async updateStatus(id: string, status: BranchStatus): Promise<Branch> {
+    const current = await this.getById(id);
+    return toBranch(await authenticatedRequest<BranchDto>(
+      "PUT", branchPath(current.organizationId, id), {
+        body: {
+          branchCode: current.branchCode, branchName: current.name,
+          email: current.email || null, phone: current.phone || null,
+          address: current.address || null, status,
+        },
+      },
+    ));
   },
 
-  async remove(
-    id: string,
-  ): Promise<void> {
-    await delay();
-
-    const branches = readBranches();
-
-    const branch = branches.find(
-      (item) => item.id === id,
-    );
-
-    if (!branch) {
-      throw new Error(
-        "Không tìm thấy chi nhánh.",
-      );
-    }
-
-    if (branch.employeeCount > 0) {
-      throw new Error(
-        "Không thể xóa chi nhánh đang có nhân viên.",
-      );
-    }
-
-    if (branch.activeRentalCount > 0) {
-      throw new Error(
-        "Không thể xóa chi nhánh đang có đơn thuê.",
-      );
-    }
-
-    if (branch.status !== "INACTIVE") {
-      throw new Error(
-        "Chỉ có thể xóa chi nhánh đã ngừng hoạt động.",
-      );
-    }
-
-    writeBranches(
-      branches.filter(
-        (item) => item.id !== id,
-      ),
-    );
+  async remove(id: string): Promise<void> {
+    const current = await this.getById(id);
+    await authenticatedRequest("DELETE", branchPath(current.organizationId, id));
   },
 
-  async resetMockData(): Promise<
-    Branch[]
-  > {
-    await delay();
-
-    return resetBranches();
+  async resetMockData(): Promise<Branch[]> {
+    return unsupported("Khôi phục dữ liệu mẫu");
   },
 };
