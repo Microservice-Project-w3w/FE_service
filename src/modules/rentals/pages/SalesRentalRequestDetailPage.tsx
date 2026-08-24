@@ -14,9 +14,10 @@ import {
 
 import {
     Link,
-    Navigate,
     useParams,
 } from "react-router";
+
+import { useSalesRentalRequest } from "@/modules/rentals/hooks/useSalesRentalRequests";
 
 type RentalRequestStatus =
     | "NEW"
@@ -392,6 +393,7 @@ const REQUEST_DETAIL_MOCKS:
         ],
     },
 ];
+void REQUEST_DETAIL_MOCKS;
 
 const STATUS_CONFIG: Record<
     RentalRequestStatus,
@@ -476,20 +478,58 @@ export const SalesRentalRequestDetailPage =
             requestId: string;
         }>();
 
-        const request =
-            REQUEST_DETAIL_MOCKS.find(
-                (item) =>
-                    item.id === requestId,
-            );
+        const { request: backendRequest, error, isLoading } = useSalesRentalRequest(requestId);
 
-        if (!request) {
-            return (
-                <Navigate
-                    to="/sales/rental-requests"
-                    replace
-                />
-            );
+        if (isLoading) {
+            return <p className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-500">Đang tải chi tiết yêu cầu thuê...</p>;
         }
+
+        if (error || !backendRequest) {
+            return <p className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">{error ?? "Không tìm thấy yêu cầu thuê."}</p>;
+        }
+
+        const request: RentalRequestDetail = {
+            id: String(backendRequest.id),
+            requestCode: backendRequest.requestCode,
+            customerName: `Khách hàng #${backendRequest.customerId}`,
+            contactName: "Thông tin liên hệ từ hồ sơ khách hàng",
+            contactPhone: "—",
+            contactEmail: "—",
+            branch: `Chi nhánh #${backendRequest.branchId}`,
+            deliveryAddress: backendRequest.deliveryAddress ?? "Chưa có địa chỉ giao",
+            createdDate: new Date(backendRequest.createdAt).toLocaleString("vi-VN"),
+            rentalStartDate: new Date(backendRequest.startAt).toLocaleDateString("vi-VN"),
+            rentalEndDate: new Date(backendRequest.endAt).toLocaleDateString("vi-VN"),
+            purpose: backendRequest.note ?? "Không có mô tả",
+            note: backendRequest.note ?? "Không có ghi chú",
+            status: backendRequest.status === "QUOTED"
+                ? "QUOTED"
+                : backendRequest.status === "CANCELLED" || backendRequest.status === "REJECTED"
+                    ? "CANCELLED"
+                    : backendRequest.status === "PROCESSING"
+                        ? "PROCESSING"
+                        : "NEW",
+            priority: "MEDIUM",
+            equipment: backendRequest.items.map((item) => ({
+                id: String(item.id),
+                equipmentName: `Loại thiết bị #${item.equipmentTypeId}`,
+                category: "Dữ liệu Rental",
+                quantity: item.quantity,
+                rentalDays: Math.max(1, Math.ceil(
+                    (new Date(backendRequest.endAt).getTime() - new Date(backendRequest.startAt).getTime()) /
+                    86_400_000,
+                )),
+                estimatedPrice: 0,
+            })),
+            timeline: [{
+                id: `created-${backendRequest.id}`,
+                title: "Yêu cầu được tạo",
+                description: backendRequest.note ?? "Đã ghi nhận trên backend",
+                date: new Date(backendRequest.createdAt).toLocaleString("vi-VN"),
+                completed: true,
+            }],
+        };
+
 
         const status =
             STATUS_CONFIG[

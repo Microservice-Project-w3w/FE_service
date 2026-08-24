@@ -43,7 +43,7 @@ interface RentalRequest {
     priority: Priority;
 }
 
-export const _DATA: RentalRequest[] = [
+const _DATA: RentalRequest[] = [
     {
         id: "request-001",
         code: "REQ-2026-028",
@@ -121,6 +121,7 @@ export const _DATA: RentalRequest[] = [
         priority: "LOW",
     },
 ];
+void _DATA;
 
 const STATUS = {
     NEW: {

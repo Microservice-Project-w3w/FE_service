@@ -41,3 +41,35 @@ export const useSalesRentalRequests = () => {
 
     return { requests, error, isLoading, reload };
 };
+
+export const useSalesRentalRequest = (requestId?: string) => {
+    const [request, setRequest] = useState<SalesRentalRequestDto | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        let active = true;
+        if (!requestId) {
+            setError("Thiếu mã yêu cầu thuê.");
+            setIsLoading(false);
+            return () => { active = false; };
+        }
+        setIsLoading(true);
+        setError(null);
+        void salesRentalWorkflowApi.getRequest(requestId)
+            .then((data) => {
+                if (active) setRequest(data);
+            })
+            .catch((requestError: unknown) => {
+                if (active) setError(requestError instanceof Error
+                    ? requestError.message
+                    : "Không thể tải chi tiết yêu cầu thuê.");
+            })
+            .finally(() => {
+                if (active) setIsLoading(false);
+            });
+        return () => { active = false; };
+    }, [requestId]);
+
+    return { request, error, isLoading };
+};
