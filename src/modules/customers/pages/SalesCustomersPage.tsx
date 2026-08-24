@@ -24,7 +24,7 @@ import type {
     SalesCustomerStatus,
 } from "@/modules/customers/types/sales-customer.types";
 
-const _CUSTOMER_MOCKS: SalesCustomerItem[] = [
+export const _CUSTOMER_MOCKS: SalesCustomerItem[] = [
     {
         id: "customer-001",
         customerCode: "CUS-2026-001",
