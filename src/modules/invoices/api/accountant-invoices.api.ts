@@ -1,6 +1,7 @@
 import { ApiError } from "@/core/api";
 import { authenticatedRequest } from "@/modules/auth/api/authenticatedClient";
 import type { InvoiceDto, InvoicePaymentStatusDto } from "@/modules/invoices/api/accountant-invoice.dto";
+import type { CancelInvoiceRequestDto } from "@/modules/invoices/api/accountant-invoice-write.dto";
 import { mapInvoice } from "@/modules/invoices/api/accountant-invoice.mapper";
 import type {
   AccountantInvoice, AccountantInvoiceListData, AccountantInvoicePayment,
@@ -40,6 +41,21 @@ const getById = async (invoiceId: string): Promise<AccountantInvoice> => {
   return loadInvoice(invoice);
 };
 
+const issue = async (invoiceId: string): Promise<AccountantInvoice> => {
+  const invoice = await authenticatedRequest<InvoiceDto>("POST", `${BASE_PATH}/${invoiceId}/issue`);
+  return loadInvoice(invoice);
+};
+
+const cancel = async (
+  invoiceId: string,
+  request: CancelInvoiceRequestDto,
+): Promise<AccountantInvoice> => {
+  const invoice = await authenticatedRequest<InvoiceDto>("POST", `${BASE_PATH}/${invoiceId}/cancel`, {
+    body: request,
+  });
+  return loadInvoice(invoice);
+};
+
 const unsupportedWrite = (): never => {
   throw new ApiError("Invoice write actions are not integrated in this phase", {
     code: "INVOICE_WRITE_NOT_IMPLEMENTED",
@@ -49,8 +65,8 @@ const unsupportedWrite = (): never => {
 export const accountantInvoicesApi = {
   getList,
   getById,
-  issue: async (_invoiceId: string): Promise<AccountantInvoice> => unsupportedWrite(),
-  cancel: async (_invoiceId: string): Promise<AccountantInvoice> => unsupportedWrite(),
+  issue,
+  cancel,
   recordPayment: async (_input: RecordInvoicePaymentInput): Promise<{
     invoice: AccountantInvoice; payment: AccountantInvoicePayment;
   }> => unsupportedWrite(),

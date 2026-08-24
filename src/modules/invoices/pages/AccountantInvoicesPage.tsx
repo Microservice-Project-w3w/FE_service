@@ -100,7 +100,7 @@ export const AccountantInvoicesPage = () => {
 
       <AccountantInvoiceDetailDrawer invoice={viewModel.selectedInvoice} isLoading={viewModel.isDetailLoading} onClose={() => viewModel.setSelectedInvoice(null)} onRecordPayment={(invoice) => { viewModel.setSelectedInvoice(null); viewModel.setPaymentInvoice(invoice); }} />
       <AccountantInvoicePaymentDialog invoice={viewModel.paymentInvoice} recordedBy={viewModel.user?.fullName ?? "Kế toán"} isSubmitting={viewModel.isSubmitting} onClose={() => viewModel.setPaymentInvoice(null)} onSubmit={viewModel.recordPayment} />
-      <AccountantInvoiceActionDialog open={Boolean(viewModel.actionTarget)} action={viewModel.actionTarget?.action ?? "ISSUE"} invoiceCode={viewModel.actionTarget?.invoice.invoiceCode ?? ""} isSubmitting={viewModel.isSubmitting} onClose={() => viewModel.setActionTarget(null)} onConfirm={() => void viewModel.confirmAction()} />
+      <AccountantInvoiceActionDialog open={Boolean(viewModel.actionTarget)} action={viewModel.actionTarget?.action ?? "ISSUE"} invoiceCode={viewModel.actionTarget?.invoice.invoiceCode ?? ""} isSubmitting={viewModel.isSubmitting} onClose={() => viewModel.setActionTarget(null)} onConfirm={(reason) => void viewModel.confirmAction(reason)} />
     </div>
   );
 };

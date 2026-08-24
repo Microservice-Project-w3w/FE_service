@@ -23,7 +23,7 @@ const canRecordPayment = (invoice: AccountantInvoice) =>
   !["DRAFT", "PAID", "CANCELLED"].includes(invoice.status) && invoice.remainingAmount > 0;
 
 const canCancel = (invoice: AccountantInvoice) =>
-  ["DRAFT", "UNPAID"].includes(invoice.status) && invoice.paidAmount === 0;
+  !["PAID", "CANCELLED"].includes(invoice.status);
 
 export const AccountantInvoiceTable = ({
   invoices,

@@ -114,13 +114,13 @@ export const useAccountantInvoices = () => {
     }
   };
 
-  const confirmAction = async () => {
+  const confirmAction = async (cancelReason: string) => {
     if (!actionTarget) return;
     setIsSubmitting(true);
     setErrorMessage(null);
     try {
       if (actionTarget.action === "ISSUE") await accountantInvoicesApi.issue(actionTarget.invoice.id);
-      else await accountantInvoicesApi.cancel(actionTarget.invoice.id);
+      else await accountantInvoicesApi.cancel(actionTarget.invoice.id, { reason: cancelReason.trim() });
       setSuccessMessage(actionTarget.action === "ISSUE" ? "Hóa đơn đã được phát hành." : "Hóa đơn đã được hủy.");
       setActionTarget(null);
       setSelectedInvoice(null);
