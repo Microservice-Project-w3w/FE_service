@@ -66,6 +66,7 @@ export const AccountantInvoiceFilters = ({
       <select value={status} disabled={disabled} onChange={(event) => onStatusChange(event.target.value as AccountantInvoiceStatusFilter)} className={controlClass}>
         <option value="ALL">Tất cả trạng thái</option>
         <option value="DRAFT">Bản nháp</option>
+        <option value="ISSUED">Đã phát hành</option>
         <option value="UNPAID">Chưa thanh toán</option>
         <option value="PARTIALLY_PAID">Thanh toán một phần</option>
         <option value="PAID">Đã thanh toán</option>

@@ -1,9 +1,7 @@
-import type {
-  AccountantPaymentMethod,
-} from "@/modules/invoices/types/accountant-invoice.types";
+import type { AccountantPaymentMethod } from "@/modules/invoices/types/accountant-invoice.types";
 
-export const formatInvoiceCurrency = (value: number): string =>
-  new Intl.NumberFormat("vi-VN", {
+export const formatInvoiceCurrency = (value: number | null): string =>
+  value === null ? "—" : new Intl.NumberFormat("vi-VN", {
     style: "currency",
     currency: "VND",
     maximumFractionDigits: 0,
@@ -16,7 +14,9 @@ export const formatInvoiceDate = (value: string | null): string =>
         month: "2-digit",
         year: "numeric",
       }).format(new Date(value))
-    : "Chưa phát hành";
+    : "—";
+
+export const displayInvoiceValue = (value: string | null): string => value || "—";
 
 export const paymentMethodLabels: Record<AccountantPaymentMethod, string> = {
   CASH: "Tiền mặt",

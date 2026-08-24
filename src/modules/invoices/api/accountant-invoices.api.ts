@@ -1,147 +1,61 @@
-import {
-  cloneAccountantInvoiceMocks,
-  invoiceStatusAfterPayment,
-} from "@/modules/invoices/mocks/accountant-invoices.mock";
+import { ApiError } from "@/core/api";
+import { authenticatedRequest } from "@/modules/auth/api/authenticatedClient";
+import type { InvoiceDto, InvoicePaymentStatusDto } from "@/modules/invoices/api/accountant-invoice.dto";
+import { mapInvoice } from "@/modules/invoices/api/accountant-invoice.mapper";
 import type {
-  AccountantInvoice,
-  AccountantInvoiceListData,
-  AccountantInvoicePayment,
-  AccountantInvoiceSummary,
-  RecordInvoicePaymentInput,
-  UpdateInvoicePaymentInput,
+  AccountantInvoice, AccountantInvoiceListData, AccountantInvoicePayment,
+  RecordInvoicePaymentInput, UpdateInvoicePaymentInput,
 } from "@/modules/invoices/types/accountant-invoice.types";
 
-const MOCK_DELAY_MS = 180;
-let invoices = cloneAccountantInvoiceMocks();
+const BASE_PATH = "/api/v1/billing/invoices";
 
-const delay = () => new Promise<void>((resolve) => window.setTimeout(resolve, MOCK_DELAY_MS));
-const clone = <T,>(value: T): T => structuredClone(value);
+const getPaymentStatus = (invoiceId: number) =>
+  authenticatedRequest<InvoicePaymentStatusDto>("GET", `${BASE_PATH}/${invoiceId}/payment-status`);
 
-const requireInvoice = (invoiceId: string): AccountantInvoice => {
-  const invoice = invoices.find((item) => item.id === invoiceId);
-  if (!invoice) throw new Error("Không tìm thấy hóa đơn.");
-  return invoice;
-};
+const loadInvoice = async (invoice: InvoiceDto): Promise<AccountantInvoice> =>
+  mapInvoice(invoice, await getPaymentStatus(invoice.id));
 
-const getSummary = (items: AccountantInvoice[]): AccountantInvoiceSummary => ({
-  totalInvoices: items.length,
-  unpaidCount: items.filter((item) => item.status === "UNPAID" || item.status === "DRAFT").length,
-  partiallyPaidCount: items.filter((item) => item.status === "PARTIALLY_PAID").length,
-  paidCount: items.filter((item) => item.status === "PAID").length,
-  overdueCount: items.filter((item) => item.status === "OVERDUE").length,
-  outstandingAmount: items
-    .filter((item) => item.status !== "CANCELLED")
-    .reduce((total, item) => total + item.remainingAmount, 0),
+const getSummary = (invoices: AccountantInvoice[]) => ({
+  totalInvoices: invoices.length,
+  unpaidCount: invoices.filter(({ status }) => ["DRAFT", "ISSUED", "UNPAID"].includes(status)).length,
+  partiallyPaidCount: invoices.filter(({ status }) => status === "PARTIALLY_PAID").length,
+  paidCount: invoices.filter(({ status }) => status === "PAID").length,
+  overdueCount: invoices.filter(({ status }) => status === "OVERDUE").length,
+  outstandingAmount: invoices
+    .filter(({ status }) => status !== "CANCELLED")
+    .reduce((total, invoice) => total + invoice.remainingAmount, 0),
 });
 
 const getList = async (): Promise<AccountantInvoiceListData> => {
-  await delay();
-  const sorted = [...invoices].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-  return { invoices: clone(sorted), summary: getSummary(sorted) };
+  const response = await authenticatedRequest<InvoiceDto[]>("GET", BASE_PATH);
+  if (!Array.isArray(response)) {
+    throw new ApiError("Unexpected invoice list response", { code: "INVOICE_CONTRACT_INVALID" });
+  }
+  const invoices = await Promise.all(response.map(loadInvoice));
+  return { invoices, summary: getSummary(invoices) };
 };
 
 const getById = async (invoiceId: string): Promise<AccountantInvoice> => {
-  await delay();
-  return clone(requireInvoice(invoiceId));
+  const invoice = await authenticatedRequest<InvoiceDto>("GET", `${BASE_PATH}/${invoiceId}`);
+  return loadInvoice(invoice);
 };
 
-const issue = async (invoiceId: string): Promise<AccountantInvoice> => {
-  await delay();
-  const invoice = requireInvoice(invoiceId);
-  if (invoice.status !== "DRAFT") throw new Error("Chỉ hóa đơn nháp mới có thể phát hành.");
-  invoice.status = "UNPAID";
-  invoice.issuedAt = new Date().toISOString();
-  invoice.updatedAt = invoice.issuedAt;
-  return clone(invoice);
-};
-
-const cancel = async (invoiceId: string): Promise<AccountantInvoice> => {
-  await delay();
-  const invoice = requireInvoice(invoiceId);
-  if (!(["DRAFT", "UNPAID"] as const).includes(invoice.status as "DRAFT" | "UNPAID") || invoice.paidAmount > 0) {
-    throw new Error("Hóa đơn đã có thanh toán hoặc không còn ở trạng thái có thể hủy.");
-  }
-  invoice.status = "CANCELLED";
-  invoice.updatedAt = new Date().toISOString();
-  return clone(invoice);
-};
-
-const recordPayment = async (
-  input: RecordInvoicePaymentInput,
-): Promise<{ invoice: AccountantInvoice; payment: AccountantInvoicePayment }> => {
-  await delay();
-  const invoice = requireInvoice(input.invoiceId);
-  if (["DRAFT", "PAID", "CANCELLED"].includes(invoice.status)) {
-    throw new Error("Hóa đơn không ở trạng thái có thể ghi nhận thanh toán.");
-  }
-  if (input.amount <= 0 || input.amount > invoice.remainingAmount) {
-    throw new Error("Số tiền thanh toán không hợp lệ.");
-  }
-  const payment: AccountantInvoicePayment = {
-    id: `payment-${Date.now()}`,
-    invoiceId: invoice.id,
-    amount: input.amount,
-    method: input.method,
-    referenceCode: input.referenceCode || null,
-    note: input.note || null,
-    paidAt: input.paidAt,
-    recordedBy: input.recordedBy,
-    status: "SUCCESS",
-  };
-  invoice.payments.unshift(payment);
-  invoice.paidAmount += input.amount;
-  invoice.remainingAmount = Math.max(0, invoice.totalAmount - invoice.paidAmount);
-  invoice.status = invoiceStatusAfterPayment(invoice);
-  invoice.updatedAt = new Date().toISOString();
-  return { invoice: clone(invoice), payment: clone(payment) };
-};
-
-const updatePayment = async (input: UpdateInvoicePaymentInput): Promise<AccountantInvoicePayment> => {
-  await delay();
-  for (const invoice of invoices) {
-    const payment = invoice.payments.find((item) => item.id === input.paymentId);
-    if (payment) {
-      if (payment.status === "VOIDED") throw new Error("Không thể sửa giao dịch đã hủy.");
-      payment.referenceCode = input.referenceCode.trim() || null;
-      payment.note = input.note.trim() || null;
-      invoice.updatedAt = new Date().toISOString();
-      return clone(payment);
-    }
-  }
-  throw new Error("Không tìm thấy giao dịch thanh toán.");
-};
-
-const voidPayment = async (paymentId: string): Promise<AccountantInvoice> => {
-  await delay();
-  for (const invoice of invoices) {
-    const payment = invoice.payments.find((item) => item.id === paymentId);
-    if (payment) {
-      if (payment.status === "VOIDED") throw new Error("Giao dịch đã được hủy trước đó.");
-      payment.status = "VOIDED";
-      invoice.paidAmount = Math.max(0, invoice.paidAmount - payment.amount);
-      invoice.remainingAmount = invoice.totalAmount - invoice.paidAmount;
-      invoice.status = invoiceStatusAfterPayment(invoice);
-      invoice.updatedAt = new Date().toISOString();
-      return clone(invoice);
-    }
-  }
-  throw new Error("Không tìm thấy giao dịch thanh toán.");
-};
-
-const getSnapshot = (): AccountantInvoice[] => clone(invoices);
-const resetMockData = async (): Promise<void> => {
-  await delay();
-  invoices = cloneAccountantInvoiceMocks();
+const unsupportedWrite = (): never => {
+  throw new ApiError("Invoice write actions are not integrated in this phase", {
+    code: "INVOICE_WRITE_NOT_IMPLEMENTED",
+  });
 };
 
 export const accountantInvoicesApi = {
   getList,
   getById,
-  issue,
-  cancel,
-  recordPayment,
-  updatePayment,
-  voidPayment,
-  getSnapshot,
-  resetMockData,
+  issue: async (_invoiceId: string): Promise<AccountantInvoice> => unsupportedWrite(),
+  cancel: async (_invoiceId: string): Promise<AccountantInvoice> => unsupportedWrite(),
+  recordPayment: async (_input: RecordInvoicePaymentInput): Promise<{
+    invoice: AccountantInvoice; payment: AccountantInvoicePayment;
+  }> => unsupportedWrite(),
+  updatePayment: async (_input: UpdateInvoicePaymentInput): Promise<AccountantInvoicePayment> => unsupportedWrite(),
+  voidPayment: async (_paymentId: string): Promise<AccountantInvoice> => unsupportedWrite(),
+  getSnapshot: (): AccountantInvoice[] => [],
+  resetMockData: async (): Promise<void> => unsupportedWrite(),
 };

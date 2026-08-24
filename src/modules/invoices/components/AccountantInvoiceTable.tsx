@@ -2,6 +2,7 @@ import { Ban, CircleDollarSign, Eye, Send } from "lucide-react";
 
 import { AccountantInvoiceBadge } from "@/modules/invoices/components/AccountantInvoiceBadge";
 import {
+  displayInvoiceValue,
   formatInvoiceCurrency,
   formatInvoiceDate,
 } from "@/modules/invoices/components/accountantInvoiceFormatters";
@@ -75,15 +76,15 @@ export const AccountantInvoiceTable = ({
                 <tr key={invoice.id} className="border-b border-slate-100 last:border-b-0 hover:bg-blue-50/30">
                   <td className="whitespace-nowrap px-4 py-4 align-top">
                     <button type="button" onClick={() => onView(invoice)} className="font-semibold text-blue-700 hover:text-blue-800">
-                      {invoice.invoiceCode}
+                      {displayInvoiceValue(invoice.invoiceCode)}
                     </button>
-                    <p className="mt-1 text-xs text-slate-400">{invoice.branchName}</p>
+                    <p className="mt-1 text-xs text-slate-400">{displayInvoiceValue(invoice.branchName)}</p>
                   </td>
                   <td className="px-4 py-4 align-top">
-                    <p className="max-w-60 truncate font-semibold text-slate-700">{invoice.customerName}</p>
-                    <p className="mt-1 text-xs text-slate-400">{invoice.customerPhone}</p>
+                    <p className="max-w-60 truncate font-semibold text-slate-700">{displayInvoiceValue(invoice.customerName)}</p>
+                    <p className="mt-1 text-xs text-slate-400">{displayInvoiceValue(invoice.customerPhone)}</p>
                   </td>
-                  <td className="whitespace-nowrap px-4 py-4 align-top font-semibold text-slate-700">{invoice.rentalCode}</td>
+                  <td className="whitespace-nowrap px-4 py-4 align-top font-semibold text-slate-700">{displayInvoiceValue(invoice.rentalCode)}</td>
                   <td className="whitespace-nowrap px-4 py-4 align-top text-sm text-slate-600">{formatInvoiceDate(invoice.issuedAt)}</td>
                   <td className={`whitespace-nowrap px-4 py-4 align-top text-sm font-semibold ${invoice.status === "OVERDUE" ? "text-rose-600" : "text-slate-700"}`}>
                     {formatInvoiceDate(invoice.dueDate)}

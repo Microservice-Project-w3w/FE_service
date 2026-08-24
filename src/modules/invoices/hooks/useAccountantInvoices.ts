@@ -65,8 +65,9 @@ export const useAccountantInvoices = () => {
   const filteredInvoices = useMemo(() => {
     const search = searchTerm.trim().toLowerCase();
     return data.invoices.filter((invoice) => {
-      const searchable = `${invoice.invoiceCode} ${invoice.customerName} ${invoice.rentalCode}`.toLowerCase();
-      const invoiceDate = (invoice.issuedAt ?? invoice.createdAt).slice(0, 10);
+      const searchable = [invoice.invoiceCode, invoice.customerName, invoice.rentalCode]
+        .filter(Boolean).join(" ").toLowerCase();
+      const invoiceDate = (invoice.issuedAt ?? invoice.createdAt ?? invoice.dueDate ?? "").slice(0, 10);
       return (!search || searchable.includes(search))
         && (branchId === "ALL" || invoice.branchId === branchId)
         && (status === "ALL" || invoice.status === status)
