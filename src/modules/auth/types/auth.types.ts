@@ -1,6 +1,6 @@
 export type AccountType =
-  | "personal"
-  | "business";
+    | "personal"
+    | "business";
 
 export const USER_ROLES = [
   "ADMIN",
@@ -12,16 +12,16 @@ export const USER_ROLES = [
 ] as const;
 
 export type UserRole =
-  (typeof USER_ROLES)[number];
+    (typeof USER_ROLES)[number];
 
 export const isUserRole = (
-  value: unknown,
+    value: unknown,
 ): value is UserRole => {
   return (
-    typeof value === "string" &&
-    (
-      USER_ROLES as readonly string[]
-    ).includes(value)
+      typeof value === "string" &&
+      (
+          USER_ROLES as readonly string[]
+      ).includes(value)
   );
 };
 
@@ -37,7 +37,7 @@ export interface AuthUser {
 }
 
 export interface StoredAuthUser
-  extends AuthUser {
+    extends AuthUser {
   password: string;
 }
 
@@ -60,4 +60,15 @@ export interface RegisterPayload {
   password: string;
   companyName?: string;
   taxCode?: string;
+}
+
+export interface UpdateProfilePayload {
+  fullName: string;
+  phone: string;
+  companyName?: string;
+  taxCode?: string;
+}
+export interface ChangePasswordPayload {
+  currentPassword: string;
+  newPassword: string;
 }

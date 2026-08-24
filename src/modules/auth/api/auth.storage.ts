@@ -1,186 +1,126 @@
-import { storageKeys } from "@/core/storage/storageKeys";
-import { defaultMockUsers } from "@/modules/auth/mocks/auth.mock";
+import {
+  storageKeys,
+} from "@/core/storage/storageKeys";
 
 import {
-  isUserRole,
-  type AccountType,
-  type AuthSession,
-  type AuthUser,
-  type StoredAuthUser,
+  isAuthSession,
+  isStoredAuthUser,
+  parseJson,
+} from "@/modules/auth/api/auth.storage.helpers";
+
+import {
+  defaultMockUsers,
+} from "@/modules/auth/mocks/auth.mock";
+
+import type {
+  AuthSession,
+  AuthUser,
+  StoredAuthUser,
 } from "@/modules/auth/types/auth.types";
 
-const parseJson = (
-  value: string | null,
-): unknown => {
-  if (!value) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(value);
-  } catch {
-    return null;
-  }
-};
-
-const isRecord = (
-  value: unknown,
-): value is Record<string, unknown> => {
-  return (
-    typeof value === "object" &&
-    value !== null
-  );
-};
-
-const isAccountType = (
-  value: unknown,
-): value is AccountType => {
-  return (
-    value === "personal" ||
-    value === "business"
-  );
-};
-
-const hasOptionalString = (
-  value: Record<string, unknown>,
-  key: string,
-): boolean => {
-  return (
-    value[key] === undefined ||
-    typeof value[key] === "string"
-  );
-};
-
-const isAuthUser = (
-  value: unknown,
-): value is AuthUser => {
-  if (!isRecord(value)) {
-    return false;
-  }
-
-  return (
-    typeof value.id === "string" &&
-    typeof value.fullName === "string" &&
-    typeof value.email === "string" &&
-    typeof value.phone === "string" &&
-    isAccountType(value.accountType) &&
-    isUserRole(value.role) &&
-    hasOptionalString(
-      value,
-      "companyName",
-    ) &&
-    hasOptionalString(
-      value,
-      "taxCode",
-    )
-  );
-};
-
-const isStoredAuthUser = (
-  value: unknown,
-): value is StoredAuthUser => {
-  if (
-    !isRecord(value) ||
-    !isAuthUser(value)
-  ) {
-    return false;
-  }
-
-  return (
-    typeof value.password === "string"
-  );
-};
-
-const isAuthSession = (
-  value: unknown,
-): value is AuthSession => {
-  if (!isRecord(value)) {
-    return false;
-  }
-
-  return (
-    typeof value.accessToken ===
-      "string" &&
-    isAuthUser(value.user)
-  );
-};
-
 const normalize = (
-  value: string,
+    value: string,
 ): string => {
   return value.trim().toLowerCase();
+};
+
+const updateSessionInStorage = (
+    storage: Storage,
+    user: AuthUser,
+): void => {
+  const storedValue = parseJson(
+      storage.getItem(
+          storageKeys.authSession,
+      ),
+  );
+
+  if (!isAuthSession(storedValue)) {
+    return;
+  }
+
+  storage.setItem(
+      storageKeys.authSession,
+      JSON.stringify({
+        ...storedValue,
+        user,
+      }),
+  );
 };
 
 export const authStorage = {
   getUsers(): StoredAuthUser[] {
     const storedValue = parseJson(
-      localStorage.getItem(
-        storageKeys.mockUsers,
-      ),
+        localStorage.getItem(
+            storageKeys.mockUsers,
+        ),
     );
 
     const storedUsers =
-      Array.isArray(storedValue)
-        ? storedValue.filter(
-            isStoredAuthUser,
-          )
-        : [];
+        Array.isArray(storedValue)
+            ? storedValue.filter(
+                isStoredAuthUser,
+            )
+            : [];
 
     const mergedUsers = [
       ...storedUsers,
     ];
 
     for (
-      const defaultUser
-      of defaultMockUsers
-    ) {
+        const defaultUser
+        of defaultMockUsers
+        ) {
       const existingIndex =
-        mergedUsers.findIndex(
-          (storedUser) =>
-            storedUser.id ===
-              defaultUser.id ||
-            normalize(
-              storedUser.email,
-            ) ===
-              normalize(
-                defaultUser.email,
-              ),
-        );
+          mergedUsers.findIndex(
+              (storedUser) =>
+                  storedUser.id ===
+                  defaultUser.id ||
+                  normalize(
+                      storedUser.email,
+                  ) ===
+                  normalize(
+                      defaultUser.email,
+                  ),
+          );
 
       if (existingIndex >= 0) {
-        mergedUsers[existingIndex] =
-          defaultUser;
+        mergedUsers[existingIndex] = {
+          ...defaultUser,
+          ...mergedUsers[
+              existingIndex
+              ],
+        };
       } else {
         mergedUsers.push(
-          defaultUser,
+            defaultUser,
         );
       }
     }
 
     localStorage.setItem(
-      storageKeys.mockUsers,
-      JSON.stringify(
-        mergedUsers,
-      ),
+        storageKeys.mockUsers,
+        JSON.stringify(
+            mergedUsers,
+        ),
     );
 
     return mergedUsers;
   },
 
   saveUsers(
-    users: StoredAuthUser[],
+      users: StoredAuthUser[],
   ): void {
     localStorage.setItem(
-      storageKeys.mockUsers,
-      JSON.stringify(users),
+        storageKeys.mockUsers,
+        JSON.stringify(users),
     );
   },
 
   getSession(): AuthSession | null {
     const localValue = parseJson(
-      localStorage.getItem(
-        storageKeys.authSession,
-      ),
+        localStorage.getItem(
+            storageKeys.authSession,
+        ),
     );
 
     if (isAuthSession(localValue)) {
@@ -189,14 +129,14 @@ export const authStorage = {
 
     if (localValue !== null) {
       localStorage.removeItem(
-        storageKeys.authSession,
+          storageKeys.authSession,
       );
     }
 
     const sessionValue = parseJson(
-      sessionStorage.getItem(
-        storageKeys.authSession,
-      ),
+        sessionStorage.getItem(
+            storageKeys.authSession,
+        ),
     );
 
     if (isAuthSession(sessionValue)) {
@@ -205,7 +145,7 @@ export const authStorage = {
 
     if (sessionValue !== null) {
       sessionStorage.removeItem(
-        storageKeys.authSession,
+          storageKeys.authSession,
       );
     }
 
@@ -213,29 +153,43 @@ export const authStorage = {
   },
 
   saveSession(
-    session: AuthSession,
-    rememberMe: boolean,
+      session: AuthSession,
+      rememberMe: boolean,
   ): void {
     this.clearSession();
 
     const targetStorage =
-      rememberMe
-        ? localStorage
-        : sessionStorage;
+        rememberMe
+            ? localStorage
+            : sessionStorage;
 
     targetStorage.setItem(
-      storageKeys.authSession,
-      JSON.stringify(session),
+        storageKeys.authSession,
+        JSON.stringify(session),
+    );
+  },
+
+  updateSessionUser(
+      user: AuthUser,
+  ): void {
+    updateSessionInStorage(
+        localStorage,
+        user,
+    );
+
+    updateSessionInStorage(
+        sessionStorage,
+        user,
     );
   },
 
   clearSession(): void {
     localStorage.removeItem(
-      storageKeys.authSession,
+        storageKeys.authSession,
     );
 
     sessionStorage.removeItem(
-      storageKeys.authSession,
+        storageKeys.authSession,
     );
   },
 };

@@ -70,6 +70,11 @@ import {
 } from "@/core/router/guards/RoleRoute";
 
 import {
+    AccountSettingsPage,
+    AccountSettingsRoleLayout,
+} from "@/modules/account-settings";
+
+import {
     AccountsPage,
 } from "@/modules/accounts";
 
@@ -197,6 +202,16 @@ import {
 } from "@/modules/maintenance";
 
 import {
+    NotificationRoleLayout,
+    NotificationsPage,
+} from "@/modules/notifications";
+
+import {
+    ProfilePage,
+    ProfileRoleLayout,
+} from "@/modules/profile";
+
+import {
     NotFoundPage,
 } from "@/shared/pages/NotFoundPage";
 
@@ -254,6 +269,51 @@ export const AppRouter = () => {
                             <UnauthorizedPage />
                         }
                     />
+
+                    {/* ==================== PROFILE ==================== */}
+                    <Route
+                        path="profile"
+                        element={
+                            <ProfileRoleLayout />
+                        }
+                    >
+                        <Route
+                            index
+                            element={
+                                <ProfilePage />
+                            }
+                        />
+                    </Route>
+
+                    {/* ==================== NOTIFICATIONS ==================== */}
+                    <Route
+                        path="notifications"
+                        element={
+                            <NotificationRoleLayout />
+                        }
+                    >
+                        <Route
+                            index
+                            element={
+                                <NotificationsPage />
+                            }
+                        />
+                    </Route>
+
+                    {/* ==================== ACCOUNT SETTINGS ==================== */}
+                    <Route
+                        path="settings"
+                        element={
+                            <AccountSettingsRoleLayout />
+                        }
+                    >
+                        <Route
+                            index
+                            element={
+                                <AccountSettingsPage />
+                            }
+                        />
+                    </Route>
 
                     {/* ==================== ADMIN ==================== */}
                     <Route
@@ -667,32 +727,44 @@ export const AppRouter = () => {
 
                             <Route
                                 path="invoices"
-                                element={<AccountantInvoicesPage />}
+                                element={
+                                    <AccountantInvoicesPage />
+                                }
                             />
 
                             <Route
                                 path="payments"
-                                element={<AccountantPaymentsPage />}
+                                element={
+                                    <AccountantPaymentsPage />
+                                }
                             />
 
                             <Route
                                 path="deposits"
-                                element={<AccountantDepositsPage />}
+                                element={
+                                    <AccountantDepositsPage />
+                                }
                             />
 
                             <Route
                                 path="receivables"
-                                element={<AccountantReceivablesPage />}
+                                element={
+                                    <AccountantReceivablesPage />
+                                }
                             />
 
                             <Route
                                 path="reconciliation"
-                                element={<AccountantReconciliationPage />}
+                                element={
+                                    <AccountantReconciliationPage />
+                                }
                             />
 
                             <Route
                                 path="revenue-reports"
-                                element={<AccountantRevenueReportsPage />}
+                                element={
+                                    <AccountantRevenueReportsPage />
+                                }
                             />
                         </Route>
                     </Route>
