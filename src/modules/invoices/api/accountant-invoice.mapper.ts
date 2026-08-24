@@ -19,7 +19,7 @@ const finiteNumber = (value: number, field: string): number => {
 };
 
 export const mapInvoice = (invoice: InvoiceDto, payment: InvoicePaymentStatusDto): AccountantInvoice => ({
-  id: String(invoice.id), invoiceCode: "",
+  id: String(invoice.id), organizationId: String(invoice.organizationId), invoiceCode: "",
   branchId: String(invoice.branchId), branchName: "",
   customerId: String(invoice.customerId), customerName: "", customerPhone: "", customerEmail: "",
   rentalId: String(invoice.rentalOrderId), rentalCode: "",

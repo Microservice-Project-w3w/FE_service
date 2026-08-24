@@ -37,6 +37,7 @@ export interface AccountantInvoicePayment {
 
 export interface AccountantInvoice {
   id: string;
+  organizationId?: string;
   invoiceCode: string;
   branchId: string;
   branchName: string;

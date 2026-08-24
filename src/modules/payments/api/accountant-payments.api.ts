@@ -1,162 +1,39 @@
-import {
-  accountantInvoicesApi,
-  type AccountantInvoice,
-  type AccountantInvoicePayment,
-} from "@/modules/invoices";
-import {
-  cloneAccountantExternalPayments,
-  initialDepositRefunds,
-} from "@/modules/payments/mocks/accountant-payments.mock";
-import type {
-  AccountantDeposit,
-  AccountantDepositListData,
-  AccountantDepositStatus,
-  AccountantPayment,
-  AccountantPaymentListData,
-  AccountantPaymentSummary,
-  RecordAccountantPaymentInput,
-  UpdateAccountantPaymentInput,
-} from "@/modules/payments/types/accountant-payment.types";
+import { ApiError } from "@/core/api";
+import { authenticatedRequest } from "@/modules/auth/api/authenticatedClient";
+import { accountantInvoicesApi } from "@/modules/invoices";
+import type { AccountantDeposit, AccountantDepositListData, AccountantDepositStatus, AccountantPayment, AccountantPaymentListData, AccountantPaymentStatus, RecordAccountantPaymentInput, UpdateAccountantPaymentInput } from "@/modules/payments/types/accountant-payment.types";
 
-const MOCK_DELAY_MS = 180;
-const TODAY = "2026-08-13";
-let externalPayments = cloneAccountantExternalPayments();
-let depositRefunds = structuredClone(initialDepositRefunds);
+interface PaymentDto { id:number; organizationId:number; branchId:number; customerId:number; invoiceId:number; amount:number; paymentMethod:"CASH"|"BANK_TRANSFER"|"QR"; transactionReference:string; status:"PENDING"|"SUCCESS"|"CANCELLED"|"REFUNDED"; paidAt:string }
+interface DepositDto { id:number; organizationId:number; branchId:number; customerId:number; rentalOrderId:number; rentalContractId:number; amount:number; deductedAmount:number; refundedAmount:number; remainingAmount:number; paymentMethod:string; reference:string|null; notes:string|null; status:string; createdAt:string; updatedAt:string }
+const requireList = <T,>(value:unknown, code:string):T[] => { if (!Array.isArray(value)) throw new ApiError("Unexpected billing list response", { code }); return value as T[]; };
+const mapStatus = (status:PaymentDto["status"]):AccountantPaymentStatus => status === "CANCELLED" || status === "REFUNDED" ? "VOIDED" : status;
+const mapMethod = (method:PaymentDto["paymentMethod"]) => method === "QR" ? "CARD" as const : method;
 
-const delay = () => new Promise<void>((resolve) => window.setTimeout(resolve, MOCK_DELAY_MS));
-const clone = <T,>(value: T): T => structuredClone(value);
-
-const mapInvoicePayment = (
-  payment: AccountantInvoicePayment,
-  invoice: AccountantInvoice,
-): AccountantPayment => ({
-  id: payment.id,
-  invoiceId: invoice.id,
-  invoiceCode: invoice.invoiceCode,
-  customerName: invoice.customerName,
-  branchId: invoice.branchId,
-  branchName: invoice.branchName,
-  amount: payment.amount,
-  method: payment.method,
-  referenceCode: payment.referenceCode,
-  paidAt: payment.paidAt,
-  recordedBy: payment.recordedBy,
-  status: payment.status,
-  source: "MANUAL",
-  note: payment.note,
-});
-
-const snapshotPayments = (): AccountantPayment[] => {
-  const invoicePayments = accountantInvoicesApi.getSnapshot().flatMap((invoice) =>
-    invoice.payments.map((payment) => mapInvoicePayment(payment, invoice)),
-  );
-  return [...invoicePayments, ...externalPayments].sort((a, b) => b.paidAt.localeCompare(a.paidAt));
+const getList = async ():Promise<AccountantPaymentListData> => {
+  const [raw, invoiceData] = await Promise.all([authenticatedRequest<PaymentDto[]>("GET", "/api/v1/billing/payments"), accountantInvoicesApi.getList()]);
+  const invoices = new Map(invoiceData.invoices.map((invoice) => [invoice.id, invoice]));
+  const payments = requireList<PaymentDto>(raw, "PAYMENT_CONTRACT_INVALID").map((dto):AccountantPayment => {
+    const invoice = invoices.get(String(dto.invoiceId));
+    return { id:String(dto.id), invoiceId:String(dto.invoiceId), invoiceCode:invoice?.invoiceCode || `Invoice #${dto.invoiceId}`, customerName:invoice?.customerName || `Customer #${dto.customerId}`, branchId:String(dto.branchId), branchName:invoice?.branchName || `Branch #${dto.branchId}`, amount:Number(dto.amount), method:mapMethod(dto.paymentMethod), referenceCode:dto.transactionReference || null, paidAt:dto.paidAt, recordedBy:"Backend", status:mapStatus(dto.status), source:"MANUAL", note:null };
+  });
+  const successful = payments.filter((item) => item.status === "SUCCESS"); const today = new Date().toISOString().slice(0, 10);
+  return { payments, payableInvoices:invoiceData.invoices.filter((invoice) => !["DRAFT","PAID","CANCELLED"].includes(invoice.status) && invoice.remainingAmount > 0), summary:{ collectedAmount:successful.reduce((sum,item)=>sum+item.amount,0), collectedToday:successful.filter((item)=>item.paidAt.startsWith(today)).reduce((sum,item)=>sum+item.amount,0), successCount:successful.length, pendingCount:payments.filter((item)=>item.status==="PENDING").length, failedOrVoidedCount:payments.filter((item)=>item.status==="VOIDED").length } };
 };
-
-const getSummary = (payments: AccountantPayment[]): AccountantPaymentSummary => {
-  const successful = payments.filter((payment) => payment.status === "SUCCESS");
-  return {
-    collectedAmount: successful.reduce((total, payment) => total + payment.amount, 0),
-    collectedToday: successful.filter((payment) => payment.paidAt.startsWith(TODAY)).reduce((total, payment) => total + payment.amount, 0),
-    successCount: successful.length,
-    pendingCount: payments.filter((payment) => payment.status === "PENDING").length,
-    failedOrVoidedCount: payments.filter((payment) => ["FAILED", "VOIDED"].includes(payment.status)).length,
-  };
+const getById = async (id:string):Promise<AccountantPayment> => { const payment=(await getList()).payments.find((item)=>item.id===id); if(!payment) throw new ApiError("Payment not found",{code:"PAYMENT_NOT_FOUND"}); return payment; };
+const record = async (input:RecordAccountantPaymentInput):Promise<AccountantPayment> => {
+  const invoice=await accountantInvoicesApi.getById(input.invoiceId);
+  if (!invoice.organizationId) throw new ApiError("Invoice organization is unavailable",{code:"PAYMENT_SCOPE_UNAVAILABLE"});
+  if(input.method==="OTHER") throw new ApiError("Unsupported payment method",{code:"PAYMENT_METHOD_UNSUPPORTED"});
+  const created=await authenticatedRequest<PaymentDto>("POST","/api/v1/billing/payments",{body:{organizationId:Number(invoice.organizationId),branchId:Number(invoice.branchId),customerId:Number(invoice.customerId),invoiceId:Number(input.invoiceId),amount:input.amount,paymentMethod:input.method==="CARD"?"QR":input.method,transactionReference:input.referenceCode||`PAY-${Date.now()}`,paidAt:input.paidAt}});
+  await authenticatedRequest("POST",`/api/v1/billing/payments/${created.id}/confirm`); return getById(String(created.id));
 };
-
-const getList = async (): Promise<AccountantPaymentListData> => {
-  await delay();
-  const payments = snapshotPayments();
-  const payableInvoices = accountantInvoicesApi.getSnapshot().filter((invoice) =>
-    !["DRAFT", "PAID", "CANCELLED"].includes(invoice.status) && invoice.remainingAmount > 0,
-  );
-  return { payments: clone(payments), summary: getSummary(payments), payableInvoices: clone(payableInvoices) };
+const update=async(_input:UpdateAccountantPaymentInput):Promise<AccountantPayment>=>{throw new ApiError("Backend does not support editing payments",{code:"PAYMENT_UPDATE_UNSUPPORTED"});};
+const voidPayment=async(id:string):Promise<void>=>{await authenticatedRequest("POST",`/api/v1/billing/payments/${id}/cancel`);};
+const depositStatus=(dto:DepositDto):AccountantDepositStatus=>Number(dto.refundedAmount)>=Number(dto.amount)?"REFUNDED":Number(dto.refundedAmount)>0?"PARTIALLY_REFUNDED":Number(dto.remainingAmount)>0?"HELD":"PENDING";
+const getDeposits=async():Promise<AccountantDepositListData>=>{
+  const raw=requireList<DepositDto>(await authenticatedRequest("GET","/api/v1/billing/deposits"),"DEPOSIT_CONTRACT_INVALID");
+  const deposits=raw.map((dto):AccountantDeposit=>({id:String(dto.id),invoiceId:"",invoiceCode:"—",rentalCode:`Order #${dto.rentalOrderId}`,customerName:`Customer #${dto.customerId}`,branchName:`Branch #${dto.branchId}`,depositAmount:Number(dto.amount),heldAmount:Number(dto.amount)-Number(dto.deductedAmount),refundedAmount:Number(dto.refundedAmount),status:depositStatus(dto),updatedAt:dto.updatedAt}));
+  return {deposits,summary:{totalDeposit:deposits.reduce((s,x)=>s+x.depositAmount,0),heldAmount:deposits.reduce((s,x)=>s+x.heldAmount,0),refundableAmount:deposits.reduce((s,x)=>s+x.heldAmount-x.refundedAmount,0),refundedAmount:deposits.reduce((s,x)=>s+x.refundedAmount,0)}};
 };
-
-const getById = async (paymentId: string): Promise<AccountantPayment> => {
-  await delay();
-  const payment = snapshotPayments().find((item) => item.id === paymentId);
-  if (!payment) throw new Error("Không tìm thấy giao dịch thanh toán.");
-  return clone(payment);
-};
-
-const record = async (input: RecordAccountantPaymentInput): Promise<AccountantPayment> => {
-  const result = await accountantInvoicesApi.recordPayment(input);
-  const invoice = accountantInvoicesApi.getSnapshot().find((item) => item.id === input.invoiceId);
-  if (!invoice) throw new Error("Không thể đồng bộ hóa đơn sau thanh toán.");
-  return mapInvoicePayment(result.payment, invoice);
-};
-
-const update = async (input: UpdateAccountantPaymentInput): Promise<AccountantPayment> => {
-  const invoicePayment = accountantInvoicesApi.getSnapshot().some((invoice) => invoice.payments.some((payment) => payment.id === input.paymentId));
-  if (invoicePayment) await accountantInvoicesApi.updatePayment(input);
-  else {
-    await delay();
-    const payment = externalPayments.find((item) => item.id === input.paymentId);
-    if (!payment) throw new Error("Không tìm thấy giao dịch thanh toán.");
-    if (payment.status === "VOIDED") throw new Error("Không thể sửa giao dịch đã hủy.");
-    payment.referenceCode = input.referenceCode.trim() || null;
-    payment.note = input.note.trim() || null;
-  }
-  return getById(input.paymentId);
-};
-
-const voidPayment = async (paymentId: string): Promise<void> => {
-  const invoicePayment = accountantInvoicesApi.getSnapshot().some((invoice) => invoice.payments.some((payment) => payment.id === paymentId));
-  if (invoicePayment) {
-    await accountantInvoicesApi.voidPayment(paymentId);
-    return;
-  }
-  await delay();
-  const payment = externalPayments.find((item) => item.id === paymentId);
-  if (!payment) throw new Error("Không tìm thấy giao dịch thanh toán.");
-  if (payment.status === "VOIDED") throw new Error("Giao dịch đã được hủy.");
-  payment.status = "VOIDED";
-};
-
-const getDepositStatus = (held: number, refunded: number): AccountantDepositStatus => {
-  if (held === 0) return "PENDING";
-  if (refunded === 0) return "HELD";
-  return refunded >= held ? "REFUNDED" : "PARTIALLY_REFUNDED";
-};
-
-const getDeposits = async (): Promise<AccountantDepositListData> => {
-  await delay();
-  const deposits = accountantInvoicesApi.getSnapshot()
-    .filter((invoice) => invoice.depositAmount > 0 && invoice.status !== "CANCELLED")
-    .map((invoice): AccountantDeposit => {
-      const heldAmount = Math.min(invoice.depositAmount, invoice.paidAmount);
-      const refundedAmount = Math.min(depositRefunds[invoice.id] ?? 0, heldAmount);
-      return {
-        id: `deposit-${invoice.id}`,
-        invoiceId: invoice.id,
-        invoiceCode: invoice.invoiceCode,
-        rentalCode: invoice.rentalCode,
-        customerName: invoice.customerName,
-        branchName: invoice.branchName,
-        depositAmount: invoice.depositAmount,
-        heldAmount,
-        refundedAmount,
-        status: getDepositStatus(heldAmount, refundedAmount),
-        updatedAt: invoice.updatedAt,
-      };
-    });
-  return {
-    deposits: clone(deposits),
-    summary: {
-      totalDeposit: deposits.reduce((total, item) => total + item.depositAmount, 0),
-      heldAmount: deposits.reduce((total, item) => total + item.heldAmount, 0),
-      refundableAmount: deposits.reduce((total, item) => total + item.heldAmount - item.refundedAmount, 0),
-      refundedAmount: deposits.reduce((total, item) => total + item.refundedAmount, 0),
-    },
-  };
-};
-
-const refundDeposit = async (invoiceId: string): Promise<void> => {
-  const data = await getDeposits();
-  const deposit = data.deposits.find((item) => item.invoiceId === invoiceId);
-  if (!deposit || deposit.heldAmount <= deposit.refundedAmount) throw new Error("Khoản cọc không còn số dư để hoàn.");
-  depositRefunds[invoiceId] = deposit.heldAmount;
-};
-
-export const accountantPaymentsApi = { getList, getById, record, update, voidPayment, getDeposits, refundDeposit };
+const refundDeposit=async(depositId:string):Promise<void>=>{const dto=await authenticatedRequest<DepositDto>("GET",`/api/v1/billing/deposits/${depositId}`);await authenticatedRequest("POST",`/api/v1/billing/deposits/${depositId}/refund`,{body:{amount:Number(dto.remainingAmount),paymentMethod:"BANK_TRANSFER",reason:"Accountant refund"}});};
+export const accountantPaymentsApi={getList,getById,record,update,voidPayment,getDeposits,refundDeposit};
