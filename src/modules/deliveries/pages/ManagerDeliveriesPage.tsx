@@ -185,6 +185,8 @@ export const ManagerDeliveriesPage = () => {
         await managerContextApi.getMyAccessContext(
           {
             userId: user.id,
+            organizationId: user.organizationId,
+            branchIds: user.branchIds,
           },
         );
 

@@ -26,4 +26,6 @@ export interface ManagerAccessContext {
 
 export interface GetManagerAccessContextInput {
   userId: string;
+  organizationId?: number;
+  branchIds: number[];
 }

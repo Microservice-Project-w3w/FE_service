@@ -214,7 +214,9 @@ export const ManagerQuotationApprovalsPage =
         const context =
           await managerContextApi
             .getMyAccessContext({
-              userId: user.id,
+            userId: user.id,
+            organizationId: user.organizationId,
+            branchIds: user.branchIds,
             });
 
         setAccessContext(context);
@@ -222,6 +224,8 @@ export const ManagerQuotationApprovalsPage =
         accessContext,
         setAccessContext,
         user?.id,
+        user?.organizationId,
+        user?.branchIds,
       ]);
 
     const loadQuotations =

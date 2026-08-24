@@ -217,7 +217,9 @@ export const ManagerContractApprovalsPage =
         const context =
           await managerContextApi
             .getMyAccessContext({
-              userId: user.id,
+            userId: user.id,
+            organizationId: user.organizationId,
+            branchIds: user.branchIds,
             });
 
         setAccessContext(context);
@@ -225,6 +227,8 @@ export const ManagerContractApprovalsPage =
         accessContext,
         setAccessContext,
         user?.id,
+        user?.organizationId,
+        user?.branchIds,
       ]);
 
     const loadContracts =
