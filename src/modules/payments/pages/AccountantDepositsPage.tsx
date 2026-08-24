@@ -1,5 +1,6 @@
 import { AlertTriangle, CircleDollarSign, Plus, RefreshCw, RotateCcw, Search, ShieldCheck, WalletCards } from "lucide-react";
 import { AccountantDepositCreateDialog } from "@/modules/payments/components/AccountantDepositCreateDialog";
+import { AccountantDepositDeductionDialog } from "@/modules/payments/components/AccountantDepositDeductionDialog";
 import { AccountantDepositDetailDrawer } from "@/modules/payments/components/AccountantDepositDetailDrawer";
 import { AccountantDepositRefundDialog } from "@/modules/payments/components/AccountantDepositRefundDialog";
 import { AccountantDepositTable } from "@/modules/payments/components/AccountantDepositTable";
@@ -20,7 +21,8 @@ export const AccountantDepositsPage = () => {
     <div className="flex min-h-6 items-center justify-between gap-4"><p className="text-sm font-medium text-slate-500">Tìm thấy <span className="font-bold text-slate-800">{vm.filtered.length}</span> khoản cọc</p><ShieldCheck size={18} className="text-slate-300" /></div>
     <AccountantDepositTable deposits={vm.paginated} isLoading={vm.loading} onView={vm.setSelected} onRefund={(deposit) => { vm.setSelected(null); vm.setRefundTarget(deposit); }} />
     {!vm.loading && vm.filtered.length > 0 && <AccountantPaymentPagination currentPage={vm.page} totalPages={vm.totalPages} pageItems={vm.paginated.length} totalItems={vm.filtered.length} itemLabel="khoản cọc" onPageChange={vm.setPage} />}
-    <AccountantDepositDetailDrawer deposit={vm.selected} onClose={() => vm.setSelected(null)} onRefund={(deposit) => { vm.setSelected(null); vm.setRefundTarget(deposit); }} />
+    <AccountantDepositDetailDrawer deposit={vm.selected} onClose={() => vm.setSelected(null)} onDeduct={(deposit) => { vm.setSelected(null); vm.setDeductionTarget(deposit); }} onRefund={(deposit) => { vm.setSelected(null); vm.setRefundTarget(deposit); }} />
+    <AccountantDepositDeductionDialog deposit={vm.deductionTarget} isSubmitting={vm.submitting} onClose={() => vm.setDeductionTarget(null)} onConfirm={(amount, reason) => void vm.deduct(amount, reason)} />
     <AccountantDepositRefundDialog deposit={vm.refundTarget} isSubmitting={vm.submitting} onClose={() => vm.setRefundTarget(null)} onConfirm={() => void vm.refund()} />
     <AccountantDepositCreateDialog open={vm.createOpen} organizationId={vm.organizationId} references={vm.references} isSubmitting={vm.submitting} onClose={() => vm.setCreateOpen(false)} onSubmit={vm.create} />
   </div>;

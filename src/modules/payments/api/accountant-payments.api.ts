@@ -1,11 +1,12 @@
 import { ApiError } from "@/core/api";
 import { authenticatedRequest } from "@/modules/auth/api/authenticatedClient";
 import { accountantInvoicesApi } from "@/modules/invoices";
-import type { AccountantDeposit, AccountantDepositListData, AccountantDepositStatus, AccountantPayment, AccountantPaymentListData, AccountantPaymentStatus, RecordAccountantPaymentInput, UpdateAccountantPaymentInput } from "@/modules/payments/types/accountant-payment.types";
+import type { AccountantDeposit, AccountantDepositHistory, AccountantDepositListData, AccountantDepositStatus, AccountantPayment, AccountantPaymentListData, AccountantPaymentStatus, RecordAccountantPaymentInput, UpdateAccountantPaymentInput } from "@/modules/payments/types/accountant-payment.types";
 import type { CreateDepositInput } from "@/modules/payments/components/AccountantDepositCreateDialog";
 
 interface PaymentDto { id:number; organizationId:number; branchId:number; customerId:number; invoiceId:number; amount:number; paymentMethod:"CASH"|"BANK_TRANSFER"|"QR"; transactionReference:string; status:"PENDING"|"SUCCESS"|"CANCELLED"|"REFUNDED"; paidAt:string }
 interface DepositDto { id:number; organizationId:number; branchId:number; customerId:number; rentalOrderId:number; rentalContractId:number; amount:number; deductedAmount:number; refundedAmount:number; remainingAmount:number; paymentMethod:string; reference:string|null; notes:string|null; status:string; createdAt:string; updatedAt:string }
+interface DepositHistoryDto { id:number; action:string; amount:number|null; oldStatus:string|null; newStatus:string|null; description:string|null; createdAt:string }
 const requireList = <T,>(value:unknown, code:string):T[] => { if (!Array.isArray(value)) throw new ApiError("Unexpected billing list response", { code }); return value as T[]; };
 const mapStatus = (status:PaymentDto["status"]):AccountantPaymentStatus => status === "CANCELLED" || status === "REFUNDED" ? "VOIDED" : status;
 const mapMethod = (method:PaymentDto["paymentMethod"]) => method === "QR" ? "CARD" as const : method;
@@ -30,12 +31,17 @@ const record = async (input:RecordAccountantPaymentInput):Promise<AccountantPaym
 };
 const update=async(_input:UpdateAccountantPaymentInput):Promise<AccountantPayment>=>{throw new ApiError("Backend does not support editing payments",{code:"PAYMENT_UPDATE_UNSUPPORTED"});};
 const voidPayment=async(id:string):Promise<void>=>{await authenticatedRequest("POST",`/api/v1/billing/payments/${id}/cancel`);};
-const depositStatus=(dto:DepositDto):AccountantDepositStatus=>Number(dto.refundedAmount)>=Number(dto.amount)?"REFUNDED":Number(dto.refundedAmount)>0?"PARTIALLY_REFUNDED":Number(dto.remainingAmount)>0?"HELD":"PENDING";
+const depositStatus=(dto:DepositDto):AccountantDepositStatus=>dto.status === "REFUNDED" ? "REFUNDED" : Number(dto.refundedAmount)>0 ? "PARTIALLY_REFUNDED" : Number(dto.deductedAmount)>0 ? "PARTIALLY_DEDUCTED" : Number(dto.remainingAmount)>0 ? "HELD" : "PENDING";
 const getDeposits=async():Promise<AccountantDepositListData>=>{
   const raw=requireList<DepositDto>(await authenticatedRequest("GET","/api/v1/billing/deposits"),"DEPOSIT_CONTRACT_INVALID");
-  const deposits=raw.map((dto):AccountantDeposit=>({id:String(dto.id),invoiceId:"",invoiceCode:"—",rentalCode:`Order #${dto.rentalOrderId}`,customerName:`Customer #${dto.customerId}`,branchName:`Branch #${dto.branchId}`,depositAmount:Number(dto.amount),heldAmount:Number(dto.amount)-Number(dto.deductedAmount),refundedAmount:Number(dto.refundedAmount),status:depositStatus(dto),updatedAt:dto.updatedAt}));
-  return {deposits,summary:{totalDeposit:deposits.reduce((s,x)=>s+x.depositAmount,0),heldAmount:deposits.reduce((s,x)=>s+x.heldAmount,0),refundableAmount:deposits.reduce((s,x)=>s+x.heldAmount-x.refundedAmount,0),refundedAmount:deposits.reduce((s,x)=>s+x.refundedAmount,0)}};
+  const deposits=await Promise.all(raw.map(async(dto):Promise<AccountantDeposit>=>{
+    const historyRaw=requireList<DepositHistoryDto>(await authenticatedRequest("GET",`/api/v1/billing/deposits/${dto.id}/history`),"DEPOSIT_HISTORY_CONTRACT_INVALID");
+    const history:AccountantDepositHistory[]=historyRaw.map((item)=>({id:String(item.id),action:item.action,amount:item.amount===null?null:Number(item.amount),oldStatus:item.oldStatus,newStatus:item.newStatus,description:item.description,createdAt:item.createdAt}));
+    return {id:String(dto.id),invoiceId:"",invoiceCode:"—",rentalCode:`Order #${dto.rentalOrderId}`,customerName:`Customer #${dto.customerId}`,branchName:`Branch #${dto.branchId}`,depositAmount:Number(dto.amount),deductedAmount:Number(dto.deductedAmount),heldAmount:Number(dto.amount)-Number(dto.deductedAmount),refundedAmount:Number(dto.refundedAmount),remainingAmount:Number(dto.remainingAmount),history,status:depositStatus(dto),updatedAt:dto.updatedAt};
+  }));
+  return {deposits,summary:{totalDeposit:deposits.reduce((s,x)=>s+x.depositAmount,0),heldAmount:deposits.reduce((s,x)=>s+x.remainingAmount,0),refundableAmount:deposits.reduce((s,x)=>s+x.remainingAmount,0),refundedAmount:deposits.reduce((s,x)=>s+x.refundedAmount,0)}};
 };
 const refundDeposit=async(depositId:string):Promise<void>=>{const dto=await authenticatedRequest<DepositDto>("GET",`/api/v1/billing/deposits/${depositId}`);await authenticatedRequest("POST",`/api/v1/billing/deposits/${depositId}/refund`,{body:{amount:Number(dto.remainingAmount),paymentMethod:"BANK_TRANSFER",reason:"Accountant refund"}});};
+const deductDeposit=async(depositId:string,amount:number,reason:string):Promise<void>=>{await authenticatedRequest("POST",`/api/v1/billing/deposits/${depositId}/deductions`,{body:{amount,reason,referenceType:"ACCOUNTANT",referenceId:Number(depositId)}});};
 const createDeposit=async(input:CreateDepositInput):Promise<void>=>{await authenticatedRequest("POST","/api/v1/billing/deposits",{body:input});};
-export const accountantPaymentsApi={getList,getById,record,update,voidPayment,getDeposits,createDeposit,refundDeposit};
+export const accountantPaymentsApi={getList,getById,record,update,voidPayment,getDeposits,createDeposit,deductDeposit,refundDeposit};
