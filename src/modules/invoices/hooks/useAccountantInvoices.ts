@@ -10,6 +10,7 @@ import type {
   AccountantInvoiceListData,
   RecordInvoicePaymentInput,
 } from "@/modules/invoices/types/accountant-invoice.types";
+import type { CreateInvoiceRequestDto } from "@/modules/invoices/api/accountant-invoice-write.dto";
 
 export const ACCOUNTANT_INVOICE_PAGE_SIZE = 5;
 
@@ -42,6 +43,7 @@ export const useAccountantInvoices = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
 
   const loadInvoices = useCallback(async () => {
     setIsLoading(true);
@@ -145,6 +147,18 @@ export const useAccountantInvoices = () => {
     URL.revokeObjectURL(url);
   };
 
+  const createInvoice = async (request: CreateInvoiceRequestDto) => {
+    setIsSubmitting(true); setErrorMessage(null);
+    try {
+      await accountantInvoicesApi.create(request);
+      setCreateOpen(false); setSuccessMessage("Hóa đơn đã được tạo và lưu trên backend.");
+      await loadInvoices();
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Không thể tạo hóa đơn.");
+      throw error;
+    } finally { setIsSubmitting(false); }
+  };
+
   const resetFilters = () => {
     setSearchTerm(""); setBranchId("ALL"); setStatus("ALL"); setFromDate(""); setToDate("");
   };
@@ -155,6 +169,7 @@ export const useAccountantInvoices = () => {
     currentPage, isLoading, isDetailLoading, isSubmitting, errorMessage, successMessage,
     setSearchTerm, setBranchId, setStatus, setFromDate, setToDate, setCurrentPage,
     setSelectedInvoice, setPaymentInvoice, setActionTarget, setSuccessMessage,
+    createOpen, setCreateOpen, createInvoice,
     loadInvoices, viewInvoice, recordPayment, confirmAction, exportInvoices, resetFilters,
   };
 };

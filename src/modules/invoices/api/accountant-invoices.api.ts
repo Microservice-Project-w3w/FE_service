@@ -1,7 +1,7 @@
 import { ApiError } from "@/core/api";
 import { authenticatedRequest } from "@/modules/auth/api/authenticatedClient";
 import type { InvoiceDto, InvoicePaymentStatusDto } from "@/modules/invoices/api/accountant-invoice.dto";
-import type { CancelInvoiceRequestDto } from "@/modules/invoices/api/accountant-invoice-write.dto";
+import type { CancelInvoiceRequestDto, CreateInvoiceRequestDto } from "@/modules/invoices/api/accountant-invoice-write.dto";
 import { mapInvoice } from "@/modules/invoices/api/accountant-invoice.mapper";
 import type {
   AccountantInvoice, AccountantInvoiceListData, AccountantInvoicePayment,
@@ -56,6 +56,11 @@ const cancel = async (
   return loadInvoice(invoice);
 };
 
+const create = async (request: CreateInvoiceRequestDto): Promise<AccountantInvoice> => {
+  const invoice = await authenticatedRequest<InvoiceDto>("POST", BASE_PATH, { body: request });
+  return loadInvoice(invoice);
+};
+
 const unsupportedWrite = (): never => {
   throw new ApiError("Invoice write actions are not integrated in this phase", {
     code: "INVOICE_WRITE_NOT_IMPLEMENTED",
@@ -65,6 +70,7 @@ const unsupportedWrite = (): never => {
 export const accountantInvoicesApi = {
   getList,
   getById,
+  create,
   issue,
   cancel,
   recordPayment: async (_input: RecordInvoicePaymentInput): Promise<{
