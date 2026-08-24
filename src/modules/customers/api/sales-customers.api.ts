@@ -22,7 +22,8 @@ export const salesCustomersApi = {
         companyName: customer.companyName ?? customer.displayName,
         contactName: customer.representativeName ?? customer.fullName ?? customer.displayName,
         phone: customer.phone ?? "", email: customer.email ?? "",
-        branch: branch.branchName, totalTransactions: 0, potentialValue: 0,
+        branchId: customer.branchId, branch: branch.branchName,
+        totalTransactions: 0, potentialValue: 0,
         status: customer.status === "ACTIVE" ? "CUSTOMER"
           : customer.status === "BLOCKED" ? "NEGOTIATING" : "NEW",
         lastInteraction: customer.updatedAt,

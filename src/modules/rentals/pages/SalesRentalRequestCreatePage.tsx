@@ -18,6 +18,7 @@ import type {
 } from "react";
 
 import {
+    useEffect,
     useMemo,
     useState,
 } from "react";
@@ -26,6 +27,10 @@ import {
     Link,
     useNavigate,
 } from "react-router";
+
+import { useAuthStore } from "@/modules/auth/store/auth.store";
+import { useSalesCustomers } from "@/modules/customers/hooks/useSalesCustomers";
+import { salesRentalWorkflowApi } from "@/modules/rentals/api/sales-rental-workflow.api";
 
 type CreateStep =
     | 1
@@ -50,6 +55,7 @@ const CUSTOMERS = [
     "Công ty TNHH Sự kiện Việt",
     "Công ty Minh Phát",
 ];
+void CUSTOMERS;
 
 const INITIAL_EQUIPMENT: EquipmentOption[] = [
     {
@@ -98,6 +104,7 @@ const INITIAL_EQUIPMENT: EquipmentOption[] = [
         quantity: 1,
     },
 ];
+void INITIAL_EQUIPMENT;
 
 const inputClass =
     "h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100";
@@ -229,6 +236,13 @@ const ConfirmItem = ({
 export const SalesRentalRequestCreatePage =
     () => {
         const navigate = useNavigate();
+        const user = useAuthStore((state) => state.user);
+        const { customers, error: customerError } = useSalesCustomers(
+            user?.organizationId,
+            user?.branchIds,
+        );
+        const [submitError, setSubmitError] = useState<string | null>(null);
+        const [isSubmitting, setIsSubmitting] = useState(false);
 
         const [
             step,
@@ -308,8 +322,26 @@ export const SalesRentalRequestCreatePage =
             equipment,
             setEquipment,
         ] = useState(
-            INITIAL_EQUIPMENT,
+            [] as EquipmentOption[],
         );
+
+        useEffect(() => {
+            if (!user?.organizationId) return;
+            let active = true;
+            void salesRentalWorkflowApi.getEquipmentTypes(user.organizationId)
+                .then((types) => {
+                    if (active) setEquipment(types.filter((item) => item.active).map((item) => ({
+                        id: String(item.id), name: item.name, code: item.code,
+                        category: `Danh mục #${item.categoryId}`, available: 999,
+                        selected: false, quantity: 1,
+                    })));
+                })
+                .catch((reason: unknown) => {
+                    if (active) setSubmitError(reason instanceof Error
+                        ? reason.message : "Không thể tải loại thiết bị.");
+                });
+            return () => { active = false; };
+        }, [user?.organizationId]);
 
         const selectedEquipment =
             useMemo(
@@ -417,7 +449,7 @@ export const SalesRentalRequestCreatePage =
                 );
             };
 
-        const handleSubmit =
+        const handleSubmitMock =
             (): void => {
                 window.alert(
                     "Đã tạo yêu cầu thuê mới thành công.",
@@ -427,9 +459,44 @@ export const SalesRentalRequestCreatePage =
                     "/sales/rental-requests",
                 );
             };
+        void handleSubmitMock;
+
+        const handleSubmit = async (): Promise<void> => {
+            const selectedCustomer = customers.find((item) => item.id === customer);
+            if (!user?.organizationId || !selectedCustomer?.branchId || !startDate || !endDate || selectedEquipment.length === 0) {
+                setSubmitError("Vui lòng chọn đầy đủ khách hàng, thời gian và thiết bị.");
+                return;
+            }
+            setIsSubmitting(true);
+            setSubmitError(null);
+            try {
+                await salesRentalWorkflowApi.createRequest({
+                    organizationId: user.organizationId,
+                    branchId: selectedCustomer.branchId,
+                    customerId: Number(selectedCustomer.id),
+                    startAt: `${startDate}T00:00:00`,
+                    endAt: `${endDate}T23:59:59`,
+                    deliveryAddress,
+                    note: [purpose, note, specialRequest].filter(Boolean).join("\n"),
+                    items: selectedEquipment.map((item) => ({
+                        equipmentTypeId: Number(item.id), quantity: item.quantity,
+                    })),
+                });
+                navigate("/sales/rental-requests");
+            } catch (reason) {
+                setSubmitError(reason instanceof Error ? reason.message : "Không thể tạo yêu cầu thuê.");
+            } finally {
+                setIsSubmitting(false);
+            }
+        };
 
         return (
             <main className="space-y-5">
+                {customerError || submitError ? (
+                    <p className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+                        {submitError ?? customerError}
+                    </p>
+                ) : null}
                 <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div>
                         <div className="mb-2 flex items-center gap-2 text-sm text-slate-500">
@@ -544,6 +611,13 @@ export const SalesRentalRequestCreatePage =
                                                 event.target
                                                     .value,
                                             );
+                                            const selected = customers.find((item) => item.id === event.target.value);
+                                            if (selected) {
+                                                setContactName(selected.contactName);
+                                                setPhone(selected.phone);
+                                                setEmail(selected.email);
+                                                setBranch(selected.branch);
+                                            }
                                         }}
                                         className={
                                             inputClass
@@ -553,17 +627,17 @@ export const SalesRentalRequestCreatePage =
                                             Chọn khách hàng
                                         </option>
 
-                                        {CUSTOMERS.map(
+                                        {customers.map(
                                             (item) => (
                                                 <option
                                                     key={
-                                                        item
+                                                        item.id
                                                     }
                                                     value={
-                                                        item
+                                                        item.id
                                                     }
                                                 >
-                                                    {item}
+                                                    {item.companyName} ({item.branch})
                                                 </option>
                                             ),
                                         )}
@@ -1164,10 +1238,11 @@ export const SalesRentalRequestCreatePage =
                     ) : (
                         <button
                             type="button"
+                            disabled={isSubmitting}
                             onClick={
                                 handleSubmit
                             }
-                            className="inline-flex h-10 items-center gap-2 rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white transition hover:bg-blue-700"
+                            className="inline-flex h-10 items-center gap-2 rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             <Check
                                 size={17}

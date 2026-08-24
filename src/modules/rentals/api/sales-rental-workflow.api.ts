@@ -22,6 +22,27 @@ export interface SalesRentalRequestDto {
     createdAt: string;
 }
 
+export interface CreateSalesRentalRequestInput {
+    organizationId: number;
+    branchId: number;
+    customerId: number;
+    startAt: string;
+    endAt: string;
+    deliveryAddress?: string;
+    note?: string;
+    items: Array<{ equipmentTypeId: number; quantity: number }>;
+}
+
+export interface SalesEquipmentTypeDto {
+    id: number;
+    organizationId: number;
+    categoryId: number;
+    code: string;
+    name: string;
+    description: string | null;
+    active: boolean;
+}
+
 const getForBranch = async (organizationId: number, branchId: number) => {
     const response = await authenticatedRequest<ApiEnvelope<SalesRentalRequestDto[]>>(
         "GET",
@@ -31,6 +52,13 @@ const getForBranch = async (organizationId: number, branchId: number) => {
 };
 
 export const salesRentalWorkflowApi = {
+    async getEquipmentTypes(organizationId: number) {
+        return authenticatedRequest<SalesEquipmentTypeDto[]>(
+            "GET",
+            `/api/v1/inventory/equipment-types?organizationId=${organizationId}`,
+        );
+    },
+
     async getRequests(organizationId: number, branchIds: number[]) {
         const requests = await Promise.all(
             branchIds.map((branchId) => getForBranch(organizationId, branchId)),
@@ -42,6 +70,15 @@ export const salesRentalWorkflowApi = {
         const response = await authenticatedRequest<ApiEnvelope<SalesRentalRequestDto>>(
             "GET",
             `/api/v1/rental-requests/${id}`,
+        );
+        return response.data;
+    },
+
+    async createRequest(input: CreateSalesRentalRequestInput) {
+        const response = await authenticatedRequest<ApiEnvelope<SalesRentalRequestDto>>(
+            "POST",
+            "/api/v1/rental-requests",
+            { body: input },
         );
         return response.data;
     },
