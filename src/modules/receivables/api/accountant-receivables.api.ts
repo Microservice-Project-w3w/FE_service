@@ -1,91 +1,137 @@
-import { accountantInvoicesApi, type AccountantInvoice } from "@/modules/invoices";
+import { ApiError } from "@/core/api";
+import { authenticatedRequest } from "@/modules/auth/api/authenticatedClient";
+import { accountantInvoicesApi } from "@/modules/invoices";
+import { accountantPaymentsApi } from "@/modules/payments";
 import type {
   AccountantDebtAgingData,
   AccountantDebtAgingRow,
   AccountantReceivable,
   AccountantReceivableListData,
   AccountantReceivableStatus,
-  AccountantReceivableSummary,
 } from "@/modules/receivables/types/accountant-receivable.types";
 
-const MOCK_DELAY_MS = 180;
-const MOCK_NOW = new Date("2026-08-13T12:00:00+07:00");
-const receivableNotes: Record<string, string | null> = {};
-const delay = () => new Promise<void>((resolve) => window.setTimeout(resolve, MOCK_DELAY_MS));
-const clone = <T,>(value: T): T => structuredClone(value);
+interface DebtDto {
+  id: number;
+  organizationId: number;
+  branchId: number;
+  customerId: number;
+  invoiceId: number;
+  amount: number;
+  remainingAmount: number;
+  dueAt: string;
+  reason: string | null;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
-const mapStatus = (invoice: AccountantInvoice): AccountantReceivableStatus => {
-  if (invoice.status === "PAID") return "PAID";
-  if (invoice.status === "OVERDUE") return "OVERDUE";
-  return invoice.paidAmount > 0 ? "PARTIALLY_PAID" : "UNPAID";
+const BASE_PATH = "/api/v1/billing/debts";
+
+const requireList = (value: unknown): DebtDto[] => {
+  if (!Array.isArray(value)) {
+    throw new ApiError("Unexpected debt list response", { code: "DEBT_CONTRACT_INVALID" });
+  }
+  return value as DebtDto[];
 };
 
-const mapInvoice = (invoice: AccountantInvoice): AccountantReceivable => ({
-  id: `receivable-${invoice.id}`,
-  invoiceId: invoice.id,
-  receivableCode: invoice.invoiceCode.replace("INV-", "CN-"),
-  invoiceCode: invoice.invoiceCode,
-  rentalCode: invoice.rentalCode,
-  contractCode: invoice.contractCode,
-  branchId: invoice.branchId,
-  branchName: invoice.branchName,
-  customerId: invoice.customerId,
-  customerName: invoice.customerName,
-  customerPhone: invoice.customerPhone,
-  customerEmail: invoice.customerEmail,
-  totalAmount: invoice.totalAmount,
-  paidAmount: invoice.paidAmount,
-  outstandingAmount: invoice.remainingAmount,
-  dueDate: invoice.dueDate,
-  status: mapStatus(invoice),
-  note: receivableNotes[invoice.id] ?? invoice.note,
-  updatedAt: invoice.updatedAt,
-  payments: invoice.payments,
-});
+const mapStatus = (debt: DebtDto): AccountantReceivableStatus => {
+  if (Number(debt.remainingAmount) <= 0 || debt.status === "PAID" || debt.status === "SETTLED") return "PAID";
+  if (new Date(debt.dueAt).getTime() < Date.now() || debt.status === "OVERDUE") return "OVERDUE";
+  if (Number(debt.remainingAmount) < Number(debt.amount)) return "PARTIALLY_PAID";
+  return "UNPAID";
+};
 
-const snapshot = (): AccountantReceivable[] => accountantInvoicesApi.getSnapshot()
-  .filter((invoice) => !["DRAFT", "CANCELLED"].includes(invoice.status))
-  .map(mapInvoice)
-  .sort((a, b) => a.dueDate.localeCompare(b.dueDate));
-
-const summary = (items: AccountantReceivable[]): AccountantReceivableSummary => {
-  const dueSoonLimit = new Date(MOCK_NOW); dueSoonLimit.setDate(dueSoonLimit.getDate() + 7);
+const loadReceivable = async (debt: DebtDto): Promise<AccountantReceivable> => {
+  const [invoice, paymentData] = await Promise.all([
+    accountantInvoicesApi.getById(String(debt.invoiceId)),
+    accountantPaymentsApi.getList(),
+  ]);
   return {
-    totalAmount: items.reduce((total, item) => total + item.totalAmount, 0),
-    paidAmount: items.reduce((total, item) => total + item.paidAmount, 0),
-    outstandingAmount: items.reduce((total, item) => total + item.outstandingAmount, 0),
-    overdueAmount: items.filter((item) => item.status === "OVERDUE").reduce((total, item) => total + item.outstandingAmount, 0),
-    dueSoonAmount: items.filter((item) => item.status !== "PAID" && new Date(item.dueDate) >= MOCK_NOW && new Date(item.dueDate) <= dueSoonLimit).reduce((total, item) => total + item.outstandingAmount, 0),
+    id: String(debt.id),
+    invoiceId: String(debt.invoiceId),
+    receivableCode: `DEBT-${debt.id}`,
+    invoiceCode: invoice.invoiceCode || `Invoice #${debt.invoiceId}`,
+    rentalCode: invoice.rentalCode || `Order #${invoice.rentalId}`,
+    contractCode: invoice.contractCode,
+    branchId: String(debt.branchId),
+    branchName: invoice.branchName || `Branch #${debt.branchId}`,
+    customerId: String(debt.customerId),
+    customerName: invoice.customerName || `Customer #${debt.customerId}`,
+    customerPhone: invoice.customerPhone,
+    customerEmail: invoice.customerEmail,
+    totalAmount: Number(debt.amount),
+    paidAmount: Math.max(0, Number(debt.amount) - Number(debt.remainingAmount)),
+    outstandingAmount: Number(debt.remainingAmount),
+    dueDate: debt.dueAt,
+    status: mapStatus(debt),
+    note: debt.reason,
+    updatedAt: debt.updatedAt,
+    payments: paymentData.payments
+      .filter((payment) => payment.invoiceId === String(debt.invoiceId))
+      .filter((payment) => payment.status === "SUCCESS" || payment.status === "VOIDED")
+      .map((payment) => ({
+        id: payment.id,
+        invoiceId: payment.invoiceId,
+        amount: payment.amount,
+        method: payment.method,
+        referenceCode: payment.referenceCode,
+        paidAt: payment.paidAt,
+        recordedBy: payment.recordedBy,
+        status: payment.status === "VOIDED" ? "VOIDED" as const : "SUCCESS" as const,
+        note: payment.note,
+      })),
+  };
+};
+
+const summarize = (receivables: AccountantReceivable[]) => {
+  const dueSoonLimit = Date.now() + 7 * 24 * 60 * 60 * 1000;
+  return {
+    totalAmount: receivables.reduce((sum, item) => sum + item.totalAmount, 0),
+    paidAmount: receivables.reduce((sum, item) => sum + item.paidAmount, 0),
+    outstandingAmount: receivables.reduce((sum, item) => sum + item.outstandingAmount, 0),
+    overdueAmount: receivables.filter((item) => item.status === "OVERDUE").reduce((sum, item) => sum + item.outstandingAmount, 0),
+    dueSoonAmount: receivables
+      .filter((item) => item.status !== "PAID" && new Date(item.dueDate).getTime() >= Date.now() && new Date(item.dueDate).getTime() <= dueSoonLimit)
+      .reduce((sum, item) => sum + item.outstandingAmount, 0),
   };
 };
 
 const getList = async (): Promise<AccountantReceivableListData> => {
-  await delay(); const receivables = snapshot(); return { receivables: clone(receivables), summary: summary(receivables) };
-};
-const getById = async (receivableId: string): Promise<AccountantReceivable> => {
-  await delay(); const item = snapshot().find((receivable) => receivable.id === receivableId);
-  if (!item) throw new Error("Không tìm thấy công nợ."); return clone(item);
-};
-const updateNote = async (invoiceId: string, note: string): Promise<AccountantReceivable> => {
-  await delay(); if (note.trim().length > 300) throw new Error("Ghi chú tối đa 300 ký tự."); receivableNotes[invoiceId] = note.trim() || null;
-  const item = snapshot().find((receivable) => receivable.invoiceId === invoiceId);
-  if (!item) throw new Error("Không tìm thấy công nợ."); return clone(item);
+  const debts = requireList(await authenticatedRequest<DebtDto[]>("GET", BASE_PATH));
+  const receivables = await Promise.all(debts.map(loadReceivable));
+  return { receivables, summary: summarize(receivables) };
 };
 
-const getDebtAging = async (): Promise<AccountantDebtAgingData> => {
-  await delay(); const groups = new Map<string, AccountantDebtAgingRow>();
-  for (const item of snapshot().filter((receivable) => receivable.outstandingAmount > 0)) {
-    const row = groups.get(item.customerId) ?? { customerId: item.customerId, customerName: item.customerName, totalDebt: 0, currentAmount: 0, oneToThirtyDays: 0, overThirtyDays: 0, invoiceCount: 0, status: "GOOD" };
-    const overdueDays = Math.max(0, Math.floor((MOCK_NOW.getTime() - new Date(item.dueDate).getTime()) / 86_400_000));
-    row.totalDebt += item.outstandingAmount; row.invoiceCount += 1;
-    if (overdueDays === 0) row.currentAmount += item.outstandingAmount;
-    else if (overdueDays <= 30) row.oneToThirtyDays += item.outstandingAmount;
+const getById = async (id: string): Promise<AccountantReceivable> =>
+  loadReceivable(await authenticatedRequest<DebtDto>("GET", `${BASE_PATH}/${id}`));
+
+const getAging = async (): Promise<AccountantDebtAgingData> => {
+  const { receivables } = await getList();
+  const grouped = new Map<string, AccountantDebtAgingRow>();
+  const now = Date.now();
+  for (const item of receivables.filter(({ outstandingAmount }) => outstandingAmount > 0)) {
+    const daysOverdue = Math.floor((now - new Date(item.dueDate).getTime()) / 86_400_000);
+    const row = grouped.get(item.customerId) ?? { customerId: item.customerId, customerName: item.customerName, totalDebt: 0, currentAmount: 0, oneToThirtyDays: 0, overThirtyDays: 0, invoiceCount: 0, status: "GOOD" };
+    row.totalDebt += item.outstandingAmount;
+    row.invoiceCount += 1;
+    if (daysOverdue <= 0) row.currentAmount += item.outstandingAmount;
+    else if (daysOverdue <= 30) row.oneToThirtyDays += item.outstandingAmount;
     else row.overThirtyDays += item.outstandingAmount;
     row.status = row.overThirtyDays > 0 ? "CRITICAL" : row.oneToThirtyDays > 0 ? "WARNING" : "GOOD";
-    groups.set(item.customerId, row);
+    grouped.set(item.customerId, row);
   }
-  const rows = [...groups.values()].sort((a, b) => b.totalDebt - a.totalDebt);
-  return { rows: clone(rows), totalDebt: rows.reduce((t, r) => t + r.totalDebt, 0), currentAmount: rows.reduce((t, r) => t + r.currentAmount, 0), oneToThirtyDays: rows.reduce((t, r) => t + r.oneToThirtyDays, 0), overThirtyDays: rows.reduce((t, r) => t + r.overThirtyDays, 0) };
+  const rows = [...grouped.values()];
+  return {
+    rows,
+    totalDebt: rows.reduce((sum, row) => sum + row.totalDebt, 0),
+    currentAmount: rows.reduce((sum, row) => sum + row.currentAmount, 0),
+    oneToThirtyDays: rows.reduce((sum, row) => sum + row.oneToThirtyDays, 0),
+    overThirtyDays: rows.reduce((sum, row) => sum + row.overThirtyDays, 0),
+  };
 };
 
-export const accountantReceivablesApi = { getList, getById, updateNote, getDebtAging };
+const updateNote = async (): Promise<never> => {
+  throw new ApiError("Backend does not provide a debt note update endpoint", { code: "DEBT_NOTE_UNSUPPORTED" });
+};
+
+export const accountantReceivablesApi = { getList, getById, getAging, getDebtAging: getAging, updateNote };
