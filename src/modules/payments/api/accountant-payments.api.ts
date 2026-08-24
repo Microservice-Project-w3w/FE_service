@@ -2,6 +2,7 @@ import { ApiError } from "@/core/api";
 import { authenticatedRequest } from "@/modules/auth/api/authenticatedClient";
 import { accountantInvoicesApi } from "@/modules/invoices";
 import type { AccountantDeposit, AccountantDepositListData, AccountantDepositStatus, AccountantPayment, AccountantPaymentListData, AccountantPaymentStatus, RecordAccountantPaymentInput, UpdateAccountantPaymentInput } from "@/modules/payments/types/accountant-payment.types";
+import type { CreateDepositInput } from "@/modules/payments/components/AccountantDepositCreateDialog";
 
 interface PaymentDto { id:number; organizationId:number; branchId:number; customerId:number; invoiceId:number; amount:number; paymentMethod:"CASH"|"BANK_TRANSFER"|"QR"; transactionReference:string; status:"PENDING"|"SUCCESS"|"CANCELLED"|"REFUNDED"; paidAt:string }
 interface DepositDto { id:number; organizationId:number; branchId:number; customerId:number; rentalOrderId:number; rentalContractId:number; amount:number; deductedAmount:number; refundedAmount:number; remainingAmount:number; paymentMethod:string; reference:string|null; notes:string|null; status:string; createdAt:string; updatedAt:string }
@@ -36,4 +37,5 @@ const getDeposits=async():Promise<AccountantDepositListData>=>{
   return {deposits,summary:{totalDeposit:deposits.reduce((s,x)=>s+x.depositAmount,0),heldAmount:deposits.reduce((s,x)=>s+x.heldAmount,0),refundableAmount:deposits.reduce((s,x)=>s+x.heldAmount-x.refundedAmount,0),refundedAmount:deposits.reduce((s,x)=>s+x.refundedAmount,0)}};
 };
 const refundDeposit=async(depositId:string):Promise<void>=>{const dto=await authenticatedRequest<DepositDto>("GET",`/api/v1/billing/deposits/${depositId}`);await authenticatedRequest("POST",`/api/v1/billing/deposits/${depositId}/refund`,{body:{amount:Number(dto.remainingAmount),paymentMethod:"BANK_TRANSFER",reason:"Accountant refund"}});};
-export const accountantPaymentsApi={getList,getById,record,update,voidPayment,getDeposits,refundDeposit};
+const createDeposit=async(input:CreateDepositInput):Promise<void>=>{await authenticatedRequest("POST","/api/v1/billing/deposits",{body:input});};
+export const accountantPaymentsApi={getList,getById,record,update,voidPayment,getDeposits,createDeposit,refundDeposit};
