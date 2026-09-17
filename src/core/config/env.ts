@@ -13,14 +13,22 @@ const timeout = Number(
   import.meta.env.VITE_API_TIMEOUT ?? 15000,
 );
 
+const normalizeBaseUrl = (
+  value: string,
+): string => {
+  return value.replace(/\/+$/, "");
+};
+
 export const env = {
   appName:
     import.meta.env.VITE_APP_NAME ??
     "Hệ thống quản lý cho thuê máy móc và thiết bị sự kiện",
 
   apiBaseUrl:
-    import.meta.env.VITE_API_BASE_URL ??
-    "http://localhost:8080/api",
+    normalizeBaseUrl(
+      import.meta.env.VITE_API_BASE_URL ??
+      "http://localhost:8080",
+    ),
 
   apiTimeout:
     Number.isFinite(timeout) ? timeout : 15000,

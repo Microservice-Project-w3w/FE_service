@@ -16,6 +16,8 @@ import {
     Link,
 } from "react-router";
 
+import { useSalesRentalRequests } from "@/modules/rentals/hooks/useSalesRentalRequests";
+
 type Status =
     | "NEW"
     | "PROCESSING"
@@ -41,7 +43,7 @@ interface RentalRequest {
     priority: Priority;
 }
 
-const DATA: RentalRequest[] = [
+const _DATA: RentalRequest[] = [
     {
         id: "request-001",
         code: "REQ-2026-028",
@@ -119,6 +121,7 @@ const DATA: RentalRequest[] = [
         priority: "LOW",
     },
 ];
+void _DATA;
 
 const STATUS = {
     NEW: {
@@ -165,6 +168,7 @@ const PRIORITY = {
 
 export const SalesAllRentalRequestsPage =
     () => {
+        const { requests, error, isLoading } = useSalesRentalRequests();
         const [
             search,
             setSearch,
@@ -184,7 +188,29 @@ export const SalesAllRentalRequestsPage =
                         .toLowerCase()
                         .trim();
 
-                return DATA.filter(
+                const backendRequests: RentalRequest[] = requests.map((item) => ({
+                    id: String(item.id),
+                    code: item.requestCode,
+                    company: `Khách hàng #${item.customerId}`,
+                    contact: item.deliveryAddress ?? "Chưa có địa chỉ giao",
+                    equipment: item.items.reduce((sum, equipment) => sum + equipment.quantity, 0),
+                    types: item.items.length,
+                    date: new Date(item.createdAt).toLocaleDateString("vi-VN"),
+                    time: new Date(item.createdAt).toLocaleTimeString("vi-VN", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                    }),
+                    status: item.status === "QUOTED"
+                        ? "QUOTED"
+                        : item.status === "CANCELLED" || item.status === "REJECTED"
+                            ? "CANCELLED"
+                            : item.status === "PROCESSING"
+                                ? "PROCESSING"
+                                : "NEW",
+                    priority: "MEDIUM",
+                }));
+
+                return backendRequests.filter(
                     (item) => {
                         const matchSearch =
                             !keyword ||
@@ -211,10 +237,21 @@ export const SalesAllRentalRequestsPage =
             }, [
                 search,
                 status,
+                requests,
             ]);
 
         return (
             <main className="space-y-5">
+                {isLoading ? (
+                    <p className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-500">
+                        Đang tải yêu cầu thuê từ backend...
+                    </p>
+                ) : null}
+                {error ? (
+                    <p className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+                        {error}
+                    </p>
+                ) : null}
                 <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                     <div>
                         <div className="text-sm text-slate-500">

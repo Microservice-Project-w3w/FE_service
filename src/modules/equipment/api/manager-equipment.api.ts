@@ -1,223 +1,74 @@
-import {
-  cloneManagerEquipmentMockData,
-} from "@/modules/equipment/mocks/manager-equipment.mock";
-
+import { authenticatedRequest } from "@/modules/auth/api/authenticatedClient";
 import type {
-  GetManagerEquipmentInput,
-  ManagerEquipment,
-  ManagerEquipmentListData,
-  ManagerEquipmentSummary,
+  GetManagerEquipmentInput, ManagerEquipment, ManagerEquipmentCondition,
+  ManagerEquipmentListData, ManagerEquipmentStatus,
 } from "@/modules/equipment/types/manager-equipment.types";
 
-const MOCK_NOW =
-  new Date(
-    "2026-08-07T23:10:00+07:00",
-  );
-
-const MAINTENANCE_WARNING_DAYS = 7;
-
-const MOCK_DELAY_MS = 250;
-
-let equipment =
-  cloneManagerEquipmentMockData();
-
-const delay = async () => {
-  await new Promise<void>(
-    (resolve) => {
-      window.setTimeout(
-        resolve,
-        MOCK_DELAY_MS,
-      );
-    },
-  );
+interface EquipmentDto {
+  id: number; organizationId: number; branchId: number; warehouseId: number;
+  modelId: number; assetCode: string; serialNumber: string | null;
+  status: string; conditionStatus: string; note: string | null; updatedAt: string;
+}
+const uiStatus = (status: string): ManagerEquipmentStatus => {
+  if (status === "AVAILABLE") return "AVAILABLE";
+  if (status === "RESERVED") return "RESERVED";
+  if (status === "MAINTENANCE" || status === "INSPECTION") return "MAINTENANCE";
+  if (status === "DAMAGED" || status === "LOST" || status === "RETIRED") return "DAMAGED";
+  return "RENTED";
 };
-
-const requireEquipment = (
-  equipmentId: string,
-) => {
-  const item =
-    equipment.find(
-      (current) =>
-        current.id ===
-        equipmentId,
-    );
-
-  if (!item) {
-    throw new Error(
-      "Không tìm thấy thiết bị.",
-    );
-  }
-
-  return item;
-};
-
-const getScopedEquipment = ({
-  assignedBranchIds,
-  selectedScopeId,
-}: GetManagerEquipmentInput) => {
-  const assignedBranchSet =
-    new Set(
-      assignedBranchIds,
-    );
-
-  return equipment.filter(
-    (item) =>
-      assignedBranchSet.has(
-        item.branchId,
-      ) &&
-      (
-        selectedScopeId ===
-          "ALL" ||
-        item.branchId ===
-          selectedScopeId
-      ),
-  );
-};
-
-const getSummary = (
-  items: ManagerEquipment[],
-): ManagerEquipmentSummary => {
-  const warningLimit =
-    new Date(MOCK_NOW);
-
-  warningLimit.setDate(
-    warningLimit.getDate() +
-      MAINTENANCE_WARNING_DAYS,
-  );
-
+const uiCondition = (condition: string): ManagerEquipmentCondition =>
+  condition === "DAMAGED" || condition === "POOR"
+    ? "DAMAGED" : condition === "FAIR" ? "NEEDS_INSPECTION" : "GOOD";
+const toEquipment = (dto: EquipmentDto): ManagerEquipment => {
+  const status = uiStatus(dto.status);
   return {
-    totalQuantity:
-      items.reduce(
-        (
-          total,
-          item,
-        ) =>
-          total +
-          item.totalQuantity,
-        0,
-      ),
-
-    availableQuantity:
-      items.reduce(
-        (
-          total,
-          item,
-        ) =>
-          total +
-          item.availableQuantity,
-        0,
-      ),
-
-    rentedQuantity:
-      items.reduce(
-        (
-          total,
-          item,
-        ) =>
-          total +
-          item.rentedQuantity,
-        0,
-      ),
-
-    reservedQuantity:
-      items.reduce(
-        (
-          total,
-          item,
-        ) =>
-          total +
-          item.reservedQuantity,
-        0,
-      ),
-
-    maintenanceQuantity:
-      items.reduce(
-        (
-          total,
-          item,
-        ) =>
-          total +
-          item.maintenanceQuantity,
-        0,
-      ),
-
-    damagedQuantity:
-      items.reduce(
-        (
-          total,
-          item,
-        ) =>
-          total +
-          item.damagedQuantity,
-        0,
-      ),
-
-    maintenanceDueCount:
-      items.filter(
-        (item) => {
-          if (
-            !item.nextMaintenanceAt
-          ) {
-            return false;
-          }
-
-          return (
-            new Date(
-              item.nextMaintenanceAt,
-            ) <= warningLimit
-          );
-        },
-      ).length,
+    id: String(dto.id), organizationId: String(dto.organizationId),
+    branchId: String(dto.branchId), branchName: `Chi nhánh #${dto.branchId}`,
+    equipmentCode: dto.assetCode, equipmentName: dto.serialNumber || `Thiết bị #${dto.id}`,
+    categoryId: "", categoryName: "", warehouseId: String(dto.warehouseId),
+    warehouseName: `Kho #${dto.warehouseId}`, status,
+    condition: uiCondition(dto.conditionStatus), totalQuantity: 1,
+    availableQuantity: status === "AVAILABLE" ? 1 : 0,
+    rentedQuantity: status === "RENTED" ? 1 : 0,
+    reservedQuantity: status === "RESERVED" ? 1 : 0,
+    maintenanceQuantity: status === "MAINTENANCE" ? 1 : 0,
+    damagedQuantity: status === "DAMAGED" ? 1 : 0,
+    currentRentalCodes: [], lastMaintenanceAt: null, nextMaintenanceAt: null,
+    note: dto.note, updatedAt: dto.updatedAt, maintenanceHistory: [],
   };
 };
-
-const getList = async (
-  input: GetManagerEquipmentInput,
-): Promise<ManagerEquipmentListData> => {
-  await delay();
-
-  const scopedEquipment =
-    getScopedEquipment(
-      input,
-    ).sort(
-      (
-        first,
-        second,
-      ) =>
-        first.equipmentCode.localeCompare(
-          second.equipmentCode,
-        ),
-    );
-
-  return {
-    summary:
-      getSummary(
-        scopedEquipment,
-      ),
-
-    equipment:
-      structuredClone(
-        scopedEquipment,
-      ),
-
-    generatedAt:
-      MOCK_NOW.toISOString(),
-  };
-};
-
-const getById = async (
-  equipmentId: string,
-): Promise<ManagerEquipment> => {
-  await delay();
-
-  return structuredClone(
-    requireEquipment(
-      equipmentId,
-    ),
-  );
-};
+let lastItems: ManagerEquipment[] = [];
+const summary = (items: ManagerEquipment[]) => ({
+  totalQuantity: items.length,
+  availableQuantity: items.reduce((sum, item) => sum + item.availableQuantity, 0),
+  rentedQuantity: items.reduce((sum, item) => sum + item.rentedQuantity, 0),
+  reservedQuantity: items.reduce((sum, item) => sum + item.reservedQuantity, 0),
+  maintenanceQuantity: items.reduce((sum, item) => sum + item.maintenanceQuantity, 0),
+  damagedQuantity: items.reduce((sum, item) => sum + item.damagedQuantity, 0),
+  maintenanceDueCount: 0,
+});
 
 export const managerEquipmentApi = {
-  getList,
-  getById,
+  async getList(input: GetManagerEquipmentInput): Promise<ManagerEquipmentListData> {
+    const branchIds = input.selectedScopeId === "ALL"
+      ? input.assignedBranchIds : [input.selectedScopeId];
+    const groups = await Promise.all(branchIds.map((branchId) =>
+      authenticatedRequest<EquipmentDto[]>(
+        "GET",
+        `/api/v1/inventory/equipment?organizationId=${Number(input.organizationId)}&branchId=${Number(branchId)}`,
+      ),
+    ));
+    lastItems = groups.flat().map(toEquipment)
+      .sort((a, b) => a.equipmentCode.localeCompare(b.equipmentCode));
+    return { summary: summary(lastItems), equipment: lastItems, generatedAt: new Date().toISOString() };
+  },
+  async getById(equipmentId: string): Promise<ManagerEquipment> {
+    const cached = lastItems.find((item) => item.id === equipmentId);
+    if (!cached) throw new Error("Hãy tải danh sách thiết bị trước khi xem chi tiết.");
+    const dto = await authenticatedRequest<EquipmentDto>(
+      "GET",
+      `/api/v1/inventory/equipment/${equipmentId}?organizationId=${Number(cached.organizationId)}`,
+    );
+    return toEquipment(dto);
+  },
 };

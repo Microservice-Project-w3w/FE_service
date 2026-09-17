@@ -228,13 +228,17 @@ export const ManagerRentalsPage = () => {
         await managerContextApi
           .getMyAccessContext({
             userId: user.id,
+            organizationId: user.organizationId,
+            branchIds: user.branchIds,
           });
 
       setAccessContext(context);
     }, [
       accessContext,
       setAccessContext,
-      user?.id,
+        user?.id,
+        user?.organizationId,
+        user?.branchIds,
     ]);
 
   const loadRentals =

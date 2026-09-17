@@ -7,6 +7,7 @@ import {
   FileClock,
   Files,
   RefreshCw,
+  Plus,
   TriangleAlert,
 } from "lucide-react";
 
@@ -17,6 +18,7 @@ import { AccountantInvoicePagination } from "@/modules/invoices/components/Accou
 import { AccountantInvoicePaymentDialog } from "@/modules/invoices/components/AccountantInvoicePaymentDialog";
 import { AccountantInvoiceSummaryCard } from "@/modules/invoices/components/AccountantInvoiceSummaryCard";
 import { AccountantInvoiceTable } from "@/modules/invoices/components/AccountantInvoiceTable";
+import { AccountantInvoiceCreateDialog } from "@/modules/invoices/components/AccountantInvoiceCreateDialog";
 import { formatInvoiceCurrency } from "@/modules/invoices/components/accountantInvoiceFormatters";
 import { useAccountantInvoices } from "@/modules/invoices/hooks/useAccountantInvoices";
 
@@ -35,6 +37,9 @@ export const AccountantInvoicesPage = () => {
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
+          <button type="button" onClick={() => viewModel.setCreateOpen(true)} className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm hover:bg-blue-700">
+            <Plus size={17} /> Tạo hóa đơn
+          </button>
           <button type="button" disabled={viewModel.isLoading || viewModel.filteredInvoices.length === 0} onClick={viewModel.exportInvoices} className="inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 disabled:opacity-50">
             <Download size={17} /> Xuất danh sách
           </button>
@@ -100,7 +105,8 @@ export const AccountantInvoicesPage = () => {
 
       <AccountantInvoiceDetailDrawer invoice={viewModel.selectedInvoice} isLoading={viewModel.isDetailLoading} onClose={() => viewModel.setSelectedInvoice(null)} onRecordPayment={(invoice) => { viewModel.setSelectedInvoice(null); viewModel.setPaymentInvoice(invoice); }} />
       <AccountantInvoicePaymentDialog invoice={viewModel.paymentInvoice} recordedBy={viewModel.user?.fullName ?? "Kế toán"} isSubmitting={viewModel.isSubmitting} onClose={() => viewModel.setPaymentInvoice(null)} onSubmit={viewModel.recordPayment} />
-      <AccountantInvoiceActionDialog open={Boolean(viewModel.actionTarget)} action={viewModel.actionTarget?.action ?? "ISSUE"} invoiceCode={viewModel.actionTarget?.invoice.invoiceCode ?? ""} isSubmitting={viewModel.isSubmitting} onClose={() => viewModel.setActionTarget(null)} onConfirm={() => void viewModel.confirmAction()} />
+      <AccountantInvoiceActionDialog open={Boolean(viewModel.actionTarget)} action={viewModel.actionTarget?.action ?? "ISSUE"} invoiceCode={viewModel.actionTarget?.invoice.invoiceCode ?? ""} isSubmitting={viewModel.isSubmitting} onClose={() => viewModel.setActionTarget(null)} onConfirm={(reason) => void viewModel.confirmAction(reason)} />
+      <AccountantInvoiceCreateDialog open={viewModel.createOpen} submitting={viewModel.isSubmitting} onClose={() => viewModel.setCreateOpen(false)} onSubmit={viewModel.createInvoice} />
     </div>
   );
 };

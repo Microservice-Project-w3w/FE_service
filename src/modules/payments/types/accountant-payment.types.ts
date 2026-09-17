@@ -46,7 +46,17 @@ export interface UpdateAccountantPaymentInput {
 
 export type RecordAccountantPaymentInput = RecordInvoicePaymentInput;
 
-export type AccountantDepositStatus = "PENDING" | "HELD" | "PARTIALLY_REFUNDED" | "REFUNDED";
+export type AccountantDepositStatus = "PENDING" | "HELD" | "PARTIALLY_DEDUCTED" | "PARTIALLY_REFUNDED" | "REFUNDED";
+
+export interface AccountantDepositHistory {
+  id: string;
+  action: string;
+  amount: number | null;
+  oldStatus: string | null;
+  newStatus: string | null;
+  description: string | null;
+  createdAt: string;
+}
 
 export interface AccountantDeposit {
   id: string;
@@ -56,8 +66,11 @@ export interface AccountantDeposit {
   customerName: string;
   branchName: string;
   depositAmount: number;
+  deductedAmount: number;
   heldAmount: number;
   refundedAmount: number;
+  remainingAmount: number;
+  history: AccountantDepositHistory[];
   status: AccountantDepositStatus;
   updatedAt: string;
 }

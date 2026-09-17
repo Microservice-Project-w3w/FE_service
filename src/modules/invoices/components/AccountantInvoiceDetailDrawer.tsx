@@ -3,6 +3,7 @@ import { useEffect } from "react";
 
 import { AccountantInvoiceBadge } from "@/modules/invoices/components/AccountantInvoiceBadge";
 import {
+  displayInvoiceValue,
   formatInvoiceCurrency,
   formatInvoiceDate,
   paymentMethodLabels,
@@ -50,7 +51,7 @@ export const AccountantInvoiceDetailDrawer = ({
             <span className="flex size-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600"><FileText size={22} /></span>
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">Chi tiết hóa đơn</p>
-              <h2 className="mt-1 text-xl font-bold text-slate-900">{invoice.invoiceCode}</h2>
+              <h2 className="mt-1 text-xl font-bold text-slate-900">{displayInvoiceValue(invoice.invoiceCode)}</h2>
             </div>
           </div>
           <button type="button" aria-label="Đóng" onClick={onClose} className="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700"><X size={20} /></button>
@@ -67,8 +68,8 @@ export const AccountantInvoiceDetailDrawer = ({
                   <AccountantInvoiceBadge status={invoice.status} />
                 </div>
                 <dl className="mt-5 grid gap-4 text-sm sm:grid-cols-2">
-                  <div><dt className="text-slate-400">Chi nhánh</dt><dd className="mt-1 font-semibold text-slate-700">{invoice.branchName}</dd></div>
-                  <div><dt className="text-slate-400">Đơn thuê</dt><dd className="mt-1 font-semibold text-blue-700">{invoice.rentalCode}</dd></div>
+                  <div><dt className="text-slate-400">Chi nhánh</dt><dd className="mt-1 font-semibold text-slate-700">{displayInvoiceValue(invoice.branchName)}</dd></div>
+                  <div><dt className="text-slate-400">Đơn thuê</dt><dd className="mt-1 font-semibold text-blue-700">{displayInvoiceValue(invoice.rentalCode)}</dd></div>
                   <div><dt className="text-slate-400">Ngày phát hành</dt><dd className="mt-1 font-semibold text-slate-700">{formatInvoiceDate(invoice.issuedAt)}</dd></div>
                   <div><dt className="text-slate-400">Hạn thanh toán</dt><dd className={`mt-1 font-semibold ${invoice.status === "OVERDUE" ? "text-rose-600" : "text-slate-700"}`}>{formatInvoiceDate(invoice.dueDate)}</dd></div>
                 </dl>
@@ -76,8 +77,8 @@ export const AccountantInvoiceDetailDrawer = ({
 
               <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <h3 className="font-bold text-slate-900">Khách hàng</h3>
-                <p className="mt-4 font-semibold text-slate-800">{invoice.customerName}</p>
-                <p className="mt-1 text-sm text-slate-500">{invoice.customerPhone} · {invoice.customerEmail}</p>
+                <p className="mt-4 font-semibold text-slate-800">{displayInvoiceValue(invoice.customerName)}</p>
+                <p className="mt-1 text-sm text-slate-500">{displayInvoiceValue(invoice.customerPhone)} · {displayInvoiceValue(invoice.customerEmail)}</p>
               </section>
 
               <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -86,9 +87,9 @@ export const AccountantInvoiceDetailDrawer = ({
                   {invoice.lines.map((line) => (
                     <div key={line.id} className="flex justify-between gap-4"><span className="text-slate-500">{line.description}</span><strong className="whitespace-nowrap text-slate-700">{formatInvoiceCurrency(line.amount)}</strong></div>
                   ))}
-                  <div className="flex justify-between gap-4"><span className="text-slate-500">Tiền đặt cọc</span><strong className="text-slate-700">{formatInvoiceCurrency(invoice.depositAmount)}</strong></div>
-                  <div className="flex justify-between gap-4"><span className="text-slate-500">VAT</span><strong className="text-slate-700">{formatInvoiceCurrency(invoice.taxAmount)}</strong></div>
-                  <div className="flex justify-between gap-4"><span className="text-slate-500">Giảm giá</span><strong className="text-slate-700">-{formatInvoiceCurrency(invoice.discountAmount)}</strong></div>
+                  <div className="flex justify-between gap-4"><span className="text-slate-500">Tiền đặt cọc</span><strong className="text-slate-700">{invoice.supplementalAmountsAvailable === false ? "—" : formatInvoiceCurrency(invoice.depositAmount)}</strong></div>
+                  <div className="flex justify-between gap-4"><span className="text-slate-500">VAT</span><strong className="text-slate-700">{invoice.supplementalAmountsAvailable === false ? "—" : formatInvoiceCurrency(invoice.taxAmount)}</strong></div>
+                  <div className="flex justify-between gap-4"><span className="text-slate-500">Giảm giá</span><strong className="text-slate-700">{invoice.supplementalAmountsAvailable === false ? "—" : `-${formatInvoiceCurrency(invoice.discountAmount)}`}</strong></div>
                   <div className="border-t border-slate-100 pt-3"><div className="flex justify-between gap-4"><span className="font-semibold text-slate-700">Tổng hóa đơn</span><strong className="text-slate-900">{formatInvoiceCurrency(invoice.totalAmount)}</strong></div></div>
                   <div className="flex justify-between gap-4"><span className="text-slate-500">Đã thanh toán</span><strong className="text-emerald-700">{formatInvoiceCurrency(invoice.paidAmount)}</strong></div>
                   <div className="flex justify-between gap-4"><span className="font-semibold text-slate-700">Còn phải thu</span><strong className={invoice.status === "OVERDUE" ? "text-rose-600" : "text-blue-700"}>{formatInvoiceCurrency(invoice.remainingAmount)}</strong></div>
@@ -97,7 +98,9 @@ export const AccountantInvoiceDetailDrawer = ({
 
               <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
                 <h3 className="border-b border-slate-100 px-5 py-4 font-bold text-slate-900">Lịch sử thanh toán</h3>
-                {invoice.payments.length === 0 ? (
+                {invoice.paymentsAvailable === false ? (
+                  <p className="px-5 py-8 text-center text-sm text-slate-400">—</p>
+                ) : invoice.payments.length === 0 ? (
                   <p className="px-5 py-8 text-center text-sm text-slate-400">Chưa có giao dịch thanh toán.</p>
                 ) : invoice.payments.map((payment) => (
                   <div key={payment.id} className="border-b border-slate-100 px-5 py-4 last:border-b-0">

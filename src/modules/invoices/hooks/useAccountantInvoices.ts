@@ -10,6 +10,7 @@ import type {
   AccountantInvoiceListData,
   RecordInvoicePaymentInput,
 } from "@/modules/invoices/types/accountant-invoice.types";
+import type { CreateInvoiceRequestDto } from "@/modules/invoices/api/accountant-invoice-write.dto";
 
 export const ACCOUNTANT_INVOICE_PAGE_SIZE = 5;
 
@@ -42,6 +43,7 @@ export const useAccountantInvoices = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
 
   const loadInvoices = useCallback(async () => {
     setIsLoading(true);
@@ -65,8 +67,9 @@ export const useAccountantInvoices = () => {
   const filteredInvoices = useMemo(() => {
     const search = searchTerm.trim().toLowerCase();
     return data.invoices.filter((invoice) => {
-      const searchable = `${invoice.invoiceCode} ${invoice.customerName} ${invoice.rentalCode}`.toLowerCase();
-      const invoiceDate = (invoice.issuedAt ?? invoice.createdAt).slice(0, 10);
+      const searchable = [invoice.invoiceCode, invoice.customerName, invoice.rentalCode]
+        .filter(Boolean).join(" ").toLowerCase();
+      const invoiceDate = (invoice.issuedAt ?? invoice.createdAt ?? invoice.dueDate ?? "").slice(0, 10);
       return (!search || searchable.includes(search))
         && (branchId === "ALL" || invoice.branchId === branchId)
         && (status === "ALL" || invoice.status === status)
@@ -113,13 +116,13 @@ export const useAccountantInvoices = () => {
     }
   };
 
-  const confirmAction = async () => {
+  const confirmAction = async (cancelReason: string) => {
     if (!actionTarget) return;
     setIsSubmitting(true);
     setErrorMessage(null);
     try {
       if (actionTarget.action === "ISSUE") await accountantInvoicesApi.issue(actionTarget.invoice.id);
-      else await accountantInvoicesApi.cancel(actionTarget.invoice.id);
+      else await accountantInvoicesApi.cancel(actionTarget.invoice.id, { reason: cancelReason.trim() });
       setSuccessMessage(actionTarget.action === "ISSUE" ? "Hóa đơn đã được phát hành." : "Hóa đơn đã được hủy.");
       setActionTarget(null);
       setSelectedInvoice(null);
@@ -144,6 +147,18 @@ export const useAccountantInvoices = () => {
     URL.revokeObjectURL(url);
   };
 
+  const createInvoice = async (request: CreateInvoiceRequestDto) => {
+    setIsSubmitting(true); setErrorMessage(null);
+    try {
+      await accountantInvoicesApi.create(request);
+      setCreateOpen(false); setSuccessMessage("Hóa đơn đã được tạo và lưu trên backend.");
+      await loadInvoices();
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Không thể tạo hóa đơn.");
+      throw error;
+    } finally { setIsSubmitting(false); }
+  };
+
   const resetFilters = () => {
     setSearchTerm(""); setBranchId("ALL"); setStatus("ALL"); setFromDate(""); setToDate("");
   };
@@ -154,6 +169,7 @@ export const useAccountantInvoices = () => {
     currentPage, isLoading, isDetailLoading, isSubmitting, errorMessage, successMessage,
     setSearchTerm, setBranchId, setStatus, setFromDate, setToDate, setCurrentPage,
     setSelectedInvoice, setPaymentInvoice, setActionTarget, setSuccessMessage,
+    createOpen, setCreateOpen, createInvoice,
     loadInvoices, viewInvoice, recordPayment, confirmAction, exportInvoices, resetFilters,
   };
 };

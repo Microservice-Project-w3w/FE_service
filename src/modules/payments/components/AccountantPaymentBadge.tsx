@@ -18,9 +18,11 @@ export const AccountantPaymentBadge = ({ status }: { status: AccountantPaymentSt
 );
 
 const depositLabels: Record<AccountantDepositStatus, string> = {
+  PARTIALLY_DEDUCTED: "Đã khấu trừ",
   PENDING: "Chờ thu", HELD: "Đang giữ", PARTIALLY_REFUNDED: "Đã hoàn một phần", REFUNDED: "Đã hoàn",
 };
 const depositClasses: Record<AccountantDepositStatus, string> = {
+  PARTIALLY_DEDUCTED: "border-orange-200 bg-orange-50 text-orange-700",
   PENDING: "border-amber-200 bg-amber-50 text-amber-700",
   HELD: "border-blue-200 bg-blue-50 text-blue-700",
   PARTIALLY_REFUNDED: "border-violet-200 bg-violet-50 text-violet-700",

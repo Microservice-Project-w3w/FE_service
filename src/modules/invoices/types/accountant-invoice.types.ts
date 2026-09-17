@@ -1,5 +1,6 @@
 export type AccountantInvoiceStatus =
   | "DRAFT"
+  | "ISSUED"
   | "UNPAID"
   | "PARTIALLY_PAID"
   | "PAID"
@@ -36,6 +37,7 @@ export interface AccountantInvoicePayment {
 
 export interface AccountantInvoice {
   id: string;
+  organizationId?: string;
   invoiceCode: string;
   branchId: string;
   branchName: string;
@@ -52,6 +54,7 @@ export interface AccountantInvoice {
   depositAmount: number;
   taxAmount: number;
   discountAmount: number;
+  supplementalAmountsAvailable?: boolean;
   totalAmount: number;
   paidAmount: number;
   remainingAmount: number;
@@ -61,6 +64,7 @@ export interface AccountantInvoice {
   updatedAt: string;
   lines: AccountantInvoiceLine[];
   payments: AccountantInvoicePayment[];
+  paymentsAvailable?: boolean;
 }
 
 export interface AccountantInvoiceSummary {

@@ -1,261 +1,75 @@
-import {
-  initialManagerQuotations,
-} from "@/modules/quotations/mocks/manager-quotation-approvals.mock";
-
+import { authenticatedRequest } from "@/modules/auth/api/authenticatedClient";
+import type { ApiEnvelope } from "@/modules/auth/types/auth.types";
 import type {
-  ApproveManagerQuotationInput,
-  GetManagerQuotationsInput,
-  ManagerQuotation,
-  ManagerQuotationListData,
-  RejectManagerQuotationInput,
+  ApproveManagerQuotationInput, GetManagerQuotationsInput, ManagerQuotation,
+  ManagerQuotationListData, QuotationApprovalStatus, RejectManagerQuotationInput,
 } from "@/modules/quotations/types/manager-quotation-approval.types";
 
-const delay = async (
-  milliseconds = 220,
-): Promise<void> => {
-  await new Promise<void>((resolve) => {
-    window.setTimeout(
-      resolve,
-      milliseconds,
-    );
-  });
-};
-
-let quotationDatabase =
-  structuredClone(
-    initialManagerQuotations,
+interface QuotationDto {
+  id: number; organizationId: number; branchId: number; quotationCode: string;
+  rentalRequestId: number; customerId: number; rentalAmount: number; depositAmount: number;
+  deliveryFee: number; discountAmount: number; totalAmount: number;
+  status: string; validUntil: string; specialTerms: string | null;
+}
+const supportedStatuses = new Set(["PENDING_APPROVAL", "APPROVED", "REJECTED", "EXPIRED"]);
+const toQuotation = (dto: QuotationDto): ManagerQuotation => ({
+  id: String(dto.id), organizationId: String(dto.organizationId), branchId: String(dto.branchId),
+  branchName: `Chi nhánh #${dto.branchId}`, quotationCode: dto.quotationCode,
+  customerId: String(dto.customerId), customerName: `Khách hàng #${dto.customerId}`,
+  customerPhone: "", customerEmail: "", eventName: `Yêu cầu thuê #${dto.rentalRequestId}`,
+  eventLocation: "", rentalStartDate: "", rentalEndDate: "", expiresAt: dto.validUntil,
+  status: dto.status as QuotationApprovalStatus, priority: "NORMAL",
+  subtotal: Number(dto.rentalAmount), discountAmount: Number(dto.discountAmount),
+  deliveryFee: Number(dto.deliveryFee), taxAmount: 0, depositType: "FIXED",
+  depositValue: Number(dto.depositAmount), depositAmount: Number(dto.depositAmount),
+  totalAmount: Number(dto.totalAmount), createdById: "", createdByName: "",
+  createdAt: dto.validUntil, note: dto.specialTerms, lineItems: [], approvalHistory: [],
+});
+const getBranches = (input: GetManagerQuotationsInput): string[] =>
+  input.selectedScopeId === "ALL" ? input.assignedBranchIds : [input.selectedScopeId];
+const load = async (organizationId: string, branchId: string): Promise<ManagerQuotation[]> => {
+  const response = await authenticatedRequest<ApiEnvelope<QuotationDto[]>>(
+    "GET", `/api/v1/quotations?organizationId=${Number(organizationId)}&branchId=${Number(branchId)}`,
   );
-
-const getQuotationOrThrow = (
-  quotationId: string,
-): ManagerQuotation => {
-  const quotation =
-    quotationDatabase.find(
-      (item) =>
-        item.id === quotationId,
-    );
-
-  if (!quotation) {
-    throw new Error(
-      "Không tìm thấy báo giá.",
-    );
-  }
-
-  return quotation;
+  return response.data.filter((dto) => supportedStatuses.has(dto.status)).map(toQuotation);
 };
 
-const ensurePendingQuotation = (
-  quotation: ManagerQuotation,
-): void => {
-  if (
-    quotation.status !==
-    "PENDING_APPROVAL"
-  ) {
-    throw new Error(
-      "Báo giá này không còn ở trạng thái chờ duyệt.",
+export const managerQuotationApprovalsApi = {
+  async getList(input: GetManagerQuotationsInput): Promise<ManagerQuotationListData> {
+    const quotations = (await Promise.all(
+      getBranches(input).map((branchId) => load(input.organizationId, branchId)),
+    )).flat().sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    const pending = quotations.filter((item) => item.status === "PENDING_APPROVAL");
+    const soon = Date.now() + 48 * 60 * 60 * 1000;
+    return {
+      summary: {
+        pendingCount: pending.length,
+        pendingValue: pending.reduce((sum, item) => sum + item.totalAmount, 0),
+        expiringSoonCount: pending.filter((item) => new Date(item.expiresAt).getTime() <= soon).length,
+        processedCount: quotations.filter((item) =>
+          item.status === "APPROVED" || item.status === "REJECTED",
+        ).length,
+      },
+      quotations, generatedAt: new Date().toISOString(),
+    };
+  },
+  async getById(_quotationId: string): Promise<ManagerQuotation> {
+    throw new Error("Backend chưa có API lấy chi tiết báo giá theo ID.");
+  },
+  async approve(input: ApproveManagerQuotationInput): Promise<ManagerQuotation> {
+    const response = await authenticatedRequest<ApiEnvelope<QuotationDto>>(
+      "PATCH", `/api/v1/quotations/${input.quotationId}/approve`,
     );
-  }
+    return toQuotation(response.data);
+  },
+  async reject(input: RejectManagerQuotationInput): Promise<ManagerQuotation> {
+    if (!input.reason.trim()) throw new Error("Vui lòng nhập lý do từ chối báo giá.");
+    const response = await authenticatedRequest<ApiEnvelope<QuotationDto>>(
+      "PATCH", `/api/v1/quotations/${input.quotationId}/reject`,
+    );
+    return toQuotation(response.data);
+  },
+  resetMockData(): void {
+    throw new Error("Khôi phục dữ liệu mẫu đã bị vô hiệu hóa.");
+  },
 };
-
-export const managerQuotationApprovalsApi =
-  {
-    async getList(
-      input: GetManagerQuotationsInput,
-    ): Promise<ManagerQuotationListData> {
-      await delay();
-
-      const allowedBranchIds =
-        input.selectedScopeId === "ALL"
-          ? input.assignedBranchIds
-          : [
-              input.selectedScopeId,
-            ];
-
-      const quotations =
-        quotationDatabase
-          .filter(
-            (quotation) =>
-              quotation.organizationId ===
-                input.organizationId &&
-              allowedBranchIds.includes(
-                quotation.branchId,
-              ),
-          )
-          .sort(
-            (first, second) =>
-              new Date(
-                second.createdAt,
-              ).getTime() -
-              new Date(
-                first.createdAt,
-              ).getTime(),
-          );
-
-      const pendingQuotations =
-        quotations.filter(
-          (quotation) =>
-            quotation.status ===
-            "PENDING_APPROVAL",
-        );
-
-      const now =
-        new Date(
-          "2026-08-06T14:48:00.000Z",
-        );
-
-      const fortyEightHours =
-        48 * 60 * 60 * 1000;
-
-      const processedCount =
-        quotations.filter(
-          (quotation) =>
-            quotation.status ===
-              "APPROVED" ||
-            quotation.status ===
-              "REJECTED",
-        ).length;
-
-      return {
-        summary: {
-          pendingCount:
-            pendingQuotations.length,
-
-          pendingValue:
-            pendingQuotations.reduce(
-              (total, quotation) =>
-                total +
-                quotation.totalAmount,
-              0,
-            ),
-
-          expiringSoonCount:
-            pendingQuotations.filter(
-              (quotation) => {
-                const expiresAt =
-                  new Date(
-                    quotation.expiresAt,
-                  ).getTime();
-
-                const remainingTime =
-                  expiresAt -
-                  now.getTime();
-
-                return (
-                  remainingTime >= 0 &&
-                  remainingTime <=
-                    fortyEightHours
-                );
-              },
-            ).length,
-
-          processedCount,
-        },
-
-        quotations:
-          structuredClone(
-            quotations,
-          ),
-
-        generatedAt:
-          new Date().toISOString(),
-      };
-    },
-
-    async getById(
-      quotationId: string,
-    ): Promise<ManagerQuotation> {
-      await delay(140);
-
-      return structuredClone(
-        getQuotationOrThrow(
-          quotationId,
-        ),
-      );
-    },
-
-    async approve(
-      input:
-        ApproveManagerQuotationInput,
-    ): Promise<ManagerQuotation> {
-      await delay();
-
-      const quotation =
-        getQuotationOrThrow(
-          input.quotationId,
-        );
-
-      ensurePendingQuotation(
-        quotation,
-      );
-
-      quotation.status = "APPROVED";
-
-      quotation.approvalHistory.push({
-        id: `history-${Date.now()}`,
-        action: "APPROVED",
-        actorId:
-          input.reviewerId,
-        actorName:
-          input.reviewerName,
-        note:
-          input.note?.trim() ||
-          null,
-        createdAt:
-          new Date().toISOString(),
-      });
-
-      return structuredClone(
-        quotation,
-      );
-    },
-
-    async reject(
-      input:
-        RejectManagerQuotationInput,
-    ): Promise<ManagerQuotation> {
-      await delay();
-
-      const reason =
-        input.reason.trim();
-
-      if (!reason) {
-        throw new Error(
-          "Vui lòng nhập lý do từ chối báo giá.",
-        );
-      }
-
-      const quotation =
-        getQuotationOrThrow(
-          input.quotationId,
-        );
-
-      ensurePendingQuotation(
-        quotation,
-      );
-
-      quotation.status = "REJECTED";
-
-      quotation.approvalHistory.push({
-        id: `history-${Date.now()}`,
-        action: "REJECTED",
-        actorId:
-          input.reviewerId,
-        actorName:
-          input.reviewerName,
-        note: reason,
-        createdAt:
-          new Date().toISOString(),
-      });
-
-      return structuredClone(
-        quotation,
-      );
-    },
-
-    resetMockData(): void {
-      quotationDatabase =
-        structuredClone(
-          initialManagerQuotations,
-        );
-    },
-  };

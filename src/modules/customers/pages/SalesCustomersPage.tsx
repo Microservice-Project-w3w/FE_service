@@ -17,28 +17,14 @@ import {
 import {
     useNavigate,
 } from "react-router";
+import { useAuthStore } from "@/modules/auth";
+import { useSalesCustomers } from "@/modules/customers/hooks/useSalesCustomers";
+import type {
+    SalesCustomerItem,
+    SalesCustomerStatus,
+} from "@/modules/customers/types/sales-customer.types";
 
-type SalesCustomerStatus =
-    | "NEW"
-    | "INTERESTED"
-    | "NEGOTIATING"
-    | "CUSTOMER";
-
-interface SalesCustomerItem {
-    id: string;
-    customerCode: string;
-    companyName: string;
-    contactName: string;
-    phone: string;
-    email: string;
-    branch: string;
-    totalTransactions: number;
-    potentialValue: number;
-    status: SalesCustomerStatus;
-    lastInteraction: string;
-}
-
-const CUSTOMER_MOCKS: SalesCustomerItem[] = [
+const _CUSTOMER_MOCKS: SalesCustomerItem[] = [
     {
         id: "customer-001",
         customerCode: "CUS-2026-001",
@@ -118,6 +104,7 @@ const CUSTOMER_MOCKS: SalesCustomerItem[] = [
         lastInteraction: "09/08/2026",
     },
 ];
+void _CUSTOMER_MOCKS;
 
 const STATUS_CONFIG: Record<
     SalesCustomerStatus,
@@ -173,6 +160,15 @@ const normalizeSearch = (
 
 export const SalesCustomersPage = () => {
     const navigate = useNavigate();
+    const user = useAuthStore((state) => state.user);
+    const {
+        customers,
+        isLoading,
+        error,
+    } = useSalesCustomers(
+        user?.organizationId,
+        user?.branchIds ?? [],
+    );
 
     const [
         searchTerm,
@@ -198,7 +194,7 @@ export const SalesCustomersPage = () => {
                     searchTerm,
                 );
 
-            return CUSTOMER_MOCKS.filter(
+            return customers.filter(
                 (customer) => {
                     const searchable =
                         normalizeSearch(
@@ -230,6 +226,7 @@ export const SalesCustomersPage = () => {
                 },
             );
         }, [
+            customers,
             searchTerm,
             status,
         ]);
@@ -259,7 +256,7 @@ export const SalesCustomersPage = () => {
         ]);
 
     const totalPotentialValue =
-        CUSTOMER_MOCKS.reduce(
+        customers.reduce(
             (total, customer) =>
                 total +
                 customer.potentialValue,
@@ -267,7 +264,7 @@ export const SalesCustomersPage = () => {
         );
 
     const interestedCount =
-        CUSTOMER_MOCKS.filter(
+        customers.filter(
             (customer) =>
                 customer.status ===
                 "INTERESTED" ||
@@ -276,7 +273,7 @@ export const SalesCustomersPage = () => {
         ).length;
 
     const negotiatingCount =
-        CUSTOMER_MOCKS.filter(
+        customers.filter(
             (customer) =>
                 customer.status ===
                 "NEGOTIATING",
@@ -300,6 +297,16 @@ export const SalesCustomersPage = () => {
 
     return (
         <main className="space-y-5">
+            {isLoading && (
+                <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+                    Đang tải khách hàng từ backend...
+                </div>
+            )}
+            {error && (
+                <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    {error}
+                </div>
+            )}
             <header className="flex items-start gap-3">
                 <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
                     <Users
@@ -347,7 +354,7 @@ export const SalesCustomersPage = () => {
 
                         <p className="mt-2 text-2xl font-bold text-slate-950">
                             {
-                                CUSTOMER_MOCKS.length
+                                customers.length
                             }
                         </p>
                     </div>

@@ -192,7 +192,9 @@ export const ManagerDashboardPage = () => {
         const context =
           await managerContextApi
             .getMyAccessContext({
-              userId: user.id,
+            userId: user.id,
+            organizationId: user.organizationId,
+            branchIds: user.branchIds,
             });
 
         setAccessContext(context);
@@ -207,7 +209,9 @@ export const ManagerDashboardPage = () => {
       }
     }, [
       setAccessContext,
-      user?.id,
+        user?.id,
+        user?.organizationId,
+        user?.branchIds,
     ]);
 
   const loadDashboard =

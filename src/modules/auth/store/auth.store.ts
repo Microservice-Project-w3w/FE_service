@@ -10,7 +10,12 @@ import {
     authStorage,
 } from "@/modules/auth/api/auth.storage";
 
+import {
+    setAuthSessionListener,
+} from "@/modules/auth/api/authenticatedClient";
+
 import type {
+    AuthSession,
     AuthUser,
     ChangePasswordPayload,
     LoginPayload,
@@ -163,3 +168,17 @@ export const useAuthStore =
                 },
         }),
     );
+
+const applySession = (
+    session: AuthSession | null,
+): void => {
+    useAuthStore.setState({
+        user: session?.user ?? null,
+        accessToken:
+            session?.accessToken ?? null,
+        isAuthenticated:
+            Boolean(session?.accessToken),
+    });
+};
+
+setAuthSessionListener(applySession);
