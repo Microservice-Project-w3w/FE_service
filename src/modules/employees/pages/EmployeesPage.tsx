@@ -1,3 +1,4 @@
+import { branchesApi } from "@/modules/branches/api/branches.api";
 import {
   BriefcaseBusiness,
   Building2,
@@ -60,21 +61,6 @@ import type {
   UpdateEmployeeInput,
 } from "@/modules/employees/types/employee.types";
 
-const branches = [
-  {
-    id: "branch-hanoi",
-    name: "Chi nhánh Hà Nội",
-  },
-  {
-    id: "branch-hcm",
-    name: "Chi nhánh TP. Hồ Chí Minh",
-  },
-  {
-    id: "branch-danang",
-    name: "Chi nhánh Đà Nẵng",
-  },
-];
-
 const positionLabels: Record<
   EmployeePosition,
   string
@@ -111,6 +97,7 @@ export const EmployeesPage = () => {
     employees,
     setEmployees,
   ] = useState<Employee[]>([]);
+  const [branches, setBranches] = useState<{id: string, name: string}[]>([]);
 
   const [
     isLoading,
@@ -216,9 +203,12 @@ export const EmployeesPage = () => {
       setErrorMessage(null);
 
       try {
-        setEmployees(
-          await employeesApi.list(),
-        );
+        const [empData, branchData] = await Promise.all([
+            employeesApi.list(),
+            branchesApi.list()
+          ]);
+          setEmployees(empData);
+          setBranches(branchData.map(b => ({ id: b.id, name: b.name })));
       } catch (error) {
         setErrorMessage(
           error instanceof Error

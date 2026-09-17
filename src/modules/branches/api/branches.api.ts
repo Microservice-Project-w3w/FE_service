@@ -16,7 +16,7 @@ const toBranch = (dto: BranchDto): Branch => ({
   email: dto.email ?? "", address: dto.address ?? "", province: "",
   managerEmployeeId: null, managerName: null, managerEmail: null,
   employeeCount: 0, activeRentalCount: 0, status: dto.status,
-  openedAt: "", description: "", createdAt: dto.createdAt, updatedAt: dto.updatedAt,
+  openedAt: dto.createdAt, description: "", createdAt: dto.createdAt, updatedAt: dto.updatedAt,
 });
 const normalizeText = (value: string): string => value.trim().toLocaleLowerCase("vi");
 const branchPath = (organizationId: string, id?: string): string =>
@@ -94,3 +94,4 @@ export const branchesApi = {
     return unsupported("Khôi phục dữ liệu mẫu");
   },
 };
+

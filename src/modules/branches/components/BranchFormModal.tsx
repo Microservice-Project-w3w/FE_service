@@ -72,7 +72,7 @@ const createInitialForm = (
   }
 
   return {
-    organizationId: "org-rentai",
+    organizationId: "1",
     branchCode: "",
     name: "",
     phone: "",
@@ -503,3 +503,4 @@ export const BranchFormModal = ({
     </div>
   );
 };
+

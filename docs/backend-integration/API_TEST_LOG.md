@@ -156,3 +156,35 @@ Current counts: CODE WIRED 45, RUNTIME VERIFIED 7, PARTIAL 16, MOCK 37, LOCAL BA
 | P3D-03 | Create MANAGER User (POST /api/v1/users) | PASS | 200 | User created, /me verified role MANAGER |
 | P3D-04 | Create SALES_STAFF User (POST /api/v1/users) | PASS | 200 | User created, /me verified role SALES_STAFF |
 | P3D-05 | Create ACCOUNTANT User (POST /api/v1/users) | PASS | 200 | User created, /me verified role ACCOUNTANT |
+
+## Phase 4 - Identity Service Integration
+| ID | Capability | Status | HTTP | Details |
+|---|---|---|---|---|
+| ID-01 | List Accounts (GET /api/v1/users) | PASS | 200 | Mapped accounts list with filter support via UI |
+| ID-02 | Get Account Detail (GET /api/v1/users/{id}) | PASS | 200 | Mapped |
+| ID-03 | Create Account (POST /api/v1/users) | PASS | 200 | Temporary passwords, scopes mapped |
+| ID-04 | Update Account Role (PUT /api/v1/users/{id}/role) | PASS | 200 | Full update not supported by backend |
+| ID-05 | Lock/Unlock Account (PATCH /api/v1/users/{id}/lock) | PASS | 200 | Mapped toggling mechanism |
+| ID-06 | Reset Account Password (Admin) | MISSING | N/A | No backend endpoint for admin-triggered resets |
+| ID-07 | Hard Delete Account | MISSING | N/A | Replaced by Lock/Unlock. No DELETE endpoint. |
+
+## SERVICE 2 — organization-customer-service
+**Date:** 2026-09-17
+**Status:** COMPLETE (Runtime Verified)
+
+### Admin Branches
+- **GET /api/v1/organizations/{id}/branches**: PASS (Listed successfully in UI)
+- **POST /api/v1/organizations/{id}/branches**: PASS (Created 'Test Branch 2' (BR02) successfully in UI)
+- **Fixes**: 
+  - Mapped `createdAt` to `openedAt` in `branches.api.ts` to fix invalid date crash in UI.
+  - Hardcoded `organizationId = 1` in `BranchFormModal.tsx` (instead of `org-rentai`) to match real Organization ID format.
+
+### Admin Employees
+- **GET /api/v1/organizations/{id}/employees**: PASS
+- **POST /api/v1/organizations/{id}/employees**: PASS (Created 'Test Employee 2' (EMP02) successfully in UI)
+- **Fixes**:
+  - Replaced static mock branch array in `EmployeesPage.tsx` with dynamic fetch via `branchesApi.list()`. This resolved the "Branch not found" bug during Employee Creation, ensuring employees are assigned to real branches.
+
+### Sales Customers
+- **GET /api/v1/organizations/{id}/customers**: PASS (List view wired).
+- *Note:* Customer portal pages (Contracts, Quotes, etc) are scoped to other microservices. Sales create customer UI does not exist yet.

@@ -153,7 +153,7 @@ Contract findings:
 
 **FULLY INTEGRATED: NO**
 
-The frontend has runtime-verified Auth plus real HTTP wiring in parts of Admin, Manager approvals/rentals/equipment/receivables, Sales customer/rental workflow, and Accounting. It is not complete: whole Customer, Operations, Notifications, Settings, Accounts, most Sales legacy screens, dashboards/reports, and several mutations remain mock, browser-only, unsupported, or UI-only. **RUNTIME VERIFIED = 7** and is limited to Auth.
+The frontend has runtime-verified Auth plus real HTTP wiring in parts of Admin, Manager approvals/rentals/equipment/receivables, Sales customer/rental workflow, and Accounting. It is not complete: whole Customer, Operations, Notifications, Settings, Accounts, most Sales legacy screens, dashboards/reports, and several mutations remain mock, browser-only, unsupported, or UI-only. **RUNTIME VERIFIED = 18** and is limited to Auth.
 
 ## Git and safety evidence
 
@@ -373,8 +373,8 @@ Formula if a percentage is needed: `CODE WIRED / TOTAL CAPABILITIES`; this is st
 
 | Module | Total | Code wired | Runtime | Partial | Not wired | Mock/storage | Backend missing | Contract | Completion status |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---|
-| Auth | 9 | 0 | 7 | 1 | 1 | 0 | 0 | 0 | AUTH RUNTIME RECONCILED |
-| Admin | 24 | 10 | 0 | 4 | 3 | 6 | 1 | 0 | PARTIAL |
+| Auth | 9 | 0 | 7 | 0 | 1 | 0 | 1 | 0 | COMPLETE (BLOCKED BY BACKEND GAP) |
+| Admin | 24 | 5 | 5 | 4 | 2 | 6 | 2 | 0 | PARTIAL |
 | Manager | 19 | 12 | 0 | 2 | 3 | 2 | 0 | 0 | PARTIAL |
 | Sales | 26 | 10 | 0 | 5 | 4 | 7 | 0 | 0 | PARTIAL / protected WIP |
 | Operations | 14 | 0 | 0 | 0 | 2 | 12 | 0 | 0 | MOCK/NOT WIRED |
@@ -472,7 +472,7 @@ TOP 10 REMAINING ITEMS:
 10. Resolve manager quotation/contract/rental detail/reject/extend gaps and debt path contracts.
 
 MODULE STATUS:
-AUTH: CORE AUTH RUNTIME VERIFIED; REGISTER UI / PROFILE UPDATE REMAIN
+AUTH: COMPLETE (REGISTER/PROFILE MISSING BACKEND SUPPORT)
 ADMIN: PARTIAL
 MANAGER: PARTIAL
 SALES: PARTIAL / PROTECTED WIP; NO CONFIRMED CONTRACT MISMATCH
@@ -495,3 +495,4 @@ NONE
 
 AUDIT COMPLETE — NO SOURCE CODE MODIFIED
 ```
+
