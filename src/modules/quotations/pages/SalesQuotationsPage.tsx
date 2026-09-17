@@ -29,6 +29,8 @@ import {
     Link,
 } from "react-router";
 
+import { useSalesRentalWorkflow } from "@/modules/rentals/hooks/useSalesRentalWorkflow";
+
 type QuotationStatus =
     | "PENDING"
     | "SENT"
@@ -173,6 +175,7 @@ const QUOTATION_MOCKS: SalesQuotation[] =
             };
         },
     );
+void QUOTATION_MOCKS;
 
 const RECENT_ACTIVITIES: RecentActivity[] = [
     {
@@ -267,6 +270,23 @@ const normalizeSearch = (
 
 export const SalesQuotationsPage =
     () => {
+        const { quotations, isLoading, error } = useSalesRentalWorkflow();
+        const backendQuotations = useMemo<SalesQuotation[]>(() => quotations.map((item) => ({
+            id: String(item.id), code: item.quotationCode,
+            companyName: `Khách hàng #${item.customerId}`,
+            contactName: `Yêu cầu thuê #${item.rentalRequestId}`,
+            equipmentName: "Chi tiết theo yêu cầu thuê",
+            equipmentModel: `Chi nhánh #${item.branchId}`,
+            createdDate: new Date(item.validUntil).toLocaleDateString("vi-VN"),
+            createdTime: new Date(item.validUntil).toLocaleTimeString("vi-VN", {
+                hour: "2-digit", minute: "2-digit",
+            }),
+            ageDays: 0, value: Number(item.totalAmount),
+            status: item.status === "SENT" ? "SENT"
+                : item.status === "ACCEPTED" || item.status === "CONVERTED" ? "ACCEPTED"
+                    : item.status === "REJECTED" || item.status === "CANCELLED" || item.status === "EXPIRED" ? "REJECTED"
+                        : "PENDING",
+        })), [quotations]);
         const [
             searchTerm,
             setSearchTerm,
@@ -316,35 +336,35 @@ export const SalesQuotationsPage =
         const summary =
             useMemo(() => {
                 const pending =
-                    QUOTATION_MOCKS.filter(
+                    backendQuotations.filter(
                         (item) =>
                             item.status ===
                             "PENDING",
                     ).length;
 
                 const sent =
-                    QUOTATION_MOCKS.filter(
+                    backendQuotations.filter(
                         (item) =>
                             item.status ===
                             "SENT",
                     ).length;
 
                 const accepted =
-                    QUOTATION_MOCKS.filter(
+                    backendQuotations.filter(
                         (item) =>
                             item.status ===
                             "ACCEPTED",
                     ).length;
 
                 const rejected =
-                    QUOTATION_MOCKS.filter(
+                    backendQuotations.filter(
                         (item) =>
                             item.status ===
                             "REJECTED",
                     ).length;
 
                 const total =
-                    QUOTATION_MOCKS.length;
+                    backendQuotations.length;
 
                 return {
                     total,
@@ -359,7 +379,7 @@ export const SalesQuotationsPage =
                                 total) *
                             100,
                 };
-            }, []);
+            }, [backendQuotations]);
 
         const filteredQuotations =
             useMemo(() => {
@@ -382,7 +402,7 @@ export const SalesQuotationsPage =
                             maxValue,
                         );
 
-                return QUOTATION_MOCKS.filter(
+                return backendQuotations.filter(
                     (quotation) => {
                         const searchable =
                             normalizeSearch(
@@ -436,6 +456,7 @@ export const SalesQuotationsPage =
                 dateRange,
                 minValue,
                 maxValue,
+                backendQuotations,
             ]);
 
         const totalPages =
@@ -487,6 +508,8 @@ export const SalesQuotationsPage =
 
         return (
             <main className="space-y-4">
+                {isLoading ? <p className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-500">Đang tải báo giá từ backend...</p> : null}
+                {error ? <p className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">{error}</p> : null}
                 <header className="relative overflow-hidden rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50 via-white to-white px-5 py-4">
                     <div className="absolute -right-20 -top-24 size-48 rounded-full bg-blue-100/40 blur-3xl" />
 

@@ -43,6 +43,72 @@ export interface SalesEquipmentTypeDto {
     active: boolean;
 }
 
+export interface SalesQuotationDto {
+    id: number;
+    organizationId: number;
+    branchId: number;
+    quotationCode: string;
+    rentalRequestId: number;
+    customerId: number;
+    rentalAmount: number;
+    depositAmount: number;
+    deliveryFee: number;
+    discountAmount: number;
+    totalAmount: number;
+    discountCode: string | null;
+    status: "DRAFT" | "PENDING_APPROVAL" | "APPROVED" | "SENT" | "ACCEPTED" | "REJECTED" | "EXPIRED" | "CONVERTED" | "CANCELLED";
+    validUntil: string;
+    specialTerms: string | null;
+}
+
+export interface SalesRentalOrderDto {
+    id: number;
+    organizationId: number;
+    branchId: number;
+    orderCode: string;
+    quotationId: number;
+    customerId: number;
+    startAt: string;
+    endAt: string;
+    totalAmount: number;
+    status: "PENDING" | "RESERVED" | "CONFIRMED" | "CANCELLED" | "EXPIRED";
+    reservedUntil: string | null;
+    inventoryReservationId: string | null;
+    cancelReason: string | null;
+}
+
+export interface SalesContractDto {
+    id: number;
+    organizationId: number;
+    branchId: number;
+    contractCode: string;
+    rentalOrderId: number;
+    customerId: number;
+    startAt: string;
+    endAt: string;
+    totalAmount: number;
+    status: "PENDING_APPROVAL" | "APPROVED" | "SIGNED" | "ACTIVE" | "EXTENDED" | "LIQUIDATED" | "CANCELLED";
+    terms: string | null;
+    approvedAt: string | null;
+    signedAt: string | null;
+}
+
+const loadScoped = async <T>(
+    path: string,
+    organizationId: number,
+    branchIds: number[],
+): Promise<T[]> => {
+    const groups = await Promise.all(branchIds.map(async (branchId) => {
+        const separator = path.includes("?") ? "&" : "?";
+        const response = await authenticatedRequest<ApiEnvelope<T[]>>(
+            "GET",
+            `${path}${separator}organizationId=${organizationId}&branchId=${branchId}`,
+        );
+        return response.data;
+    }));
+    return groups.flat();
+};
+
 const getForBranch = async (organizationId: number, branchId: number) => {
     const response = await authenticatedRequest<ApiEnvelope<SalesRentalRequestDto[]>>(
         "GET",
@@ -79,6 +145,56 @@ export const salesRentalWorkflowApi = {
             "POST",
             "/api/v1/rental-requests",
             { body: input },
+        );
+        return response.data;
+    },
+
+    getQuotations(organizationId: number, branchIds: number[]) {
+        return loadScoped<SalesQuotationDto>("/api/v1/quotations", organizationId, branchIds);
+    },
+
+    async createQuotation(input: {
+        rentalRequestId: number; rentalAmount: number; depositAmount: number;
+        deliveryFee: number; discountCode?: string; validUntil: string; specialTerms?: string;
+    }) {
+        const response = await authenticatedRequest<ApiEnvelope<SalesQuotationDto>>(
+            "POST", "/api/v1/quotations", { body: input },
+        );
+        return response.data;
+    },
+
+    async sendQuotation(id: number) {
+        const response = await authenticatedRequest<ApiEnvelope<SalesQuotationDto>>(
+            "PATCH", `/api/v1/quotations/${id}/send`,
+        );
+        return response.data;
+    },
+
+    async convertQuotationToOrder(id: number) {
+        const response = await authenticatedRequest<ApiEnvelope<SalesRentalOrderDto>>(
+            "POST", `/api/v1/quotations/${id}/convert-to-order`,
+        );
+        return response.data;
+    },
+
+    getOrders(organizationId: number, branchIds: number[]) {
+        return loadScoped<SalesRentalOrderDto>("/api/v1/rental-orders", organizationId, branchIds);
+    },
+
+    getContracts(organizationId: number, branchIds: number[]) {
+        return loadScoped<SalesContractDto>("/api/v1/rental-contracts", organizationId, branchIds);
+    },
+
+    async getContract(id: number) {
+        const response = await authenticatedRequest<ApiEnvelope<SalesContractDto>>(
+            "GET", `/api/v1/rental-contracts/${id}`,
+        );
+        return response.data;
+    },
+
+    async createContract(rentalOrderId: number, terms?: string) {
+        const response = await authenticatedRequest<ApiEnvelope<SalesContractDto>>(
+            "POST", "/api/v1/rental-contracts", { body: { rentalOrderId, terms } },
         );
         return response.data;
     },
