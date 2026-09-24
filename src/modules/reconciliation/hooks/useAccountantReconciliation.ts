@@ -1,0 +1,20 @@
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { accountantReconciliationApi } from "@/modules/reconciliation/api/accountant-reconciliation.api";
+import type { ReconciliationStatusFilter } from "@/modules/reconciliation/components/AccountantReconciliationFilters";
+import type { AccountantReconciliation, AccountantReconciliationListData, ConfirmReconciliationInput } from "@/modules/reconciliation/types/accountant-reconciliation.types";
+const PAGE_SIZE = 5; const empty: AccountantReconciliationListData = { reconciliations: [], summary: { pendingCount: 0, matchedCount: 0, mismatchCount: 0, reconciledCount: 0, differenceAmount: 0 } };
+export const useAccountantReconciliation = () => {
+  const [data, setData] = useState(empty); const [selected, setSelected] = useState<AccountantReconciliation | null>(null); const [confirmTarget, setConfirmTarget] = useState<AccountantReconciliation | null>(null);
+  const [search, setSearch] = useState(""); const [branchId, setBranchId] = useState("ALL"); const [status, setStatus] = useState<ReconciliationStatusFilter>("ALL"); const [fromDate, setFromDate] = useState(""); const [toDate, setToDate] = useState(""); const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true); const [detailLoading, setDetailLoading] = useState(false); const [submitting, setSubmitting] = useState(false); const [error, setError] = useState<string | null>(null); const [success, setSuccess] = useState<string | null>(null);
+  const load = useCallback(async () => { setLoading(true); setError(null); try { setData(await accountantReconciliationApi.getList()); } catch (caught) { setData(empty); setError(caught instanceof Error ? caught.message : "Không thể tải dữ liệu đối soát."); } finally { setLoading(false); } }, []);
+  useEffect(() => { void load(); }, [load]);
+  const branches = useMemo(() => Array.from(new Map(data.reconciliations.map((i) => [i.branchId, { id: i.branchId, name: i.branchName }])).values()), [data.reconciliations]);
+  const filtered = useMemo(() => { const term = search.trim().toLowerCase(); return data.reconciliations.filter((i) => { const date = i.transactionDate.slice(0, 10); return (!term || `${i.paymentId} ${i.invoiceCode} ${i.customerName} ${i.referenceCode ?? ""}`.toLowerCase().includes(term)) && (branchId === "ALL" || i.branchId === branchId) && (status === "ALL" || i.status === status) && (!fromDate || date >= fromDate) && (!toDate || date <= toDate); }); }, [branchId, data.reconciliations, fromDate, search, status, toDate]);
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE)); const paginated = useMemo(() => filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE), [filtered, page]);
+  useEffect(() => setPage(1), [branchId, fromDate, search, status, toDate]); useEffect(() => { if (page > totalPages) setPage(totalPages); }, [page, totalPages]);
+  const view = useCallback(async (item: AccountantReconciliation) => { setSelected(item); setDetailLoading(true); try { setSelected(await accountantReconciliationApi.getById(item.id)); } catch (caught) { setError(caught instanceof Error ? caught.message : "Không thể tải chi tiết đối soát."); } finally { setDetailLoading(false); } }, []);
+  const confirm = async (input: ConfirmReconciliationInput) => { setSubmitting(true); setError(null); try { await accountantReconciliationApi.confirm(input); setConfirmTarget(null); setSelected(null); setSuccess("Đã xác nhận đối soát giao dịch."); await load(); } catch (caught) { setError(caught instanceof Error ? caught.message : "Không thể xác nhận đối soát."); } finally { setSubmitting(false); } };
+  const reset = () => { setSearch(""); setBranchId("ALL"); setStatus("ALL"); setFromDate(""); setToDate(""); };
+  return { data, selected, confirmTarget, search, branchId, status, fromDate, toDate, page, loading, detailLoading, submitting, error, success, branches, filtered, paginated, totalPages, setSelected, setConfirmTarget, setSearch, setBranchId, setStatus, setFromDate, setToDate, setPage, setSuccess, load, view, confirm, reset };
+};

@@ -1,0 +1,40 @@
+import type { LucideIcon } from "lucide-react";
+
+interface AccountantInvoiceSummaryCardProps {
+  title: string;
+  value: string;
+  description: string;
+  icon: LucideIcon;
+  tone?: "default" | "danger";
+}
+
+export const AccountantInvoiceSummaryCard = ({
+  title,
+  value,
+  description,
+  icon: Icon,
+  tone = "default",
+}: AccountantInvoiceSummaryCardProps) => (
+  <article className="h-full min-h-44 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div className="flex h-full flex-col">
+      <div className="flex min-h-11 items-start justify-between gap-3">
+        <p className="min-w-0 text-sm font-semibold leading-5 text-slate-500">{title}</p>
+      <span
+        className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${
+          tone === "danger" ? "bg-rose-50 text-rose-600" : "bg-blue-50 text-blue-600"
+        }`}
+      >
+        <Icon size={21} />
+      </span>
+      </div>
+      <p
+        className={`mt-4 whitespace-nowrap text-[clamp(1rem,1.2vw,1.5rem)] font-bold leading-tight tracking-tight tabular-nums ${
+          tone === "danger" ? "text-rose-600" : "text-slate-900"
+        }`}
+      >
+        {value}
+      </p>
+      <p className="mt-auto pt-3 text-xs leading-5 text-slate-400">{description}</p>
+    </div>
+  </article>
+);
