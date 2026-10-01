@@ -7,14 +7,6 @@ import {
 } from "@/modules/equipment-categories";
 
 import {
-    SystemSettingsPage,
-} from "@/modules/settings";
-
-import {
-    AdminReportsPage,
-} from "@/modules/reports";
-
-import {
     EmployeesPage,
 } from "@/modules/employees";
 
@@ -26,20 +18,12 @@ import {
 } from "react-router";
 
 import {
-    AccountingLayout,
-} from "@/app/layouts/AccountingLayout";
-
-import {
     AdminLayout,
 } from "@/app/layouts/AdminLayout";
 
 import {
     AuthLayout,
 } from "@/app/layouts/AuthLayout";
-
-import {
-    CustomerLayout,
-} from "@/app/layouts/CustomerLayout";
 
 import {
     ManagerLayout,
@@ -84,32 +68,13 @@ import {
 } from "@/modules/auth";
 
 import {
-    CustomerContractDetailPage,
-    CustomerContractsPage,
-    CustomerEquipmentDetailPage,
-    CustomerEquipmentPage,
-    CustomerIncidentCreatePage,
-    CustomerIncidentDetailPage,
-    CustomerIncidentsPage,
-    CustomerInvoiceDetailPage,
-    CustomerInvoicesPage,
-    CustomerQuotationDetailPage,
-    CustomerQuotationsPage,
-    CustomerRentalRequestCreatePage,
-    CustomerRentalRequestDetailPage,
-    CustomerRentalRequestsPage,
-    CustomerReturnRequestCreatePage,
-    CustomerReturnRequestDetailPage,
-    CustomerReturnRequestsPage,
+    AssistantPage,
+} from "@/modules/assistant";
+
+import {
     SalesCustomerDetailPage,
     SalesCustomersPage,
 } from "@/modules/customers";
-
-import {
-    DashboardPage,
-    ManagerDashboardPage,
-    SalesDashboardPage,
-} from "@/modules/dashboard";
 
 /*
  * QUOTATIONS
@@ -120,10 +85,6 @@ import {
 import {
     ManagerQuotationApprovalsPage,
 } from "@/modules/quotations/pages/ManagerQuotationApprovalsPage";
-
-import {
-    SalesQuotationActivitiesPage,
-} from "@/modules/quotations/pages/SalesQuotationActivitiesPage";
 
 import {
     SalesQuotationCreatePage,
@@ -142,7 +103,6 @@ import {
  */
 import {
     ManagerContractApprovalsPage,
-    SalesContractActivitiesPage,
     SalesContractCreatePage,
     SalesContractDetailPage,
     SalesContractsPage,
@@ -154,57 +114,18 @@ import {
 import {
     ManagerRentalsPage,
     SalesAllRentalRequestsPage,
-    SalesRentalActivitiesPage,
     SalesRentalCreatePage,
     SalesRentalDetailPage,
     SalesRentalRequestCreatePage,
     SalesRentalRequestDetailPage,
     SalesRentalRequestsPage,
     SalesRentalsPage,
-    SalesRequestedEquipmentPage,
 } from "@/modules/rentals";
-
-import {
-    ManagerDeliveriesPage,
-    OperationsDeliveriesPage,
-    OperationsReturnsPage,
-} from "@/modules/deliveries";
-
-import {
-    ManagerReceivablesPage,
-} from "@/modules/receivables";
 
 import {
     ManagerEquipmentPage,
     OperationsEquipmentPage,
 } from "@/modules/equipment";
-
-import {
-    AccountantInvoicesPage,
-} from "@/modules/invoices";
-
-import {
-    AccountantDepositsPage,
-    AccountantPaymentsPage,
-} from "@/modules/payments";
-
-import {
-    AccountantReceivablesPage,
-    AccountantRevenueReportsPage,
-} from "@/modules/receivables";
-
-import {
-    AccountantReconciliationPage,
-} from "@/modules/reconciliation";
-
-import {
-    OperationsMaintenancePage,
-} from "@/modules/maintenance";
-
-import {
-    NotificationRoleLayout,
-    NotificationsPage,
-} from "@/modules/notifications";
 
 import {
     ProfilePage,
@@ -285,21 +206,6 @@ export const AppRouter = () => {
                         />
                     </Route>
 
-                    {/* ==================== NOTIFICATIONS ==================== */}
-                    <Route
-                        path="notifications"
-                        element={
-                            <NotificationRoleLayout />
-                        }
-                    >
-                        <Route
-                            index
-                            element={
-                                <NotificationsPage />
-                            }
-                        />
-                    </Route>
-
                     {/* ==================== ACCOUNT SETTINGS ==================== */}
                     <Route
                         path="settings"
@@ -313,6 +219,31 @@ export const AppRouter = () => {
                                 <AccountSettingsPage />
                             }
                         />
+                    </Route>
+
+                    <Route
+                        element={
+                            <RoleRoute
+                                allowedRoles={[
+                                    "ADMIN",
+                                    "MANAGER",
+                                ]}
+                            />
+                        }
+                    >
+                        <Route
+                            path="assistant"
+                            element={
+                                <ProfileRoleLayout />
+                            }
+                        >
+                            <Route
+                                index
+                                element={
+                                    <AssistantPage />
+                                }
+                            />
+                        </Route>
                     </Route>
 
                     {/* ==================== ADMIN ==================== */}
@@ -335,16 +266,9 @@ export const AppRouter = () => {
                                 index
                                 element={
                                     <Navigate
-                                        to="dashboard"
+                                        to="accounts"
                                         replace
                                     />
-                                }
-                            />
-
-                            <Route
-                                path="dashboard"
-                                element={
-                                    <DashboardPage />
                                 }
                             />
 
@@ -376,19 +300,6 @@ export const AppRouter = () => {
                                 }
                             />
 
-                            <Route
-                                path="settings"
-                                element={
-                                    <SystemSettingsPage />
-                                }
-                            />
-
-                            <Route
-                                path="reports"
-                                element={
-                                    <AdminReportsPage />
-                                }
-                            />
                         </Route>
                     </Route>
 
@@ -412,16 +323,9 @@ export const AppRouter = () => {
                                 index
                                 element={
                                     <Navigate
-                                        to="dashboard"
+                                        to="quotation-approvals"
                                         replace
                                     />
-                                }
-                            />
-
-                            <Route
-                                path="dashboard"
-                                element={
-                                    <ManagerDashboardPage />
                                 }
                             />
 
@@ -443,20 +347,6 @@ export const AppRouter = () => {
                                 path="rentals"
                                 element={
                                     <ManagerRentalsPage />
-                                }
-                            />
-
-                            <Route
-                                path="deliveries"
-                                element={
-                                    <ManagerDeliveriesPage />
-                                }
-                            />
-
-                            <Route
-                                path="receivables"
-                                element={
-                                    <ManagerReceivablesPage />
                                 }
                             />
 
@@ -489,17 +379,9 @@ export const AppRouter = () => {
                                 index
                                 element={
                                     <Navigate
-                                        to="dashboard"
+                                        to="rental-requests"
                                         replace
                                     />
-                                }
-                            />
-
-                            {/* DASHBOARD */}
-                            <Route
-                                path="dashboard"
-                                element={
-                                    <SalesDashboardPage />
                                 }
                             />
 
@@ -541,13 +423,6 @@ export const AppRouter = () => {
                             />
 
                             <Route
-                                path="rental-requests/equipment"
-                                element={
-                                    <SalesRequestedEquipmentPage />
-                                }
-                            />
-
-                            <Route
                                 path="rental-requests/:requestId"
                                 element={
                                     <SalesRentalRequestDetailPage />
@@ -566,13 +441,6 @@ export const AppRouter = () => {
                                 path="quotations/create"
                                 element={
                                     <SalesQuotationCreatePage />
-                                }
-                            />
-
-                            <Route
-                                path="quotations/activities"
-                                element={
-                                    <SalesQuotationActivitiesPage />
                                 }
                             />
 
@@ -599,13 +467,6 @@ export const AppRouter = () => {
                             />
 
                             <Route
-                                path="rentals/activities"
-                                element={
-                                    <SalesRentalActivitiesPage />
-                                }
-                            />
-
-                            <Route
                                 path="rentals/:rentalId"
                                 element={
                                     <SalesRentalDetailPage />
@@ -624,13 +485,6 @@ export const AppRouter = () => {
                                 path="contracts/create"
                                 element={
                                     <SalesContractCreatePage />
-                                }
-                            />
-
-                            <Route
-                                path="contracts/activities"
-                                element={
-                                    <SalesContractActivitiesPage />
                                 }
                             />
 
@@ -676,257 +530,6 @@ export const AppRouter = () => {
                                 }
                             />
 
-                            <Route
-                                path="deliveries"
-                                element={
-                                    <OperationsDeliveriesPage />
-                                }
-                            />
-
-                            <Route
-                                path="returns"
-                                element={
-                                    <OperationsReturnsPage />
-                                }
-                            />
-
-                            <Route
-                                path="maintenance"
-                                element={
-                                    <OperationsMaintenancePage />
-                                }
-                            />
-                        </Route>
-                    </Route>
-
-                    {/* ==================== ACCOUNTANT ==================== */}
-                    <Route
-                        element={
-                            <RoleRoute
-                                allowedRoles={[
-                                    "ACCOUNTANT",
-                                ]}
-                            />
-                        }
-                    >
-                        <Route
-                            path="accounting"
-                            element={
-                                <AccountingLayout />
-                            }
-                        >
-                            <Route
-                                index
-                                element={
-                                    <Navigate
-                                        to="invoices"
-                                        replace
-                                    />
-                                }
-                            />
-
-                            <Route
-                                path="invoices"
-                                element={
-                                    <AccountantInvoicesPage />
-                                }
-                            />
-
-                            <Route
-                                path="payments"
-                                element={
-                                    <AccountantPaymentsPage />
-                                }
-                            />
-
-                            <Route
-                                path="deposits"
-                                element={
-                                    <AccountantDepositsPage />
-                                }
-                            />
-
-                            <Route
-                                path="receivables"
-                                element={
-                                    <AccountantReceivablesPage />
-                                }
-                            />
-
-                            <Route
-                                path="reconciliation"
-                                element={
-                                    <AccountantReconciliationPage />
-                                }
-                            />
-
-                            <Route
-                                path="revenue-reports"
-                                element={
-                                    <AccountantRevenueReportsPage />
-                                }
-                            />
-                        </Route>
-                    </Route>
-
-                    {/* ==================== CUSTOMER ==================== */}
-                    <Route
-                        element={
-                            <RoleRoute
-                                allowedRoles={[
-                                    "CUSTOMER",
-                                ]}
-                            />
-                        }
-                    >
-                        <Route
-                            path="customer"
-                            element={
-                                <CustomerLayout />
-                            }
-                        >
-                            <Route
-                                index
-                                element={
-                                    <Navigate
-                                        to="equipment"
-                                        replace
-                                    />
-                                }
-                            />
-
-                            {/* THIẾT BỊ */}
-                            <Route
-                                path="equipment"
-                                element={
-                                    <CustomerEquipmentPage />
-                                }
-                            />
-
-                            <Route
-                                path="equipment/:equipmentId"
-                                element={
-                                    <CustomerEquipmentDetailPage />
-                                }
-                            />
-
-                            <Route
-                                path="equipment/:equipmentId/rental-request"
-                                element={
-                                    <CustomerRentalRequestCreatePage />
-                                }
-                            />
-
-                            {/* YÊU CẦU THUÊ */}
-                            <Route
-                                path="rental-requests"
-                                element={
-                                    <CustomerRentalRequestsPage />
-                                }
-                            />
-
-                            <Route
-                                path="rental-requests/create"
-                                element={
-                                    <CustomerRentalRequestCreatePage />
-                                }
-                            />
-
-                            <Route
-                                path="rental-requests/:requestId"
-                                element={
-                                    <CustomerRentalRequestDetailPage />
-                                }
-                            />
-
-                            {/* BÁO GIÁ */}
-                            <Route
-                                path="quotations"
-                                element={
-                                    <CustomerQuotationsPage />
-                                }
-                            />
-
-                            <Route
-                                path="quotations/:quotationId"
-                                element={
-                                    <CustomerQuotationDetailPage />
-                                }
-                            />
-
-                            {/* HỢP ĐỒNG */}
-                            <Route
-                                path="contracts"
-                                element={
-                                    <CustomerContractsPage />
-                                }
-                            />
-
-                            <Route
-                                path="contracts/:contractId"
-                                element={
-                                    <CustomerContractDetailPage />
-                                }
-                            />
-
-                            {/* HÓA ĐƠN */}
-                            <Route
-                                path="invoices"
-                                element={
-                                    <CustomerInvoicesPage />
-                                }
-                            />
-
-                            <Route
-                                path="invoices/:invoiceId"
-                                element={
-                                    <CustomerInvoiceDetailPage />
-                                }
-                            />
-
-                            {/* YÊU CẦU TRẢ */}
-                            <Route
-                                path="return-requests"
-                                element={
-                                    <CustomerReturnRequestsPage />
-                                }
-                            />
-
-                            <Route
-                                path="return-requests/create"
-                                element={
-                                    <CustomerReturnRequestCreatePage />
-                                }
-                            />
-
-                            <Route
-                                path="return-requests/:returnRequestId"
-                                element={
-                                    <CustomerReturnRequestDetailPage />
-                                }
-                            />
-
-                            {/* BÁO CÁO SỰ CỐ */}
-                            <Route
-                                path="incidents"
-                                element={
-                                    <CustomerIncidentsPage />
-                                }
-                            />
-
-                            <Route
-                                path="incidents/create"
-                                element={
-                                    <CustomerIncidentCreatePage />
-                                }
-                            />
-
-                            <Route
-                                path="incidents/:incidentId"
-                                element={
-                                    <CustomerIncidentDetailPage />
-                                }
-                            />
                         </Route>
                     </Route>
                 </Route>

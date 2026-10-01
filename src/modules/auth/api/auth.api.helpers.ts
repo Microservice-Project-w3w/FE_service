@@ -96,5 +96,14 @@ export const mergeMeIntoUser = (currentUser: AuthUser, data: BackendMeData): Aut
       code: "AUTH_ME_CONTRACT_INVALID", details: data,
     });
   }
-  return { ...currentUser, id: data.userId, email: data.email, roles: roles as UserRole[] };
+  return {
+    ...currentUser,
+    id: data.userId,
+    email: data.email,
+    roles: roles as UserRole[],
+    fullName: data.fullName ?? currentUser.fullName,
+    phone: data.phone ?? "",
+    companyName: data.companyName ?? undefined,
+    taxCode: data.taxCode ?? undefined,
+  };
 };

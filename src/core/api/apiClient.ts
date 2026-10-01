@@ -48,6 +48,7 @@ const errorMessage = (
   return (
     stringProperty(body, "message") ??
     stringProperty(body, "error") ??
+    stringProperty(body, "detail") ??
     HTTP_MESSAGES[status] ??
     `Request failed with status ${status}`
   );

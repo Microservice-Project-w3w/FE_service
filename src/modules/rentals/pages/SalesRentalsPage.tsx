@@ -1219,12 +1219,6 @@ export const SalesRentalsPage =
                                     </h2>
                                 </div>
 
-                                <Link
-                                    to="/sales/rentals/activities"
-                                    className="text-[11px] font-bold text-blue-600 hover:text-blue-700"
-                                >
-                                    Xem tất cả
-                                </Link>
                             </header>
 
                             <div className="px-4 py-1">
@@ -1245,18 +1239,6 @@ export const SalesRentalsPage =
                                 )}
                             </div>
 
-                            <div className="border-t border-slate-100 p-3">
-                                <Link
-                                    to="/sales/rentals/activities"
-                                    className="flex h-9 w-full items-center justify-center gap-2 rounded-xl bg-blue-50 text-[11px] font-bold text-blue-600 transition hover:bg-blue-100"
-                                >
-                                    <Clock3
-                                        size={15}
-                                    />
-
-                                    Xem lịch sử hoạt động
-                                </Link>
-                            </div>
                         </article>
                     </aside>
                 </section>

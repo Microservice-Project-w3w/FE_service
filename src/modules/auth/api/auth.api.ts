@@ -39,19 +39,37 @@ export const authApi = {
 
   async refresh(): Promise<AuthSession> { return refreshAuthSession(); },
 
-  async register(_payload: RegisterPayload): Promise<void> {
-    throw new ApiError("Registration is not connected in this phase", {
-      code: "AUTH_REGISTER_NOT_IMPLEMENTED",
-    });
+  async register(payload: RegisterPayload): Promise<void> {
+    await apiClient.post<ApiEnvelope<unknown>>(
+      "/api/v1/auth/register",
+      {
+        body: {
+          fullName: payload.fullName.trim(),
+          email: payload.email.trim(),
+          password: payload.password,
+        },
+      },
+    );
   },
 
   async updateProfile(
     _userId: string,
-    _payload: UpdateProfilePayload,
+    payload: UpdateProfilePayload,
   ): Promise<AuthUser> {
-    throw new ApiError("Profile update is not supported by the current Identity API", {
-      code: "AUTH_PROFILE_UPDATE_UNAVAILABLE",
-    });
+    const response = await authenticatedRequest<ApiEnvelope<BackendMeData>>(
+      "PUT",
+      "/api/v1/auth/me",
+      { body: payload },
+    );
+    const session = authStorage.getSession();
+    if (!session) {
+      throw new ApiError("Authentication session is unavailable", {
+        code: "AUTH_SESSION_MISSING",
+      });
+    }
+    const user = mergeMeIntoUser(session.user, response.data);
+    authStorage.saveSession({ ...session, user });
+    return user;
   },
 
   async changePassword(

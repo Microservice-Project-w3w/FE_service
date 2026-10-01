@@ -53,8 +53,11 @@ export const managerQuotationApprovalsApi = {
       quotations, generatedAt: new Date().toISOString(),
     };
   },
-  async getById(_quotationId: string): Promise<ManagerQuotation> {
-    throw new Error("Backend chưa có API lấy chi tiết báo giá theo ID.");
+  async getById(quotationId: string): Promise<ManagerQuotation> {
+    const response = await authenticatedRequest<ApiEnvelope<QuotationDto>>(
+      "GET", `/api/v1/quotations/${quotationId}`,
+    );
+    return toQuotation(response.data);
   },
   async approve(input: ApproveManagerQuotationInput): Promise<ManagerQuotation> {
     const response = await authenticatedRequest<ApiEnvelope<QuotationDto>>(
@@ -66,6 +69,7 @@ export const managerQuotationApprovalsApi = {
     if (!input.reason.trim()) throw new Error("Vui lòng nhập lý do từ chối báo giá.");
     const response = await authenticatedRequest<ApiEnvelope<QuotationDto>>(
       "PATCH", `/api/v1/quotations/${input.quotationId}/reject`,
+      { body: { reason: input.reason.trim() } },
     );
     return toQuotation(response.data);
   },

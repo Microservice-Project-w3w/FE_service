@@ -855,19 +855,6 @@ export const SalesRentalRequestsPage =
                                 )}
                             </div>
 
-                            <footer className="border-t border-slate-100 bg-slate-50/40 px-5 py-3 text-center">
-                                <Link
-                                    to="/sales/rental-requests/equipment"
-                                    className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-bold text-blue-600 transition hover:bg-blue-50 hover:text-blue-700"
-                                >
-                                    Xem tất cả thiết bị
-
-                                    <ChevronRight
-                                        size={15}
-                                        aria-hidden="true"
-                                    />
-                                </Link>
-                            </footer>
                         </article>
                     </div>
                 </section>

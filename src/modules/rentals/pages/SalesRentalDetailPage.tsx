@@ -571,12 +571,6 @@ export const SalesRentalDetailPage =
                                     </button>
                                 )}
 
-                            <Link
-                                to="/sales/rentals/activities"
-                                className="flex h-9 w-full items-center justify-center rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                            >
-                                Xem lịch sử hoạt động
-                            </Link>
                         </div>
                     </aside>
                 </section>

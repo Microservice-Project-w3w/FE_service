@@ -64,8 +64,11 @@ export const managerRentalsApi = {
     )).flat().sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     return { summary: summary(rentals), rentals, generatedAt: new Date().toISOString() };
   },
-  async getById(_rentalId: string): Promise<ManagerRental> {
-    throw new Error("Backend chưa có API lấy rental order theo ID.");
+  async getById(rentalId: string): Promise<ManagerRental> {
+    const response = await authenticatedRequest<ApiEnvelope<RentalOrderDto>>(
+      "GET", `/api/v1/rental-orders/${rentalId}`,
+    );
+    return toRental(response.data);
   },
   async confirmReservation(input: ConfirmRentalReservationInput): Promise<ManagerRental> {
     const response = await authenticatedRequest<ApiEnvelope<RentalOrderDto>>(

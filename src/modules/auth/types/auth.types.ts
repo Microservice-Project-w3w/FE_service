@@ -57,7 +57,15 @@ export interface BackendAuthData {
   accessToken: string; tokenType: string; expiresIn: number; refreshToken: string;
   userId: number; email: string; fullName: string; role: string;
 }
-export interface BackendMeData { userId: string; email: string; roles: unknown; }
+export interface BackendMeData {
+  userId: string;
+  email: string;
+  roles: unknown;
+  fullName: string | null;
+  phone: string | null;
+  companyName: string | null;
+  taxCode: string | null;
+}
 export interface JwtAuthClaims {
   roles: UserRole[]; permissions: string[]; branchIds: number[];
   organizationId?: number; sessionId?: string; exp?: number;

@@ -6,13 +6,13 @@ export const ROLE_HOME_PATHS: Record<
     UserRole,
     string
 > = {
-  ADMIN: "/admin/dashboard",
-  MANAGER: "/manager/dashboard",
-  SALES_STAFF: "/sales/dashboard",
+  ADMIN: "/admin/accounts",
+  MANAGER: "/manager/quotation-approvals",
+  SALES_STAFF: "/sales/rental-requests",
   OPERATIONS_STAFF:
       "/operations/equipment",
-  ACCOUNTANT: "/accounting/invoices",
-  CUSTOMER: "/customer/equipment",
+  ACCOUNTANT: "/profile",
+  CUSTOMER: "/profile",
 };
 
 export const getRoleHomePath = (

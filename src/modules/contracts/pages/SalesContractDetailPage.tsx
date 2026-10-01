@@ -42,7 +42,7 @@ export const SalesContractDetailPage = () => {
                 </Card>
                 <aside className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                     <h2 className="text-sm font-bold">Thao tác nhanh</h2>
-                    <div className="mt-4 space-y-2"><button onClick={()=>window.alert("Đã gửi yêu cầu gia hạn.")} className="h-9 w-full rounded-xl bg-blue-600 text-xs font-bold !text-white">Gia hạn hợp đồng</button><button onClick={()=>window.alert("Đã tải bản hợp đồng mẫu.")} className="h-9 w-full rounded-xl border border-slate-200 text-xs font-semibold">Tải hợp đồng</button><Link to="/sales/contracts/activities" className="flex h-9 items-center justify-center rounded-xl border border-slate-200 text-xs font-semibold">Xem lịch sử hoạt động</Link></div>
+                    <div className="mt-4 space-y-2"><button onClick={()=>window.alert("Đã gửi yêu cầu gia hạn.")} className="h-9 w-full rounded-xl bg-blue-600 text-xs font-bold !text-white">Gia hạn hợp đồng</button><button onClick={()=>window.alert("Đã tải bản hợp đồng mẫu.")} className="h-9 w-full rounded-xl border border-slate-200 text-xs font-semibold">Tải hợp đồng</button></div>
                 </aside>
             </section>
 

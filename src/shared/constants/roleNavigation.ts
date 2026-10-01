@@ -1,18 +1,12 @@
 import {
-  BarChart3,
   Boxes,
+  Bot,
   Building2,
-  CircleDollarSign,
   ClipboardCheck,
   FileText,
-  LayoutDashboard,
   PackageCheck,
-  Scale,
-  Settings,
-  Truck,
   Users,
   Warehouse,
-  Wrench,
   type LucideIcon,
 } from "lucide-react";
 
@@ -37,16 +31,6 @@ export const ROLE_NAVIGATION: Record<
 > = {
   ADMIN: [
     {
-      label: "Tổng quan",
-      items: [
-        {
-          label: "Dashboard",
-          path: "/admin/dashboard",
-          icon: LayoutDashboard,
-        },
-      ],
-    },
-    {
       label: "Quản trị",
       items: [
         {
@@ -69,15 +53,15 @@ export const ROLE_NAVIGATION: Record<
           path: "/admin/categories",
           icon: Boxes,
         },
+      ],
+    },
+    {
+      label: "Hỗ trợ",
+      items: [
         {
-          label: "Cấu hình",
-          path: "/admin/settings",
-          icon: Settings,
-        },
-        {
-          label: "Báo cáo",
-          path: "/admin/reports",
-          icon: BarChart3,
+          label: "Trợ lý AI",
+          path: "/assistant",
+          icon: Bot,
         },
       ],
     },
@@ -87,11 +71,6 @@ export const ROLE_NAVIGATION: Record<
     {
       label: "Quản lý",
       items: [
-        {
-          label: "Dashboard quản lý",
-          path: "/manager/dashboard",
-          icon: LayoutDashboard,
-        },
         {
           label: "Báo giá chờ duyệt",
           path: "/manager/quotation-approvals",
@@ -108,19 +87,19 @@ export const ROLE_NAVIGATION: Record<
           icon: FileText,
         },
         {
-          label: "Giao nhận",
-          path: "/manager/deliveries",
-          icon: Truck,
-        },
-        {
-          label: "Công nợ",
-          path: "/manager/receivables",
-          icon: CircleDollarSign,
-        },
-        {
           label: "Thiết bị",
           path: "/manager/equipment",
           icon: Boxes,
+        },
+      ],
+    },
+    {
+      label: "Hỗ trợ",
+      items: [
+        {
+          label: "Trợ lý AI",
+          path: "/assistant",
+          icon: Bot,
         },
       ],
     },
@@ -130,11 +109,6 @@ export const ROLE_NAVIGATION: Record<
     {
       label: "Kinh doanh",
       items: [
-        {
-          label: "Tổng quan",
-          path: "/sales/dashboard",
-          icon: LayoutDashboard,
-        },
         {
           label: "Khách hàng",
           path: "/sales/customers",
@@ -173,103 +147,11 @@ export const ROLE_NAVIGATION: Record<
           path: "/operations/equipment",
           icon: Warehouse,
         },
-        {
-          label: "Giao thiết bị",
-          path: "/operations/deliveries",
-          icon: Truck,
-        },
-        {
-          label: "Nhận trả thiết bị",
-          path: "/operations/returns",
-          icon: PackageCheck,
-        },
-        {
-          label: "Bảo trì và sửa chữa",
-          path: "/operations/maintenance",
-          icon: Wrench,
-        },
       ],
     },
   ],
 
-  ACCOUNTANT: [
-    {
-      label: "Kế toán",
-      items: [
-        {
-          label: "Hóa đơn",
-          path: "/accounting/invoices",
-          icon: FileText,
-        },
-        {
-          label: "Thanh toán",
-          path: "/accounting/payments",
-          icon: CircleDollarSign,
-        },
-        {
-          label: "Tiền đặt cọc",
-          path: "/accounting/deposits",
-          icon: CircleDollarSign,
-        },
-        {
-          label: "Công nợ",
-          path: "/accounting/receivables",
-          icon: ClipboardCheck,
-        },
-        {
-          label: "Đối soát",
-          path: "/accounting/reconciliation",
-          icon: Scale,
-        },
-        {
-          label: "Báo cáo doanh thu",
-          path: "/accounting/revenue-reports",
-          icon: BarChart3,
-        },
-      ],
-    },
-  ],
+  ACCOUNTANT: [],
 
-  CUSTOMER: [
-    {
-      label: "Dịch vụ của tôi",
-      items: [
-        {
-          label: "Thiết bị",
-          path: "/customer/equipment",
-          icon: Boxes,
-        },
-        {
-          label: "Yêu cầu thuê của tôi",
-          path: "/customer/rental-requests",
-          icon: PackageCheck,
-        },
-        {
-          label: "Báo giá của tôi",
-          path: "/customer/quotations",
-          icon: FileText,
-        },
-        {
-          label: "Hợp đồng của tôi",
-          path: "/customer/contracts",
-          icon: ClipboardCheck,
-        },
-        {
-          label: "Hóa đơn",
-          path: "/customer/invoices",
-          icon: CircleDollarSign,
-        },
-        {
-          label: "Yêu cầu trả",
-          path: "/customer/return-requests",
-          icon: Truck,
-        },
-        {
-          label: "Báo cáo sự cố",
-          path: "/customer/incidents",
-          icon: Wrench,
-        },
-      ],
-    },
-  ],
+  CUSTOMER: [],
 };

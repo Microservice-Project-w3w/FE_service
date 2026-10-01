@@ -1,6 +1,4 @@
 import {
-    Activity,
-
     CheckCircle2,
     ChevronLeft,
     ChevronRight,
@@ -158,9 +156,6 @@ export const SalesContractsPage = () => {
                         <StatusCard icon={Clock3} label="Sắp hết hạn" value={summary.expiring} tone="amber" />
                         <StatusCard icon={XCircle} label="Đã hết hạn" value={summary.expired} tone="rose" />
                     </div>
-                    <Link to="/sales/contracts/activities" className="mt-4 flex items-center justify-center gap-2 text-xs font-bold text-blue-600 hover:text-blue-700">
-                        Xem tất cả hoạt động <Activity size={14} />
-                    </Link>
                 </article>
 
                 <article className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -248,7 +243,6 @@ export const SalesContractsPage = () => {
                 <aside className="rounded-2xl border border-slate-200 bg-white shadow-sm">
                     <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
                         <h2 className="text-sm font-bold text-slate-900">Hoạt động gần đây</h2>
-                        <Link to="/sales/contracts/activities" className="text-[11px] font-bold text-blue-600">Xem tất cả</Link>
                     </div>
                     <div className="space-y-1 p-4">
                         {[

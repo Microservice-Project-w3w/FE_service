@@ -5,10 +5,6 @@ import type {
 import { authenticatedRequest } from "@/modules/auth/api/authenticatedClient";
 import type { ApiEnvelope } from "@/modules/auth/types/auth.types";
 
-const unsupported = (): never => {
-  throw new Error("Identity backend hi`en ch`ua cA3 API nAy (thieu Backend capability).");
-};
-
 export const accountsApi = {
   async getAll(filters: AccountFilters): Promise<AccountListResult> {
     const res = await authenticatedRequest<ApiEnvelope<any[]>>("GET", "/api/v1/users");
@@ -102,16 +98,21 @@ export const accountsApi = {
   },
 
   async resetPassword(
-    _accountId: string, _newPassword?: string,
+    accountId: string, newPassword?: string,
   ): Promise<PasswordResetResult> { 
-    return unsupported(); 
+    if (!newPassword) throw new Error("Mật khẩu mới là bắt buộc.");
+    await authenticatedRequest<ApiEnvelope<null>>(
+      "POST", `/api/v1/users/${accountId}/reset-password`,
+      { body: { newPassword } },
+    );
+    return { temporaryPassword: newPassword };
   },
   
-  async remove(_accountId: string): Promise<void> { 
-    return unsupported(); 
+  async remove(accountId: string): Promise<void> {
+    await authenticatedRequest<null>("DELETE", `/api/v1/users/${accountId}`);
   },
   
   async resetMockData(): Promise<AccountListResult> { 
-    return unsupported(); 
+    throw new Error("Khôi phục dữ liệu mẫu đã bị vô hiệu hóa.");
   },
 };

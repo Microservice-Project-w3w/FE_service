@@ -7,10 +7,6 @@ import {
     AccountMenu,
 } from "@/app/components/header/AccountMenu";
 
-import {
-    NotificationDropdown,
-} from "@/modules/notifications";
-
 interface AppHeaderProps {
     onOpenSidebar: () => void;
 }
@@ -43,8 +39,6 @@ export const AppHeader = ({
             </div>
 
             <div className="ml-auto flex items-center gap-2">
-                <NotificationDropdown />
-
                 <AccountMenu />
             </div>
         </header>

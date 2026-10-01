@@ -11,7 +11,7 @@ interface ContractDto {
   totalAmount: number; status: string; terms: string | null;
   approvedAt: string | null; signedAt: string | null;
 }
-const statuses = new Set(["PENDING_APPROVAL", "APPROVED", "SIGNED"]);
+const statuses = new Set(["PENDING_APPROVAL", "APPROVED", "REJECTED", "SIGNED"]);
 const toContract = (dto: ContractDto): ManagerContract => ({
   id: String(dto.id), organizationId: String(dto.organizationId), branchId: String(dto.branchId),
   branchName: `Chi nhánh #${dto.branchId}`, contractCode: dto.contractCode,
@@ -52,7 +52,7 @@ export const managerContractApprovalsApi = {
           new Date(item.approvalDeadline).getTime() <= soon,
         ).length,
         processedCount: contracts.filter((item) =>
-          item.status === "APPROVED" || item.status === "SIGNED",
+          item.status === "APPROVED" || item.status === "REJECTED" || item.status === "SIGNED",
         ).length,
       },
       contracts, generatedAt: new Date().toISOString(),
@@ -70,8 +70,13 @@ export const managerContractApprovalsApi = {
     );
     return toContract(response.data);
   },
-  async reject(_input: RejectManagerContractInput): Promise<ManagerContract> {
-    throw new Error("Backend không có transition từ chối hợp đồng; thao tác không được thực hiện.");
+  async reject(input: RejectManagerContractInput): Promise<ManagerContract> {
+    if (!input.reason.trim()) throw new Error("Vui lòng nhập lý do từ chối hợp đồng.");
+    const response = await authenticatedRequest<ApiEnvelope<ContractDto>>(
+      "PATCH", `/api/v1/rental-contracts/${input.contractId}/reject`,
+      { body: { reason: input.reason.trim() } },
+    );
+    return toContract(response.data);
   },
   resetMockData(): void {
     throw new Error("Khôi phục dữ liệu mẫu đã bị vô hiệu hóa.");
