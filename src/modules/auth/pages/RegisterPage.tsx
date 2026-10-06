@@ -5,7 +5,6 @@ import {
   EyeOff,
   LockKeyhole,
   Mail,
-  MessageSquareText,
   Phone,
   ShieldCheck,
   UserPlus,
@@ -502,18 +501,10 @@ export const RegisterPage = () => {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="auth-primary-button mt-5 flex h-11 w-full items-center justify-center gap-2 rounded-xl text-sm font-semibold text-white disabled:opacity-60"
+          className="auth-primary-button mx-auto mt-5 flex h-11 w-full max-w-md items-center justify-center gap-2 rounded-xl text-sm font-semibold text-white disabled:opacity-60"
         >
           <UserPlus size={18} />
           Tạo tài khoản
-        </button>
-
-        <button
-          type="button"
-          className="mt-2.5 flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-blue-500 bg-white text-sm font-semibold text-blue-600 transition hover:bg-blue-50"
-        >
-          <MessageSquareText size={18} />
-          Đăng ký bằng mã xác thực
         </button>
       </form>
 
