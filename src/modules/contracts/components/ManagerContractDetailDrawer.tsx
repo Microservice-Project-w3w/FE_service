@@ -1,3 +1,4 @@
+import { createSafeDateFormatter } from "@/shared/utils/dateFormat";
 import {
   CalendarDays,
   FileText,
@@ -51,7 +52,7 @@ const currencyFormatter =
   );
 
 const dateFormatter =
-  new Intl.DateTimeFormat(
+  createSafeDateFormatter(
     "vi-VN",
     {
       day: "2-digit",
@@ -61,7 +62,7 @@ const dateFormatter =
   );
 
 const dateTimeFormatter =
-  new Intl.DateTimeFormat(
+  createSafeDateFormatter(
     "vi-VN",
     {
       day: "2-digit",

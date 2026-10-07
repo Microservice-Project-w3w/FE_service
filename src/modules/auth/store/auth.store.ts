@@ -13,6 +13,7 @@ import {
 import {
     setAuthSessionListener,
 } from "@/modules/auth/api/authenticatedClient";
+import { useManagerScopeStore } from "@/modules/manager-context/store/manager-scope.store";
 
 import type {
     AuthSession,
@@ -79,6 +80,8 @@ export const useAuthStore =
                     await authApi.login(
                         payload,
                     );
+
+                useManagerScopeStore.getState().resetManagerScope();
 
                 set({
                     user:
@@ -152,6 +155,7 @@ export const useAuthStore =
                     try {
                         await authApi.logout();
                     } finally {
+                        useManagerScopeStore.getState().resetManagerScope();
                         set({
                             user: null,
 
@@ -172,6 +176,9 @@ export const useAuthStore =
 const applySession = (
     session: AuthSession | null,
 ): void => {
+    if (!session || session.user.id !== useAuthStore.getState().user?.id) {
+        useManagerScopeStore.getState().resetManagerScope();
+    }
     useAuthStore.setState({
         user: session?.user ?? null,
         accessToken:

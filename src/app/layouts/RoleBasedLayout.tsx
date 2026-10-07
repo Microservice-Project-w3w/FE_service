@@ -3,9 +3,11 @@ import {
 } from "react";
 import {
   Outlet,
+  useLocation,
 } from "react-router";
 
 import { AppHeader } from "@/app/components/header";
+import { PageErrorBoundary } from "@/shared/components/feedback/PageErrorBoundary";
 
 import {
   ROLE_HOME_PATHS,
@@ -30,6 +32,7 @@ interface RoleBasedLayoutProps {
 export const RoleBasedLayout = ({
   role,
 }: RoleBasedLayoutProps) => {
+  const location = useLocation();
   const [
     sidebarOpen,
     setSidebarOpen,
@@ -60,7 +63,9 @@ export const RoleBasedLayout = ({
         />
 
         <main className="p-4 sm:p-6 lg:p-8">
-          <Outlet />
+          <PageErrorBoundary key={location.pathname}>
+            <Outlet />
+          </PageErrorBoundary>
         </main>
       </div>
     </div>

@@ -1,3 +1,4 @@
+import { createSafeDateFormatter } from "@/shared/utils/dateFormat";
 import {
   Eye,
   KeyRound,
@@ -93,7 +94,7 @@ const roleStyles: Record<
 };
 
 const dateFormatter =
-  new Intl.DateTimeFormat(
+  createSafeDateFormatter(
     "vi-VN",
     {
       dateStyle: "short",

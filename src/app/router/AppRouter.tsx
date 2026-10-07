@@ -107,6 +107,7 @@ import {
     SalesContractDetailPage,
     SalesContractsPage,
 } from "@/modules/contracts";
+import { ContractDetailLivePage } from "@/modules/rentals/pages/LiveRentalWorkflowPages";
 
 /*
  * RENTALS
@@ -343,6 +344,10 @@ export const AppRouter = () => {
                                 }
                             />
 
+                            <Route
+                                path="contracts/:contractId"
+                                element={<ContractDetailLivePage />}
+                            />
                             <Route
                                 path="rentals"
                                 element={

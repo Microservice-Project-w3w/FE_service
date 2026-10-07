@@ -1,3 +1,4 @@
+import { createSafeDateFormatter } from "@/shared/utils/dateFormat";
 import {
   Check,
   Eye,
@@ -41,7 +42,7 @@ const currencyFormatter =
   );
 
 const dateFormatter =
-  new Intl.DateTimeFormat(
+  createSafeDateFormatter(
     "vi-VN",
     {
       day: "2-digit",

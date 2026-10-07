@@ -7,6 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
+    "test": "vitest run",
+    "test:live": "RUN_LIVE_API_TESTS=1 vitest run tests/routes-live.test.tsx",
+    "test:workflow": "RUN_LIVE_WORKFLOW_TESTS=1 vitest run tests/workflow-live.test.ts",
     "preview": "vite preview"
   },
   "dependencies": {

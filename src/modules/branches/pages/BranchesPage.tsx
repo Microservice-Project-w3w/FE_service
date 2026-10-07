@@ -1,3 +1,4 @@
+import { createSafeDateFormatter } from "@/shared/utils/dateFormat";
 import {
   Building2,
   CircleOff,
@@ -97,7 +98,7 @@ const positionLabels: Record<
 };
 
 const dateFormatter =
-  new Intl.DateTimeFormat(
+  createSafeDateFormatter(
     "vi-VN",
     {
       day: "2-digit",

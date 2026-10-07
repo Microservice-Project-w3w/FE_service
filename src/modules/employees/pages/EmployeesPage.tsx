@@ -1,3 +1,4 @@
+import { createSafeDateFormatter } from "@/shared/utils/dateFormat";
 import { branchesApi } from "@/modules/branches/api/branches.api";
 import {
   BriefcaseBusiness,
@@ -75,7 +76,7 @@ const positionLabels: Record<
 };
 
 const dateFormatter =
-  new Intl.DateTimeFormat(
+  createSafeDateFormatter(
     "vi-VN",
     {
       day: "2-digit",

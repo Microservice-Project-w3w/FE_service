@@ -82,13 +82,8 @@ const initialFilters: AccountFiltersValue = {
   branchName: "ALL",
 };
 
-const branches = [
-  "Chi nhánh Hà Nội",
-  "Chi nhánh Đà Nẵng",
-  "Chi nhánh TP. Hồ Chí Minh",
-];
-
 export const AccountsPage = () => {
+  const [branches, setBranches] = useState<string[]>([]);
   const [filters, setFilters] =
     useState(initialFilters);
 
@@ -183,6 +178,7 @@ export const AccountsPage = () => {
           );
 
         setAccounts(result.items);
+        setBranches(result.branches ?? []);
       } catch (error) {
         setErrorMessage(
           error instanceof Error

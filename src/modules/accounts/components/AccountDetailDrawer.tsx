@@ -1,3 +1,4 @@
+import { createSafeDateFormatter } from "@/shared/utils/dateFormat";
 import {
   Building2,
   CalendarDays,
@@ -27,7 +28,7 @@ interface AccountDetailDrawerProps {
 }
 
 const dateFormatter =
-  new Intl.DateTimeFormat(
+  createSafeDateFormatter(
     "vi-VN",
     {
       dateStyle: "long",

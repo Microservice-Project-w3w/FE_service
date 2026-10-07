@@ -1,3 +1,4 @@
+import { createSafeDateFormatter } from "@/shared/utils/dateFormat";
 import {
   BriefcaseBusiness,
   Building2,
@@ -53,7 +54,7 @@ const employmentTypeLabels: Record<
 };
 
 const dateFormatter =
-  new Intl.DateTimeFormat(
+  createSafeDateFormatter(
     "vi-VN",
     {
       day: "2-digit",

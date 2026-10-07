@@ -1,3 +1,4 @@
+import { createSafeDateFormatter } from "@/shared/utils/dateFormat";
 import {
   Layers3,
   PackageSearch,
@@ -32,7 +33,7 @@ interface EquipmentCategoryDetailDrawerProps {
 }
 
 const dateFormatter =
-  new Intl.DateTimeFormat(
+  createSafeDateFormatter(
     "vi-VN",
     {
       day: "2-digit",

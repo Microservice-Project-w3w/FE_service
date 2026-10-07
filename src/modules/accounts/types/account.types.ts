@@ -9,6 +9,8 @@ export type AccountStatus =
   | "PENDING";
 
 export interface Account {
+  organizationId?: number | null;
+  branchIds?: number[];
   id: string;
   fullName: string;
   email: string;
@@ -47,6 +49,7 @@ export interface AccountFilters {
 }
 
 export interface AccountListResult {
+  branches?: string[];
   items: Account[];
   total: number;
 }

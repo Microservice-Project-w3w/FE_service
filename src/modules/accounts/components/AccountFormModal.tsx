@@ -6,20 +6,11 @@ import {
   UserPlus,
   X,
 } from "lucide-react";
-import {
-  type FormEvent,
-  useEffect,
-  useState,
-} from "react";
+import { type FormEvent, useEffect, useState } from "react";
 
-import {
-  USER_ROLE_LABELS,
-} from "@/core/auth/roleLabels";
+import { USER_ROLE_LABELS } from "@/core/auth/roleLabels";
 
-import {
-  USER_ROLES,
-  type UserRole,
-} from "@/modules/auth/types/auth.types";
+import { USER_ROLES, type UserRole } from "@/modules/auth/types/auth.types";
 
 import type {
   Account,
@@ -50,24 +41,16 @@ interface AccountFormModalProps {
   branches: string[];
   isSubmitting: boolean;
   onClose: () => void;
-  onSubmit: (
-    values: AccountFormValues,
-  ) => Promise<void>;
+  onSubmit: (values: AccountFormValues) => Promise<void>;
 }
 
-const createTemporaryPassword =
-  (): string => {
-    const randomValue = Math.random()
-      .toString(36)
-      .slice(2, 8)
-      .toUpperCase();
+const createTemporaryPassword = (): string => {
+  const randomValue = Math.random().toString(36).slice(2, 8).toUpperCase();
 
-    return `RentAI@${randomValue}`;
-  };
+  return `RentAI@${randomValue}`;
+};
 
-const createInitialValues = (
-  account: Account | null,
-): AccountFormValues => {
+const createInitialValues = (account: Account | null): AccountFormValues => {
   if (account) {
     return {
       fullName: account.fullName,
@@ -85,11 +68,9 @@ const createInitialValues = (
     email: "",
     phone: "",
     role: "SALES_STAFF",
-    branchName:
-      "Chi nhánh Hà Nội",
+    branchName: "",
     status: "ACTIVE",
-    temporaryPassword:
-      createTemporaryPassword(),
+    temporaryPassword: createTemporaryPassword(),
   };
 };
 
@@ -134,121 +115,74 @@ export const AccountFormModal = ({
 }: AccountFormModalProps) => {
   const isEditMode = account !== null;
 
-  const [values, setValues] =
-    useState<AccountFormValues>(
-      createInitialValues(account),
-    );
+  const [values, setValues] = useState<AccountFormValues>(
+    createInitialValues(account),
+  );
 
-  const [errors, setErrors] =
-    useState<AccountFormErrors>({});
+  const [errors, setErrors] = useState<AccountFormErrors>({});
 
-  const [
-    showTemporaryPassword,
-    setShowTemporaryPassword,
-  ] = useState(false);
+  const [showTemporaryPassword, setShowTemporaryPassword] = useState(false);
 
   useEffect(() => {
     if (!open) {
       return;
     }
 
-    setValues(
-      createInitialValues(account),
-    );
+    setValues(createInitialValues(account));
 
     setErrors({});
     setShowTemporaryPassword(false);
 
-    const previousOverflow =
-      document.body.style.overflow;
+    const previousOverflow = document.body.style.overflow;
 
-    document.body.style.overflow =
-      "hidden";
+    document.body.style.overflow = "hidden";
 
-    const handleKeyDown = (
-      event: KeyboardEvent,
-    ): void => {
-      if (
-        event.key === "Escape" &&
-        !isSubmitting
-      ) {
+    const handleKeyDown = (event: KeyboardEvent): void => {
+      if (event.key === "Escape" && !isSubmitting) {
         onClose();
       }
     };
 
-    window.addEventListener(
-      "keydown",
-      handleKeyDown,
-    );
+    window.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      document.body.style.overflow =
-        previousOverflow;
+      document.body.style.overflow = previousOverflow;
 
-      window.removeEventListener(
-        "keydown",
-        handleKeyDown,
-      );
+      window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [
-    open,
-    account,
-    isSubmitting,
-    onClose,
-  ]);
+  }, [open, account, isSubmitting, onClose]);
 
   if (!open) {
     return null;
   }
 
   const validateForm = (): boolean => {
-    const nextErrors: AccountFormErrors =
-      {};
+    const nextErrors: AccountFormErrors = {};
 
-    if (
-      values.fullName.trim().length < 2
-    ) {
-      nextErrors.fullName =
-        "Họ tên phải có ít nhất 2 ký tự.";
+    if (values.fullName.trim().length < 2) {
+      nextErrors.fullName = "Họ tên phải có ít nhất 2 ký tự.";
     }
 
-    if (
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-        values.email.trim(),
-      )
-    ) {
-      nextErrors.email =
-        "Email không đúng định dạng.";
+    if (!/^[A-Za-z0-9._%+-]+@gmail\.com$/i.test(values.email.trim())) {
+      nextErrors.email = "Hệ thống hiện chỉ nhận địa chỉ Gmail (@gmail.com).";
     }
 
-    if (
-      !/^0[0-9]{9}$/.test(
-        values.phone.trim(),
-      )
-    ) {
-      nextErrors.phone =
-        "Số điện thoại phải gồm 10 chữ số và bắt đầu bằng 0.";
+    if (!/^0[0-9]{9}$/.test(values.phone.trim())) {
+      nextErrors.phone = "Số điện thoại phải gồm 10 chữ số và bắt đầu bằng 0.";
     }
 
     if (!values.branchName) {
-      nextErrors.branchName =
-        "Vui lòng chọn chi nhánh.";
+      nextErrors.branchName = "Vui lòng chọn chi nhánh.";
     }
 
-    if (
-      !isEditMode &&
-      values.temporaryPassword.length < 8
-    ) {
+    if (!isEditMode && values.temporaryPassword.length < 8) {
       nextErrors.temporaryPassword =
         "Mật khẩu tạm thời phải có ít nhất 8 ký tự.";
     }
 
     setErrors(nextErrors);
 
-    return (
-      Object.keys(nextErrors).length ===
-      0
-    );
+    return Object.keys(nextErrors).length === 0;
   };
 
   const handleSubmit = async (
@@ -272,11 +206,7 @@ export const AccountFormModal = ({
     <div
       role="presentation"
       onMouseDown={(event) => {
-        if (
-          event.target ===
-            event.currentTarget &&
-          !isSubmitting
-        ) {
+        if (event.target === event.currentTarget && !isSubmitting) {
           onClose();
         }
       }}
@@ -303,9 +233,7 @@ export const AccountFormModal = ({
                 id="account-form-title"
                 className="mt-1 text-xl font-bold text-slate-950"
               >
-                {isEditMode
-                  ? "Chỉnh sửa tài khoản"
-                  : "Thêm tài khoản mới"}
+                {isEditMode ? "Chỉnh sửa tài khoản" : "Thêm tài khoản mới"}
               </h2>
             </div>
           </div>
@@ -339,8 +267,7 @@ export const AccountFormModal = ({
                   onChange={(event) => {
                     setValues({
                       ...values,
-                      fullName:
-                        event.target.value,
+                      fullName: event.target.value,
                     });
                   }}
                   placeholder="Nhập họ và tên"
@@ -365,8 +292,7 @@ export const AccountFormModal = ({
                   onChange={(event) => {
                     setValues({
                       ...values,
-                      email:
-                        event.target.value,
+                      email: event.target.value,
                     });
                   }}
                   placeholder="name@rentai.vn"
@@ -391,8 +317,7 @@ export const AccountFormModal = ({
                   onChange={(event) => {
                     setValues({
                       ...values,
-                      phone:
-                        event.target.value,
+                      phone: event.target.value,
                     });
                   }}
                   placeholder="0901234567"
@@ -416,27 +341,21 @@ export const AccountFormModal = ({
                   onChange={(event) => {
                     setValues({
                       ...values,
-                      role:
-                        event.target
-                          .value as UserRole,
+                      role: event.target.value as UserRole,
+                      branchName:
+                        event.target.value !== "ADMIN" &&
+                        values.branchName === "Trụ sở (ADMIN)"
+                          ? ""
+                          : values.branchName,
                     });
                   }}
                   className={inputClassName}
                 >
-                  {USER_ROLES.map(
-                    (role) => (
-                      <option
-                        key={role}
-                        value={role}
-                      >
-                        {
-                          USER_ROLE_LABELS[
-                            role
-                          ]
-                        }
-                      </option>
-                    ),
-                  )}
+                  {USER_ROLES.map((role) => (
+                    <option key={role} value={role}>
+                      {USER_ROLE_LABELS[role]}
+                    </option>
+                  ))}
                 </select>
               </label>
 
@@ -450,29 +369,23 @@ export const AccountFormModal = ({
                   onChange={(event) => {
                     setValues({
                       ...values,
-                      branchName:
-                        event.target.value,
+                      branchName: event.target.value,
                     });
                   }}
                   className={inputClassName}
                 >
-                  {values.role ===
-                    "ADMIN" && (
-                    <option value="Tất cả chi nhánh">
-                      Tất cả chi nhánh
-                    </option>
-                  )}
+                  <option value="">Chọn chi nhánh</option>
 
-                  {branches.map(
-                    (branch) => (
-                      <option
-                        key={branch}
-                        value={branch}
-                      >
+                  {branches
+                    .filter(
+                      (branch) =>
+                        values.role === "ADMIN" || branch !== "Trụ sở (ADMIN)",
+                    )
+                    .map((branch) => (
+                      <option key={branch} value={branch}>
                         {branch}
                       </option>
-                    ),
-                  )}
+                    ))}
                 </select>
 
                 {errors.branchName && (
@@ -492,23 +405,16 @@ export const AccountFormModal = ({
                   onChange={(event) => {
                     setValues({
                       ...values,
-                      status:
-                        event.target
-                          .value as AccountStatus,
+                      status: event.target.value as AccountStatus,
                     });
                   }}
                   className={inputClassName}
                 >
-                  {accountStatuses.map(
-                    (status) => (
-                      <option
-                        key={status.value}
-                        value={status.value}
-                      >
-                        {status.label}
-                      </option>
-                    ),
-                  )}
+                  {accountStatuses.map((status) => (
+                    <option key={status.value} value={status.value}>
+                      {status.label}
+                    </option>
+                  ))}
                 </select>
               </label>
 
@@ -521,20 +427,12 @@ export const AccountFormModal = ({
                   <div className="flex flex-col gap-2 sm:flex-row">
                     <div className="relative flex-1">
                       <input
-                        type={
-                          showTemporaryPassword
-                            ? "text"
-                            : "password"
-                        }
-                        value={
-                          values.temporaryPassword
-                        }
+                        type={showTemporaryPassword ? "text" : "password"}
+                        value={values.temporaryPassword}
                         onChange={(event) => {
                           setValues({
                             ...values,
-                            temporaryPassword:
-                              event.target
-                                .value,
+                            temporaryPassword: event.target.value,
                           });
                         }}
                         className={`${inputClassName} pr-12`}
@@ -548,10 +446,7 @@ export const AccountFormModal = ({
                             : "Hiện mật khẩu"
                         }
                         onClick={() => {
-                          setShowTemporaryPassword(
-                            (current) =>
-                              !current,
-                          );
+                          setShowTemporaryPassword((current) => !current);
                         }}
                         className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
                       >
@@ -568,30 +463,24 @@ export const AccountFormModal = ({
                       onClick={() => {
                         setValues({
                           ...values,
-                          temporaryPassword:
-                            createTemporaryPassword(),
+                          temporaryPassword: createTemporaryPassword(),
                         });
                       }}
                       className="flex h-12 items-center justify-center gap-2 rounded-2xl border border-blue-200 bg-blue-50 px-4 text-sm font-bold text-blue-700 transition hover:bg-blue-100"
                     >
-                      <RefreshCcw
-                        size={17}
-                      />
+                      <RefreshCcw size={17} />
                       Tạo mật khẩu
                     </button>
                   </div>
 
                   {errors.temporaryPassword && (
                     <span className="mt-1.5 block text-xs font-medium text-red-600">
-                      {
-                        errors.temporaryPassword
-                      }
+                      {errors.temporaryPassword}
                     </span>
                   )}
 
                   <p className="mt-2 text-xs leading-5 text-slate-500">
-                    Người dùng cần đổi mật khẩu
-                    sau lần đăng nhập đầu tiên.
+                    Người dùng cần đổi mật khẩu sau lần đăng nhập đầu tiên.
                   </p>
                 </label>
               )}
@@ -614,10 +503,7 @@ export const AccountFormModal = ({
               className="flex h-11 min-w-36 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-700 px-5 text-sm font-bold text-white shadow-lg shadow-blue-200 transition hover:-translate-y-0.5 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isSubmitting && (
-                <LoaderCircle
-                  size={18}
-                  className="animate-spin"
-                />
+                <LoaderCircle size={18} className="animate-spin" />
               )}
 
               {isSubmitting

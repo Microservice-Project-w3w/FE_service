@@ -1,3 +1,4 @@
+import { createSafeDateFormatter } from "@/shared/utils/dateFormat";
 import {
   Boxes,
   CalendarClock,
@@ -31,7 +32,7 @@ interface ManagerEquipmentDetailDrawerProps {
 }
 
 const dateTimeFormatter =
-  new Intl.DateTimeFormat(
+  createSafeDateFormatter(
     "vi-VN",
     {
       day: "2-digit",
